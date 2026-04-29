@@ -1,0 +1,33 @@
+appId: com.soliq.electron
+productName: Soliq
+copyright: Copyright © 2026 madrimov
+
+directories:
+  output: release
+  buildResources: resources
+
+files:
+  - dist/**/*
+  - package.json
+
+extraResources:
+  - from: .env
+    to: .env
+
+extraMetadata:
+  main: dist/main/index.js
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: resources/icon.png
+
+nsis:
+  oneClick: false
+  perMachine: true
+  allowToChangeInstallationDirectory: true
+
+publish:
+  provider: generic
+  url: https://update.example.com/releases

@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Electron Soliq — Test Panel</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; padding: 20px; }
+    h1 { font-size: 1.5rem; margin-bottom: 20px; color: #38bdf8; }
+    h2 { font-size: 1.1rem; margin-bottom: 12px; color: #94a3b8; border-bottom: 1px solid #1e293b; padding-bottom: 6px; }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .card { background: #1e293b; border-radius: 10px; padding: 16px; }
+    .card.full { grid-column: 1 / -1; }
+
+    button {
+      background: #2563eb; color: white; border: none; padding: 8px 16px;
+      border-radius: 6px; cursor: pointer; font-size: 0.85rem; margin: 4px;
+      transition: background 0.15s;
+    }
+    button:hover { background: #3b82f6; }
+    button:active { background: #1d4ed8; }
+    button.green { background: #16a34a; }
+    button.green:hover { background: #22c55e; }
+    button.orange { background: #d97706; }
+    button.orange:hover { background: #f59e0b; }
+    button.red { background: #dc2626; }
+    button.red:hover { background: #ef4444; }
+
+    .btn-group { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
+
+    #log {
+      background: #0f172a; border: 1px solid #334155; border-radius: 8px;
+      padding: 12px; font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.8rem; height: 300px; overflow-y: auto; white-space: pre-wrap;
+      line-height: 1.5;
+    }
+    .log-ok { color: #4ade80; }
+    .log-err { color: #f87171; }
+    .log-info { color: #38bdf8; }
+    .log-warn { color: #fbbf24; }
+    .log-dim { color: #64748b; }
+
+    .status { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px; }
+    .status.ok { background: #166534; color: #4ade80; }
+    .status.err { background: #7f1d1d; color: #f87171; }
+    .status.wait { background: #78350f; color: #fbbf24; }
+
+    input, select {
+      background: #0f172a; border: 1px solid #334155; color: #e2e8f0;
+      padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; margin: 4px;
+    }
+    input::placeholder { color: #475569; }
+    label { font-size: 0.8rem; color: #94a3b8; margin-right: 4px; }
+  </style>
+</head>
+<body>
+
+<h1>Electron Soliq — Test Panel <span id="electron-status"></span></h1>
+
+<div class="grid">
+
+  <!-- APP -->
+  <div class="card">
+    <h2>App</h2>
+    <div class="btn-group">
+      <button onclick="testIsElectron()">isElectron</button>
+      <button onclick="testGetVersion()">getVersion</button>
+    </div>
+  </div>
+
+  <!-- PRINTER -->
+  <div class="card">
+    <h2>Printer (posPrinter)</h2>
+    <div class="btn-group">
+      <button onclick="testGetPrinters()">getPrinters</button>
+    </div>
+  </div>
+
+  <!-- FISKAL CONFIG -->
+  <div class="card full">
+    <h2>Fiskal — Konfiguratsiya</h2>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
+      <label>Fiscal ID:</label>
+      <input id="fiscal-id" placeholder="FM identifikatori" value="" style="width:200px;">
+      <label>Environment:</label>
+      <select id="fiscal-env">
+        <option value="test">test (api.unikassa.uz)</option>
+        <option value="local">local (localhost:8181)</option>
+      </select>
+      <label>Base URL (ixtiyoriy):</label>
+      <input id="fiscal-base-url" placeholder="masalan: http://localhost:8181/api/v1" value="" style="width:280px;">
+      <button class="green" onclick="testConfigure()">Configure</button>
+    </div>
+  </div>
+
+  <!-- RECEIPT BUILDER -->
+  <div class="card">
+    <h2>Receipt Builder</h2>
+    <div class="btn-group">
+      <button class="green" onclick="testReceiptBuilder()">Build Test Receipt</button>
+      <button class="green" onclick="testPrintFromData()">printFromData</button>
+    </div>
+    <div>
+      <label>Printer:</label>
+      <input id="printer-name" placeholder="printer nomi" value="">
+      <label>Paper:</label>
+      <select id="paper-width">
+        <option value="80">80mm</option>
+        <option value="58">58mm</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- FISKAL -->
+  <div class="card">
+    <h2>Fiskal — Ma'lumot</h2>
+    <div class="btn-group">
+      <button onclick="testHealthCheck()">healthCheck</button>
+      <button onclick="testGetInfo()">getInfo</button>
+      <button onclick="testSync()">sync</button>
+      <button onclick="testGetZStats()">getZStats</button>
+      <button onclick="testGetZInfo()">getZInfo(0)</button>
+      <button onclick="testGetFiscalMemory()">getFiscalMemory</button>
+      <button onclick="testGetReceiptInfo()">getReceiptInfo(0)</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Fiskal — Smena</h2>
+    <div class="btn-group">
+      <button class="green" onclick="testOpenZReport()">openZReport</button>
+      <button class="red" onclick="testCloseZReport()">closeZReport</button>
+      <button class="orange" onclick="testEnsureZReportOpen()">ensureZReportOpen</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Fiskal — Chek yuborish</h2>
+    <div class="btn-group">
+      <button class="green" onclick="testSendSale()">sendSale (test)</button>
+      <button class="orange" onclick="testSendRefund()">sendRefund (test)</button>
+    </div>
+    <div style="margin-top: 8px;">
+      <label>PayType:</label>
+      <select id="pay-type">
+        <option value="cash">cash</option>
+        <option value="card">card</option>
+        <option value="mixed">mixed</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- LOG -->
+  <div class="card full">
+    <h2>Log <button onclick="clearLog()" style="font-size:0.7rem;padding:4px 10px;">Clear</button></h2>
+    <div id="log"></div>
+  </div>
+</div>
+
+<script>
+  const logEl = document.getElementById('log');
+
+  function log(msg, cls = '') {
+    const time = new Date().toLocaleTimeString();
+    const line = document.createElement('div');
+    line.className = cls;
+    line.textContent = `[${time}] ${msg}`;
+    logEl.appendChild(line);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function logResult(label, data) {
+    log(`${label}:`, 'log-info');
+    log(JSON.stringify(data, null, 2), 'log-ok');
+  }
+
+  function logError(label, err) {
+    log(`${label} ERROR: ${err.message || err}`, 'log-err');
+  }
+
+  function clearLog() {
+    logEl.innerHTML = '';
+    log('Log tozalandi', 'log-dim');
+  }
+
+  function getPrinterName() {
+    return document.getElementById('printer-name').value || undefined;
+  }
+
+  function getPaperWidth() {
+    return parseInt(document.getElementById('paper-width').value);
+  }
+
+  function getPayType() {
+    return document.getElementById('pay-type').value;
+  }
+
+  // ============ FISKAL CONFIG ============
+
+  async function testConfigure() {
+    const fiscalId = document.getElementById('fiscal-id').value.trim();
+    if (!fiscalId) {
+      log('Fiscal ID kiriting!', 'log-warn');
+      return;
+    }
+    const env = document.getElementById('fiscal-env').value;
+    const baseUrl = document.getElementById('fiscal-base-url').value.trim() || undefined;
+
+    try {
+      const config = { fiscalId, environment: env };
+      if (baseUrl) config.baseUrl = baseUrl;
+      const res = await window.electronSoliq.fiskal.configure(config);
+      logResult('configure', res);
+    } catch (e) { logError('configure', e); }
+  }
+
+  // ============ APP ============
+
+  function testIsElectron() {
+    const is = window.electronSoliq?.isElectron === true;
+    const el = document.getElementById('electron-status');
+    el.className = `status ${is ? 'ok' : 'err'}`;
+    el.textContent = is ? 'Electron' : 'Browser';
+    logResult('isElectron', is);
+  }
+
+  async function testGetVersion() {
+    try {
+      const v = await window.electronSoliq.getVersion();
+      logResult('getVersion', v);
+    } catch (e) { logError('getVersion', e); }
+  }
+
+  // ============ PRINTER ============
+
+  async function testGetPrinters() {
+    try {
+      const printers = await window.posPrinter.getPrinters();
+      logResult('getPrinters', printers);
+      if (printers.length > 0 && !document.getElementById('printer-name').value) {
+        const def = printers.find(p => p.isDefault) || printers[0];
+        document.getElementById('printer-name').value = def.name;
+        log(`Default printer: ${def.name}`, 'log-dim');
+      }
+    } catch (e) { logError('getPrinters', e); }
+  }
+
+  // ============ RECEIPT BUILDER ============
+
+  async function testReceiptBuilder() {
+    const name = getPrinterName();
+    if (!name) {
+      log('Printer nomini kiriting!', 'log-warn');
+      return;
+    }
+    const pw = getPaperWidth();
+    try {
+      const rb = window.receiptBuilder;
+      const id = rb.create(pw);
+
+      rb.title(id, 'TEST DO\'KON');
+      rb.subtitle(id, 'Test manzil, Toshkent');
+      rb.line(id);
+      rb.row(id, 'Sana', new Date().toLocaleString());
+      rb.row(id, 'Kassir', 'Test User');
+      rb.dashedLine(id);
+
+      rb.itemRow(id, 'Non', 2, 5000);
+      rb.itemRow(id, 'Sut 1L', 1, 12000);
+      rb.itemRow(id, 'Choy (100g)', 3, 8000);
+
+      rb.doubleLine(id);
+      rb.totalRow(id, 'Jami', 46000);
+      rb.line(id);
+
+      rb.textCenter(id, 'Rahmat xaridingiz uchun!');
+      rb.feed(id, 1);
+      rb.qrcode(id, 'https://soliq.uz/test/receipt/12345');
+      rb.feed(id, 2);
+      rb.cut(id);
+
+      log(`Receipt built (id=${id}), contents:`, 'log-info');
+      const contents = rb.getContents(id);
+      log(JSON.stringify(contents, null, 2), 'log-dim');
+
+      log('Printing...', 'log-warn');
+      const result = await rb.print(id, { printerName: name, paperWidth: pw, silent: true });
+      logResult('print result', result);
+
+      rb.destroy(id);
+    } catch (e) { logError('receiptBuilder', e); }
+  }
+
+  async function testPrintFromData() {
+    const name = getPrinterName();
+    if (!name) {
+      log('Printer nomini kiriting!', 'log-warn');
+      return;
+    }
+    const pw = getPaperWidth();
+    try {
+      const result = await window.receiptBuilder.printFromData(
+        {
+          header: { title: 'TEST DO\'KON', subtitle: 'printFromData test', address: ['Toshkent sh.'] },
+          items: [
+            { name: 'Tovar 1', quantity: 2, price: 15000 },
+            { name: 'Tovar 2', quantity: 1, price: 8000 },
+          ],
+          totals: { subtotal: 38000, tax: 4560, total: 42560 },
+          payment: { method: 'Naqd', amount: 50000, change: 7440 },
+          footer: ['Rahmat!', 'www.test.uz'],
+        },
+        { printerName: name, paperWidth: pw, silent: true },
+        pw
+      );
+      logResult('printFromData', result);
+    } catch (e) { logError('printFromData', e); }
+  }
+
+  // ============ FISKAL ============
+
+  async function testHealthCheck() {
+    try {
+      const ok = await window.electronSoliq.fiskal.healthCheck();
+      logResult('healthCheck', ok);
+    } catch (e) { logError('healthCheck', e); }
+  }
+
+  async function testGetInfo() {
+    try {
+      const info = await window.electronSoliq.fiskal.getInfo();
+      logResult('getInfo', info);
+    } catch (e) { logError('getInfo', e); }
+  }
+
+  async function testSync() {
+    try {
+      log('Syncing...', 'log-warn');
+      const res = await window.electronSoliq.fiskal.sync();
+      logResult('sync', res);
+    } catch (e) { logError('sync', e); }
+  }
+
+  async function testGetZStats() {
+    try {
+      const res = await window.electronSoliq.fiskal.getZStats();
+      logResult('getZStats', res);
+    } catch (e) { logError('getZStats', e); }
+  }
+
+  async function testGetZInfo() {
+    try {
+      const res = await window.electronSoliq.fiskal.getZInfo(0);
+      logResult('getZInfo(0)', res);
+    } catch (e) { logError('getZInfo', e); }
+  }
+
+  async function testGetFiscalMemory() {
+    try {
+      const res = await window.electronSoliq.fiskal.getFiscalMemory();
+      logResult('getFiscalMemory', res);
+    } catch (e) { logError('getFiscalMemory', e); }
+  }
+
+  async function testGetReceiptInfo() {
+    try {
+      const res = await window.electronSoliq.fiskal.getReceiptInfo(0);
+      logResult('getReceiptInfo(0)', res);
+    } catch (e) { logError('getReceiptInfo', e); }
+  }
+
+  async function testOpenZReport() {
+    try {
+      const res = await window.electronSoliq.fiskal.openZReport();
+      logResult('openZReport', res);
+    } catch (e) { logError('openZReport', e); }
+  }
+
+  async function testCloseZReport() {
+    try {
+      const res = await window.electronSoliq.fiskal.closeZReport();
+      logResult('closeZReport', res);
+    } catch (e) { logError('closeZReport', e); }
+  }
+
+  async function testEnsureZReportOpen() {
+    try {
+      await window.electronSoliq.fiskal.ensureZReportOpen();
+      logResult('ensureZReportOpen', 'OK');
+    } catch (e) { logError('ensureZReportOpen', e); }
+  }
+
+  async function testSendSale() {
+    try {
+      log('Sending sale...', 'log-warn');
+      const res = await window.electronSoliq.fiskal.sendSale({
+        PayType: getPayType(),
+        Receipt: {
+          Items: [
+            { Name: 'Test tovar', Price: 10000, Amount: 1000, VAT: 1200, VATPercent: 12 },
+          ],
+          Location: { Latitude: 41.311081, Longitude: 69.240562 },
+          ReceivedCash: getPayType() === 'card' ? 0 : 10000,
+          ReceivedCard: getPayType() === 'cash' ? 0 : 10000,
+          Time: new Date().toISOString(),
+        },
+      });
+      logResult('sendSale', res);
+    } catch (e) { logError('sendSale', e); }
+  }
+
+  async function testSendRefund() {
+    try {
+      const fiscalSign = prompt('Asl chek FiscalSign:');
+      const receiptSeq = prompt('Asl chek ReceiptSeq:');
+      const terminalId = prompt('TerminalID:');
+      const dateTime = prompt('Asl chek DateTime (ISO):');
+
+      if (!fiscalSign || !receiptSeq || !terminalId || !dateTime) {
+        log('Refund uchun barcha maydonlar kerak', 'log-warn');
+        return;
+      }
+
+      log('Sending refund...', 'log-warn');
+      const res = await window.electronSoliq.fiskal.sendRefund({
+        PayType: getPayType(),
+        Receipt: {
+          Items: [
+            { Name: 'Test tovar (qaytarish)', Price: 10000, Amount: 1000, VAT: 1200, VATPercent: 12 },
+          ],
+          Location: { Latitude: 41.311081, Longitude: 69.240562 },
+          ReceivedCash: getPayType() === 'card' ? 0 : 10000,
+          ReceivedCard: getPayType() === 'cash' ? 0 : 10000,
+          Time: new Date().toISOString(),
+          RefundInfo: {
+            DateTime: dateTime,
+            FiscalSign: fiscalSign,
+            ReceiptSeq: parseInt(receiptSeq),
+            TerminalID: terminalId,
+          },
+        },
+      });
+      logResult('sendRefund', res);
+    } catch (e) { logError('sendRefund', e); }
+  }
+
+  // ============ INIT ============
+
+  window.addEventListener('DOMContentLoaded', () => {
+    log('Test panel yuklandi', 'log-dim');
+    testIsElectron();
+  });
+</script>
+
+</body>
+</html>
