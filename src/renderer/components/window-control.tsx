@@ -17,7 +17,7 @@ export const WindowControl = () => {
   }
 
   return (
-    <div id="window-control" className="fixed inset-x-0 grid grid-cols-[1fr_auto_1fr] items-center w-full px-2 py-2 h-10 bg-background/40 backdrop-blur-2xl">
+    <div id="window-control" className="fixed inset-x-0 z-50 grid grid-cols-[1fr_auto_1fr] items-center w-full px-2 py-2 h-10 bg-background/40 backdrop-blur-2xl">
       <h3 className="text-sm text-primary" >
         ZenFocus - Pomodoro
       </h3>

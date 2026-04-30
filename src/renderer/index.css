@@ -69,6 +69,30 @@
 
     --sidebar: oklch(0.94 0.01 95);
     --sidebar-foreground: var(--foreground);
+
+    --glow-color: oklch(0.65 0.08 120 / 0.08);
+}
+
+/* ⏱️ Timer mode — Short Break (teal) */
+[data-timer-mode="short-break"] {
+    --primary: oklch(0.62 0.12 185);
+    --ring: var(--primary);
+    --glow-color: oklch(0.62 0.12 185 / 0.08);
+}
+[data-timer-mode="short-break"].dark {
+    --primary: oklch(0.72 0.12 185);
+    --glow-color: oklch(0.72 0.12 185 / 0.1);
+}
+
+/* ⏱️ Timer mode — Long Break (lavender) */
+[data-timer-mode="long-break"] {
+    --primary: oklch(0.62 0.1 285);
+    --ring: var(--primary);
+    --glow-color: oklch(0.62 0.1 285 / 0.08);
+}
+[data-timer-mode="long-break"].dark {
+    --primary: oklch(0.72 0.1 285);
+    --glow-color: oklch(0.72 0.1 285 / 0.1);
 }
 
 /* 🌙 DARK — Deep Forest Night */
@@ -103,6 +127,8 @@
 
     --sidebar: oklch(0.2 0.02 250);
     --sidebar-foreground: var(--foreground);
+
+    --glow-color: oklch(0.7 0.1 120 / 0.1);
 }
 
 /* 🧱 Base */
@@ -128,6 +154,21 @@
 }
 #window-controls-button {
     -webkit-app-region: no-drag;
+}
+
+/* 🌿 Radial glow (mode-reactive, behind glass card) */
+html::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(
+        ellipse 55% 45% at 50% 58%,
+        var(--glow-color, oklch(0.65 0.08 120 / 0.08)),
+        transparent 70%
+    );
+    z-index: -1;
+    pointer-events: none;
+    transition: background 0.8s ease;
 }
 
 /* 🖼️ Background (forest atmosphere) */
@@ -240,6 +281,22 @@ html::after {
     }
 }
 
+/* ⏱️ Timer ring breathing glow */
+@keyframes ring-breathe {
+    0%, 100% {
+        filter: drop-shadow(0 0 5px var(--color-primary));
+        opacity: 0.88;
+    }
+    50% {
+        filter: drop-shadow(0 0 14px var(--color-primary));
+        opacity: 1;
+    }
+}
+
+.timer-ring-glow {
+    animation: ring-breathe 3.5s ease-in-out infinite;
+}
+
 /* ⚡ Optimized transitions */
 body,
 button,
@@ -249,4 +306,14 @@ div {
         background-color 0.25s ease,
         color 0.2s ease,
         border-color 0.2s ease;
+}
+
+/* 🔢 Hide number input spinners */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type="number"] {
+    -moz-appearance: textfield;
 }

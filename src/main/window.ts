@@ -1,14 +1,22 @@
-import { config } from 'dotenv';
-config()
 import { BrowserWindow, shell } from 'electron';
 import { join } from 'path';
+import { createWindowState } from '@madrimov/electron-window-state';
 
 const isDev = process.env.NODE_ENV !== 'production';
 
+// Wayland: ilovalar global screen pozitsiyasini bila olmaydi,
+// shuning uchun x/y berish oynani noto'g'ri monitorda ochadi.
+const isWayland =
+  process.platform === 'linux' &&
+  (!!process.env.WAYLAND_DISPLAY || process.env.XDG_SESSION_TYPE === 'wayland');
+
 export function createMainWindow(): BrowserWindow {
+  const state = createWindowState({ defaultWidth: 1280, defaultHeight: 800 });
+
   const win = new BrowserWindow({
-    width: 1280,
-    height: 800,
+    ...(isWayland ? {} : { x: state.x, y: state.y }),
+    width: state.width,
+    height: state.height,
     minWidth: 600,
     minHeight: 400,
     frame: false,
@@ -22,12 +30,12 @@ export function createMainWindow(): BrowserWindow {
     },
   });
 
+  state.manage(win);
+
   if (isDev) {
     win.loadURL(process.env.VITE_DEV_SERVER_URL!);
-    // win.webContents.openDevTools();
   } else {
-    win.loadFile(join(__dirname, '../renderer/index.html'))
-    // win.loadURL(REMOTE_URL);
+    win.loadFile(join(__dirname, '../index.html'));
   }
 
   win.webContents.setWindowOpenHandler(({ url }) => {

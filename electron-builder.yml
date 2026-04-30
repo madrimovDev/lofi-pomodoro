@@ -1,5 +1,5 @@
-appId: com.soliq.electron
-productName: Soliq
+appId: com.madrimov.zenfocus
+productName: ZenFocus
 copyright: Copyright © 2026 madrimov
 
 directories:
@@ -17,11 +17,21 @@ extraResources:
 extraMetadata:
   main: dist/main/index.js
 
+linux:
+  target:
+    - target: AppImage
+      arch: [x64]
+  extraResources:
+    - from: bin/linux/yt-dlp
+      to: bin/yt-dlp
+
 win:
   target:
     - target: nsis
       arch: [x64]
-  icon: resources/icon.png
+  extraResources:
+    - from: bin/win/yt-dlp.exe
+      to: bin/yt-dlp.exe
 
 nsis:
   oneClick: false

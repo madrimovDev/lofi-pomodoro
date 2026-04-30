@@ -1,26 +1,33 @@
-import { useEffect, useState } from "react"
-import { Sun, Moon } from 'lucide-react'
-import { Button } from "@shared/components/ui/button"
+import { useEffect, useState } from 'react';
+import { Sun, Moon } from 'lucide-react';
+import { Button } from '@shared/components/ui/button';
+import type { Theme } from '@shared/types';
 
 export const ToggleTheme = () => {
-  const [theme, setTheme] = useState<'dark' | 'light' | undefined>()
+  const [theme, setTheme] = useState<Theme | undefined>();
 
   useEffect(() => {
-    const currentTheme = document.body.classList.contains('dark') ? 'dark' : 'light'
-    setTheme(currentTheme)
-  }, [])
-
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark')
+    if (window.electronApi) {
+      window.electronApi.getTheme().then(setTheme);
     } else {
-      document.documentElement.classList.remove('dark')
+      setTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
     }
-  }, [theme])
+  }, []);
+
+  useEffect(() => {
+    if (!theme) return;
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, [theme]);
+
+  const handleToggle = () => {
+    const next: Theme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+    window.electronApi?.setTheme(next);
+  };
 
   return (
-    <Button size='icon-xs' className="rounded-full mr-4" variant="outline" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} >
+    <Button size="icon-xs" className="rounded-full mr-4" variant="outline" onClick={handleToggle}>
       {theme === 'dark' ? <Sun /> : <Moon />}
     </Button>
-  )
-}
+  );
+};

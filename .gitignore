@@ -7,6 +7,9 @@ dist
 release
 *.tgz
 
+# yt-dlp binaries (download via: bun run download-ytdlp)
+bin/
+
 # code coverage
 coverage
 *.lcov
