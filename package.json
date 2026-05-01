@@ -1,6 +1,6 @@
 {
   "name": "zenfocus-pomodoro",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ZenFocus — lofi Pomodoro timer, glassmorphism dizayn, Electron desktop app",
   "main": "dist/main/index.js",
   "private": true,
