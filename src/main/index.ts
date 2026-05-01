@@ -3,12 +3,21 @@ import { join } from 'path';
 import { app, BrowserWindow, protocol, net } from 'electron';
 import { createMainWindow } from './window';
 import { registerAllIpcHandlers } from './ipc';
+import { setupTray } from './tray';
+import log from './logger';
 
-const envPath = app.isPackaged
-  ? join(process.resourcesPath, '.env')
-  : join(__dirname, '../../.env');
+process.on('uncaughtException', (err) => {
+  log.error('Uncaught Exception:', err);
+});
 
-config({ path: envPath });
+process.on('unhandledRejection', (reason) => {
+  log.error('Unhandled Rejection:', reason);
+});
+
+// Load .env only in development — packaged builds don't need it
+if (!app.isPackaged) {
+  config({ path: join(__dirname, '../../.env') });
+}
 
 // Register custom scheme before app is ready
 protocol.registerSchemesAsPrivileged([
@@ -36,8 +45,23 @@ if (!gotTheLock) {
       return net.fetch(`file://${filePath}`);
     });
 
+    log.info('App ready, creating main window');
     const win = createMainWindow();
     registerAllIpcHandlers(win);
+    setupTray(win);
+
+
+    // Yopish tugmasini bosish ilovani trayga yashiradi
+    win.on('close', (e) => {
+      if (!(app as typeof app & { isQuiting?: boolean }).isQuiting) {
+        e.preventDefault();
+        win.hide();
+      }
+    });
+  });
+
+  app.on('before-quit', () => {
+    (app as typeof app & { isQuiting?: boolean }).isQuiting = true;
   });
 
   app.on('window-all-closed', () => {

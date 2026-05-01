@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { useMusic } from '@renderer/hooks/use-music';
+import { useSettings } from '@renderer/hooks/use-settings';
 import { cn } from '@shared/lib/utils';
 
 interface MusicPanelProps {
@@ -36,6 +37,7 @@ function VolumeRow() {
 // ─── Playback Controls ────────────────────────────────────────────────────────
 
 function PlaybackBar() {
+  const { t } = useSettings();
   const { source, isPlaying, play, pause, next, prev, files, ytPlaylist,
     currentFileIndex, ytCurrentIndex, ytStreamInfo, ytLoading } = useMusic();
 
@@ -44,7 +46,7 @@ function PlaybackBar() {
 
   const currentName = source === 'folder'
     ? files[currentFileIndex]?.name.replace(/\.[^.]+$/, '')
-    : ytStreamInfo?.title ?? (ytLoading ? 'Yuklanmoqda...' : null);
+    : ytStreamInfo?.title ?? (ytLoading ? t('loadingTrack') : null);
 
   const trackInfo = source === 'folder' && files.length > 1
     ? `${currentFileIndex + 1} / ${files.length}`
@@ -88,6 +90,7 @@ function PlaybackBar() {
 // ─── Folder Tab ───────────────────────────────────────────────────────────────
 
 function FolderTab() {
+  const { t } = useSettings();
   const { config, updateConfig, files, currentFileIndex, pickFolder, refreshFiles, playFile, isPlaying, source } = useMusic();
 
   const sortMode = config.sortMode;
@@ -126,7 +129,7 @@ function FolderTab() {
 
       {files.length === 0 && config.folderPath && (
         <p className="text-xs text-muted-foreground/40 text-center py-3 select-none">
-          Audio fayllar topilmadi
+          {t('noAudioFiles')}
         </p>
       )}
 

@@ -1,6 +1,7 @@
-import { BrowserWindow, shell } from 'electron';
+import { BrowserWindow, shell, app } from 'electron';
 import { join } from 'path';
 import { createWindowState } from '@madrimov/electron-window-state';
+import log from './logger';
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -25,8 +26,8 @@ export function createMainWindow(): BrowserWindow {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false,
-      webSecurity: !isDev,
+      sandbox: true,
+      webSecurity: app.isPackaged || !isDev,
     },
   });
 
@@ -41,6 +42,14 @@ export function createMainWindow(): BrowserWindow {
   win.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
     return { action: 'deny' };
+  });
+
+  // Log renderer crashes so they appear in electron-log files
+  win.webContents.on('render-process-gone', (_e, details) => {
+    log.error('Renderer process gone:', details.reason, details.exitCode);
+  });
+  win.on('unresponsive', () => {
+    log.warn('Window became unresponsive');
   });
 
   return win;

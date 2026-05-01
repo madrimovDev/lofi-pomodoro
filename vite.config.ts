@@ -27,7 +27,7 @@ export default defineConfig({
           build: {
             outDir: 'dist/main',
             rollupOptions: {
-              external: ['electron'],
+              external: ['electron', 'electron-updater', 'electron-log'],
               output: { format: 'cjs' },
             },
           },

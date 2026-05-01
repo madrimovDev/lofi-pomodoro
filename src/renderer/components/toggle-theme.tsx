@@ -8,7 +8,7 @@ export const ToggleTheme = () => {
 
   useEffect(() => {
     if (window.electronApi) {
-      window.electronApi.getTheme().then(setTheme);
+      window.electronApi.getTheme().then(setTheme).catch(err => console.error('getTheme failed:', err));
     } else {
       setTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
     }

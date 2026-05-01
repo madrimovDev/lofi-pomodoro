@@ -22,6 +22,7 @@ export const TimerRing = ({ progress, isRunning, children }: TimerRingProps) => 
         width={SIZE}
         height={SIZE}
         className="rotate-[-90deg]"
+        style={{ overflow: 'visible' }}
         aria-hidden
       >
         {/* Track */}

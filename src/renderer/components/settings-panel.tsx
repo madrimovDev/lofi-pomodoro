@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { Dialog, Switch } from 'radix-ui';
-import { X } from 'lucide-react';
+import { Loader2, RefreshCw, X, Minimize2, Pin } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { useSettings } from '@renderer/hooks/use-settings';
-import { type AmbientSound } from '@shared/types';
+import { useUpdater } from '@renderer/hooks/use-updater';
+import { useTasks } from '@renderer/hooks/use-tasks';
 
 interface SettingsPanelProps {
   open: boolean;
@@ -51,53 +53,28 @@ function ToggleRow({
   );
 }
 
-const AMBIENT_OPTIONS: { value: AmbientSound; label: string }[] = [
-  { value: 'none', label: "O'chiq" },
-  { value: 'rain', label: 'Yomg\'ir' },
-  { value: 'forest', label: 'O\'rmon' },
-  { value: 'cafe', label: 'Kafe' },
-];
-
-function AmbientSelect({ value, onChange }: { value: AmbientSound; onChange: (v: AmbientSound) => void }) {
-  return (
-    <div className="flex gap-1.5 flex-wrap">
-      {AMBIENT_OPTIONS.map(opt => (
-        <button
-          key={opt.value}
-          onClick={() => onChange(opt.value)}
-          className={`px-2.5 py-1 rounded-lg text-xs transition-colors duration-200 border ${
-            value === opt.value
-              ? 'bg-primary/20 border-primary/40 text-foreground'
-              : 'border-border/50 text-muted-foreground/60 hover:border-border hover:text-muted-foreground'
-          }`}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function VolumeSlider({ value, onChange }: { value: number; onChange: (v: number) => void }) {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="text-xs text-muted-foreground/50 select-none w-4">🔈</span>
-      <input
-        type="range"
-        min={0}
-        max={1}
-        step={0.05}
-        value={value}
-        onChange={e => onChange(parseFloat(e.target.value))}
-        className="flex-1 h-1 accent-primary cursor-pointer"
-      />
-      <span className="text-xs text-muted-foreground/50 select-none w-4">🔊</span>
-    </div>
-  );
-}
 
 export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
-  const { settings, updateSettings } = useSettings();
+  const { settings, updateSettings, t } = useSettings();
+  const { status, check, install } = useUpdater();
+  const { replaceTasks } = useTasks();
+  const [todoistToken, setTodoistToken] = useState(settings.todoistToken ?? '');
+  const [todoistImporting, setTodoistImporting] = useState(false);
+  const [todoistMsg, setTodoistMsg] = useState('');
+
+  const isBusy = status?.type === 'checking' || status?.type === 'downloading';
+
+  const handleTodoistImport = async () => {
+    updateSettings({ todoistToken: todoistToken.trim() || null });
+    setTodoistImporting(true);
+    setTodoistMsg('');
+    const result = await window.electronApi?.todoistImport();
+    setTodoistImporting(false);
+    if (!result) { setTodoistMsg('Xatolik'); return; }
+    if ('error' in result) { setTodoistMsg(result.error); return; }
+    replaceTasks(result as Parameters<typeof replaceTasks>[0]);
+    setTodoistMsg(`${result.length} ta task import qilindi ✓`);
+  };
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -108,10 +85,10 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
         >
           <div className="flex items-center justify-between mb-6">
             <Dialog.Title className="text-sm font-medium tracking-widest uppercase text-muted-foreground">
-              Sozlamalar
+              {t('settings')}
             </Dialog.Title>
             <Dialog.Close asChild>
-              <Button variant="ghost" size="icon-xs" aria-label="Yopish">
+              <Button variant="ghost" size="icon-xs" aria-label={t('close')}>
                 <X className="size-3.5" />
               </Button>
             </Dialog.Close>
@@ -119,41 +96,176 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
 
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-3">
-              <p className="text-xs uppercase tracking-widest text-muted-foreground/60">Vaqtlar (daqiqa)</p>
-              <NumberInput label="Focus" value={settings.focusDuration} min={1} max={120}
+              <p className="text-xs uppercase tracking-widest text-muted-foreground/60">{t('durations')}</p>
+              <NumberInput label={t('focusDuration')} value={settings.focusDuration} min={1} max={120}
                 onChange={v => updateSettings({ focusDuration: v })} />
-              <NumberInput label="Qisqa tanaffus" value={settings.shortBreakDuration} min={1} max={60}
+              <NumberInput label={t('shortBreakDuration')} value={settings.shortBreakDuration} min={1} max={60}
                 onChange={v => updateSettings({ shortBreakDuration: v })} />
-              <NumberInput label="Uzun tanaffus" value={settings.longBreakDuration} min={1} max={60}
+              <NumberInput label={t('longBreakDuration')} value={settings.longBreakDuration} min={1} max={60}
                 onChange={v => updateSettings({ longBreakDuration: v })} />
-              <NumberInput label="Sessiyalar soni" value={settings.sessionsBeforeLongBreak} min={1} max={10}
+              <NumberInput label={t('sessionsBeforeLongBreak')} value={settings.sessionsBeforeLongBreak} min={1} max={10}
                 onChange={v => updateSettings({ sessionsBeforeLongBreak: v })} />
             </div>
 
             <div className="h-px bg-border/50" />
 
             <div className="flex flex-col gap-3">
-              <p className="text-xs uppercase tracking-widest text-muted-foreground/60">Ambient ovoz</p>
-              <AmbientSelect
-                value={settings.ambientSound}
-                onChange={v => updateSettings({ ambientSound: v })}
-              />
-              {settings.ambientSound !== 'none' && (
-                <VolumeSlider
-                  value={settings.ambientVolume}
-                  onChange={v => updateSettings({ ambientVolume: v })}
-                />
+              <p className="text-xs uppercase tracking-widest text-muted-foreground/60">{t('notifications')}</p>
+              <ToggleRow label={t('sound')} checked={settings.soundEnabled}
+                onCheckedChange={v => updateSettings({ soundEnabled: v })} />
+              <ToggleRow label={t('notification')} checked={settings.notificationsEnabled}
+                onCheckedChange={v => updateSettings({ notificationsEnabled: v })} />
+              {settings.soundEnabled && (
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-muted-foreground/60 truncate max-w-[140px] select-none">
+                    {settings.notificationSoundPath
+                      ? settings.notificationSoundPath.split('/').pop()
+                      : t('defaultBell')}
+                  </span>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      className="text-xs"
+                      onClick={async () => {
+                        const p = await window.electronApi?.pickNotificationSound();
+                        if (p) updateSettings({ notificationSoundPath: p });
+                      }}
+                    >
+                      {t('selectFile')}
+                    </Button>
+                    {settings.notificationSoundPath && (
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={() => updateSettings({ notificationSoundPath: null })}
+                        aria-label="Reset"
+                      >
+                        <X className="size-3" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
 
             <div className="h-px bg-border/50" />
 
             <div className="flex flex-col gap-3">
-              <p className="text-xs uppercase tracking-widest text-muted-foreground/60">Bildirishnomalar</p>
-              <ToggleRow label="Ovoz" checked={settings.soundEnabled}
-                onCheckedChange={v => updateSettings({ soundEnabled: v })} />
-              <ToggleRow label="Notification" checked={settings.notificationsEnabled}
-                onCheckedChange={v => updateSettings({ notificationsEnabled: v })} />
+              <p className="text-xs uppercase tracking-widest text-muted-foreground/60">{t('autoStartBreaks').split(' ')[0]}</p>
+              <ToggleRow label={t('autoStartBreaks')} checked={settings.autoStartBreaks ?? false}
+                onCheckedChange={v => updateSettings({ autoStartBreaks: v })} />
+              <ToggleRow label={t('autoStartFocus')} checked={settings.autoStartFocus ?? false}
+                onCheckedChange={v => updateSettings({ autoStartFocus: v })} />
+              <ToggleRow label={t('alwaysOnTop')} checked={settings.alwaysOnTop ?? false}
+                onCheckedChange={v => { updateSettings({ alwaysOnTop: v }); window.electronApi?.setAlwaysOnTop(v); }} />
+              <ToggleRow label={t('breakScreen')} checked={settings.showBreakScreen ?? true}
+                onCheckedChange={v => updateSettings({ showBreakScreen: v })} />
+              <NumberInput label={t('dailyGoal')} value={settings.dailyGoal ?? 0} min={0} max={20}
+                onChange={v => updateSettings({ dailyGoal: v })} />
+              <div className="flex items-center justify-between gap-4">
+                <label className="text-sm text-foreground/80 select-none">{t('miniMode')}</label>
+                <Button variant="outline" size="xs" className="text-xs gap-1.5"
+                  onClick={() => window.electronApi?.setMiniMode(true)}>
+                  <Minimize2 className="size-3" />
+                  {t('miniMode')}
+                </Button>
+              </div>
+            </div>
+
+            <div className="h-px bg-border/50" />
+
+            <div className="flex flex-col gap-3">
+              <p className="text-xs uppercase tracking-widest text-muted-foreground/60">{t('todoist')}</p>
+              <div className="flex flex-col gap-2">
+                <input
+                  type="password"
+                  placeholder={t('todoistToken')}
+                  value={todoistToken}
+                  onChange={e => setTodoistToken(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background/30 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+                <Button
+                  variant="outline"
+                  size="xs"
+                  onClick={handleTodoistImport}
+                  disabled={todoistImporting || !todoistToken.trim()}
+                  className="gap-1.5 text-xs"
+                >
+                  {todoistImporting && <Loader2 className="size-3 animate-spin" />}
+                  {t('todoistImport')}
+                </Button>
+                {todoistMsg && (
+                  <p className="text-xs text-muted-foreground/50">{todoistMsg}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="h-px bg-border/50" />
+
+            <div className="flex flex-col gap-3">
+              <p className="text-xs uppercase tracking-widest text-muted-foreground/60">{t('language')}</p>
+              <div className="flex gap-1.5">
+                {(['uz', 'en', 'ru'] as const).map((loc) => (
+                  <button
+                    key={loc}
+                    onClick={() => updateSettings({ locale: loc })}
+                    className={`px-2.5 py-1 rounded-lg text-xs transition-colors duration-200 border ${
+                      settings.locale === loc
+                        ? 'bg-primary/20 border-primary/40 text-foreground'
+                        : 'border-border/50 text-muted-foreground/60 hover:border-border hover:text-muted-foreground'
+                    }`}
+                  >
+                    {loc.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="h-px bg-border/50" />
+
+            <div className="flex flex-col gap-3">
+              <p className="text-xs uppercase tracking-widest text-muted-foreground/60">{t('app')}</p>
+              <div className="flex items-center justify-between gap-4">
+                <Button
+                  variant="outline"
+                  size="xs"
+                  onClick={check}
+                  disabled={isBusy}
+                  className="gap-1.5 text-xs"
+                >
+                  {isBusy
+                    ? <Loader2 className="size-3 animate-spin" />
+                    : <RefreshCw className="size-3" />
+                  }
+                  {t('checkUpdates')}
+                </Button>
+                {status?.type === 'downloaded' && (
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    onClick={install}
+                    className="gap-1.5 text-xs text-primary border-primary/30 hover:bg-primary/10"
+                  >
+                    {t('install')}
+                  </Button>
+                )}
+              </div>
+              {status && (
+                <p className={`text-xs select-none ${
+                  status.type === 'error' ? 'text-destructive/70' :
+                  status.type === 'downloaded' ? 'text-primary/80' :
+                  status.type === 'not-available' ? 'text-muted-foreground/50' :
+                  'text-muted-foreground/60'
+                }`}>
+                  {status.type === 'checking' && t('checking')}
+                  {status.type === 'available' && `v${status.version} — ${t('downloading')}`}
+                  {status.type === 'downloading' && `${t('downloading')} ${status.percent}%`}
+                  {status.type === 'downloaded' && `v${status.version} ${t('updateReady')}`}
+                  {status.type === 'not-available' && t('upToDate')}
+                  {status.type === 'error' && `${t('updateError')}: ${status.message}`}
+                </p>
+              )}
             </div>
           </div>
         </Dialog.Content>

@@ -13,13 +13,16 @@ import {
   type AudioFile,
   type MusicConfig,
   type MusicSortMode,
+  type RadioStation,
+  type SavedMusicFolder,
+  type SavedYtPlaylist,
   type YoutubePlaylistItem,
   type YoutubeStreamInfo,
 } from '@shared/types';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type MusicSource = 'folder' | 'youtube' | null;
+type MusicSource = 'folder' | 'youtube' | 'radio' | null;
 
 interface MusicContextValue {
   // Config
@@ -32,6 +35,9 @@ interface MusicContextValue {
   refreshFiles: () => Promise<void>;
   pickFolder: () => Promise<void>;
   playFile: (index: number) => void;
+  addFolder: () => Promise<void>;
+  removeFolder: (id: string) => void;
+  loadFolder: (folder: SavedMusicFolder) => Promise<void>;
 
   // YouTube
   ytAvailable: boolean | null; // null = checking
@@ -43,6 +49,13 @@ interface MusicContextValue {
   loadYoutube: (url: string) => Promise<void>;
   playYtTrack: (index: number) => Promise<void>;
 
+  // Radio
+  currentRadio: RadioStation | null;
+  radioError: string | null;
+  playRadio: (station: RadioStation) => void;
+  addRadioStation: (name: string, url: string, genre: string) => void;
+  removeRadioStation: (id: string) => void;
+
   // Playback (shared)
   source: MusicSource;
   isPlaying: boolean;
@@ -51,6 +64,14 @@ interface MusicContextValue {
   next: () => void;
   prev: () => void;
   setVolume: (v: number) => void;
+
+  // Saved playlists
+  addSavedPlaylist: (url: string) => Promise<void>;
+  removeSavedPlaylist: (id: string) => void;
+  loadSavedPlaylist: (playlist: SavedYtPlaylist) => Promise<void>;
+
+  // Audio element ref (for visualizer)
+  audioRef: React.RefObject<HTMLAudioElement | null>;
 }
 
 // ─── Context ─────────────────────────────────────────────────────────────────
@@ -63,6 +84,9 @@ const MusicContext = createContext<MusicContextValue>({
   refreshFiles: async () => {},
   pickFolder: async () => {},
   playFile: () => {},
+  addFolder: async () => {},
+  removeFolder: () => {},
+  loadFolder: async () => {},
   ytAvailable: null,
   ytPlaylist: [],
   ytCurrentIndex: 0,
@@ -71,6 +95,11 @@ const MusicContext = createContext<MusicContextValue>({
   ytError: null,
   loadYoutube: async () => {},
   playYtTrack: async () => {},
+  currentRadio: null,
+  radioError: null,
+  playRadio: () => {},
+  addRadioStation: () => {},
+  removeRadioStation: () => {},
   source: null,
   isPlaying: false,
   play: () => {},
@@ -78,6 +107,10 @@ const MusicContext = createContext<MusicContextValue>({
   next: () => {},
   prev: () => {},
   setVolume: () => {},
+  addSavedPlaylist: async () => {},
+  removeSavedPlaylist: () => {},
+  loadSavedPlaylist: async () => {},
+  audioRef: { current: null },
 });
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -115,21 +148,29 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Radio state
+  const [currentRadio, setCurrentRadio] = useState<RadioStation | null>(null);
+  const [radioError, setRadioError] = useState<string | null>(null);
+
   // Load config on mount
   useEffect(() => {
-    window.electronApi?.getMusic().then(c => {
-      if (c) setConfig({ ...DEFAULT_MUSIC_CONFIG, ...c });
-    });
-    window.electronApi?.ytCheck().then(ok => setYtAvailable(ok));
+    window.electronApi?.getMusic()
+      .then(c => { if (c) setConfig({ ...DEFAULT_MUSIC_CONFIG, ...c }); })
+      .catch(err => console.error('getMusic failed:', err));
+    window.electronApi?.ytCheck()
+      .then(ok => setYtAvailable(ok))
+      .catch(() => setYtAvailable(false));
   }, []);
 
   // Load files when folder changes
   useEffect(() => {
     if (config.folderPath) {
-      window.electronApi?.listMusicFiles(config.folderPath).then(f => {
-        setFiles(sortFiles(f, config.sortMode));
-        setCurrentFileIndex(0);
-      });
+      window.electronApi?.listMusicFiles(config.folderPath)
+        .then(f => {
+          setFiles(sortFiles(f, config.sortMode));
+          setCurrentFileIndex(0);
+        })
+        .catch(err => console.error('listMusicFiles failed:', err));
     } else {
       setFiles([]);
     }
@@ -190,7 +231,7 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
     const audio = getOrCreateAudio();
     audio.src = files[index].url;
     audio.loop = files.length === 1; // loop single file, cycle if multiple
-    audio.play().catch(() => {});
+    audio.play().catch(err => console.error('audio play failed:', err));
     setIsPlaying(true);
   }
 
@@ -210,9 +251,36 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
     const audio = getOrCreateAudio();
     audio.src = result.streamUrl;
     audio.loop = ytPlaylist.length === 1;
-    audio.play().catch(() => {});
+    audio.play().catch(err => console.error('audio play failed:', err));
     setYtStreamInfo(result);
     setIsPlaying(true);
+  }
+
+  // ── Audio fade ────────────────────────────────────────────────────────────
+
+  function fadeVolume(
+    audio: HTMLAudioElement,
+    from: number,
+    to: number,
+    durationMs = 1000,
+    onComplete?: () => void,
+  ) {
+    const steps = 20;
+    const stepTime = durationMs / steps;
+    const stepSize = (to - from) / steps;
+    let current = from;
+    audio.volume = Math.max(0, Math.min(1, from));
+    const interval = setInterval(() => {
+      current += stepSize;
+      if ((stepSize > 0 && current >= to) || (stepSize < 0 && current <= to)) {
+        audio.volume = Math.max(0, Math.min(1, to));
+        clearInterval(interval);
+        onComplete?.();
+      } else {
+        audio.volume = Math.max(0, Math.min(1, current));
+      }
+    }, stepTime);
+    return interval;
   }
 
   // ── Public API ────────────────────────────────────────────────────────────
@@ -280,7 +348,7 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
     const audio = getOrCreateAudio();
     audio.src = result.streamUrl;
     audio.loop = true;
-    audio.play().catch(() => {});
+    audio.play().catch(err => console.error('audio play failed:', err));
     setIsPlaying(true);
   };
 
@@ -298,13 +366,72 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
       }
       return;
     }
-    audioRef.current.play().catch(() => {});
+    const audio = audioRef.current;
+    audio.play().catch(err => console.error('audio play failed:', err));
+    fadeVolume(audio, 0, config.volume);
     setIsPlaying(true);
   };
 
   const pause = () => {
-    audioRef.current?.pause();
+    const audio = audioRef.current;
+    if (!audio) return;
+    fadeVolume(audio, audio.volume, 0, 500, () => {
+      audio.pause();
+      audio.volume = config.volume;
+    });
     setIsPlaying(false);
+  };
+
+  // ── D2: Multiple folders ──────────────────────────────────────────────────
+
+  const addFolder = async () => {
+    const path = await window.electronApi?.pickMusicFolder();
+    if (!path) return;
+    const name = path.split('/').pop() ?? path;
+    const newFolder: SavedMusicFolder = { id: crypto.randomUUID(), path, name };
+    const savedFolders = [...(config.savedFolders ?? []), newFolder];
+    updateConfig({ folderPath: path, savedFolders });
+    const f = await window.electronApi?.listMusicFiles(path) ?? [];
+    setFiles(sortFiles(f, config.sortMode));
+    setCurrentFileIndex(0);
+  };
+
+  const removeFolder = (id: string) => {
+    const savedFolders = (config.savedFolders ?? []).filter(f => f.id !== id);
+    updateConfig({ savedFolders });
+  };
+
+  const loadFolder = async (folder: SavedMusicFolder) => {
+    updateConfig({ folderPath: folder.path });
+    const f = await window.electronApi?.listMusicFiles(folder.path) ?? [];
+    setFiles(sortFiles(f, config.sortMode));
+    setCurrentFileIndex(0);
+  };
+
+  // ── D3: Radio stations ────────────────────────────────────────────────────
+
+  const playRadio = (station: RadioStation) => {
+    setRadioError(null);
+    const audio = getOrCreateAudio();
+    audio.src = station.url;
+    audio.loop = false;
+    audio.play().catch(err => {
+      setRadioError(String(err));
+    });
+    setCurrentRadio(station);
+    setSource('radio');
+    setIsPlaying(true);
+  };
+
+  const addRadioStation = (name: string, url: string, genre: string) => {
+    const station: RadioStation = { id: crypto.randomUUID(), name, url, genre, isBuiltIn: false };
+    const savedRadioStations = [...(config.savedRadioStations ?? []), station];
+    updateConfig({ savedRadioStations });
+  };
+
+  const removeRadioStation = (id: string) => {
+    const savedRadioStations = (config.savedRadioStations ?? []).filter(s => s.id !== id);
+    updateConfig({ savedRadioStations });
   };
 
   const next = () => {
@@ -333,6 +460,75 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
 
   const setVolume = (v: number) => updateConfig({ volume: v });
 
+  // ── Saved playlists ───────────────────────────────────────────────────────
+
+  function extractVideoId(url: string): string | null {
+    const m = url.match(/[?&]v=([^&]+)/) ?? url.match(/youtu\.be\/([^?&]+)/);
+    return m?.[1] ?? null;
+  }
+
+  const addSavedPlaylist = async (url: string) => {
+    setYtLoading(true);
+    setYtError(null);
+    try {
+      let name = url;
+      let thumbnailUrl: string | null = null;
+      let itemCount = 0;
+      let firstVideoId: string | null = null;
+
+      const playlistResult = await window.electronApi?.ytGetPlaylist(url);
+      if (playlistResult && !('error' in playlistResult) && playlistResult.length > 0) {
+        itemCount = playlistResult.length;
+        name = url; // will be overridden if stream info available
+        firstVideoId = playlistResult[0].id;
+        // Try to get a title from first video
+        const streamResult = await window.electronApi?.ytGetStream(
+          `https://www.youtube.com/watch?v=${firstVideoId}`,
+        );
+        if (streamResult && !('error' in streamResult)) {
+          name = streamResult.title.replace(/\s*[-–|].*$/, '').trim(); // strip channel suffix
+        }
+      } else {
+        const streamResult = await window.electronApi?.ytGetStream(url);
+        if (!streamResult || 'error' in streamResult) {
+          setYtError((streamResult as { error: string })?.error ?? 'Xatolik');
+          return;
+        }
+        name = streamResult.title;
+        firstVideoId = extractVideoId(url);
+      }
+
+      if (firstVideoId) {
+        thumbnailUrl = `https://img.youtube.com/vi/${firstVideoId}/mqdefault.jpg`;
+      }
+
+      const newPlaylist: SavedYtPlaylist = {
+        id: crypto.randomUUID(),
+        name,
+        url,
+        thumbnailUrl,
+        itemCount,
+        addedAt: Date.now(),
+      };
+
+      const next = { ...config, savedPlaylists: [...(config.savedPlaylists ?? []), newPlaylist] };
+      setConfig(next);
+      window.electronApi?.setMusic(next);
+    } finally {
+      setYtLoading(false);
+    }
+  };
+
+  const removeSavedPlaylist = (id: string) => {
+    const next = { ...config, savedPlaylists: (config.savedPlaylists ?? []).filter(p => p.id !== id) };
+    setConfig(next);
+    window.electronApi?.setMusic(next);
+  };
+
+  const loadSavedPlaylist = async (playlist: SavedYtPlaylist) => {
+    await loadYoutube(playlist.url);
+  };
+
   // Cleanup
   useEffect(() => {
     return () => {
@@ -345,9 +541,13 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
     <MusicContext.Provider value={{
       config, updateConfig,
       files, currentFileIndex, refreshFiles, pickFolder, playFile,
+      addFolder, removeFolder, loadFolder,
       ytAvailable, ytPlaylist, ytCurrentIndex, ytStreamInfo, ytLoading, ytError,
       loadYoutube, playYtTrack,
+      currentRadio, radioError, playRadio, addRadioStation, removeRadioStation,
       source, isPlaying, play, pause, next, prev, setVolume,
+      addSavedPlaylist, removeSavedPlaylist, loadSavedPlaylist,
+      audioRef,
     }}>
       {children}
     </MusicContext.Provider>

@@ -281,6 +281,12 @@ html::after {
     }
 }
 
+/* 🌌 Mini mode aurora breathing */
+@keyframes mini-aurora-breath {
+    0%, 100% { transform: scale(0.91); opacity: 0.70; }
+    50%       { transform: scale(1.08); opacity: 1; }
+}
+
 /* ⏱️ Timer ring breathing glow */
 @keyframes ring-breathe {
     0%, 100% {
@@ -316,4 +322,26 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 input[type="number"] {
     -moz-appearance: textfield;
+}
+
+/* 🎵 Marquee scrolling text */
+@keyframes marquee {
+    0%   { transform: translateX(0); }
+    20%  { transform: translateX(0); }
+    80%  { transform: translateX(var(--marquee-offset, -50%)); }
+    100% { transform: translateX(var(--marquee-offset, -50%)); }
+}
+
+.marquee-container {
+    overflow: hidden;
+    mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+
+.marquee-container span {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.marquee-text {
+    animation: marquee 18s ease-in-out infinite alternate;
 }

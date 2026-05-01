@@ -11,8 +11,8 @@ files:
   - package.json
 
 extraResources:
-  - from: .env
-    to: .env
+  - from: resources/tray-icon.png
+    to: tray-icon.png
 
 extraMetadata:
   main: dist/main/index.js
@@ -39,5 +39,7 @@ nsis:
   allowToChangeInstallationDirectory: true
 
 publish:
-  provider: generic
-  url: https://update.example.com/releases
+  provider: github
+  owner: madrimovDev
+  repo: lofi-pomodoro
+  private: false

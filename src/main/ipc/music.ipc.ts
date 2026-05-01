@@ -1,10 +1,11 @@
-import { ipcMain, dialog, app } from 'electron';
+import { ipcMain, dialog, app, BrowserWindow } from 'electron';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { readdirSync } from 'fs';
 import { extname, join } from 'path';
 import { pathToFileURL } from 'url';
 import { getAppStore } from '../store';
+import log from '../logger';
 import {
   IPC_CHANNELS,
   DEFAULT_MUSIC_CONFIG,
@@ -57,7 +58,7 @@ export function setupMusicIpc(): void {
 
   // Folder: open dialog to pick a folder
   ipcMain.handle(IPC_CHANNELS.MUSIC_PICK_FOLDER, async (event) => {
-    const win = require('electron').BrowserWindow.fromWebContents(event.sender);
+    const win = BrowserWindow.fromWebContents(event.sender);
     const result = await dialog.showOpenDialog(win!, {
       title: 'Musiqa papkasini tanlang',
       properties: ['openDirectory'],
@@ -106,6 +107,7 @@ export function setupMusicIpc(): void {
         isLive: liveOut.toLowerCase().startsWith('true'),
       };
     } catch (err: unknown) {
+      log.error('yt-dlp stream error:', err);
       const msg = err instanceof Error ? err.message : String(err);
       if (msg.includes('yt-dlp')) return { error: 'yt-dlp topilmadi. Iltimos avval o\'rnating.' };
       return { error: 'URL dan stream olishda xatolik yuz berdi.' };
@@ -131,6 +133,7 @@ export function setupMusicIpc(): void {
           };
         });
     } catch (err: unknown) {
+      log.error('yt-dlp playlist error:', err);
       const msg = err instanceof Error ? err.message : String(err);
       if (msg.includes('yt-dlp')) return { error: 'yt-dlp topilmadi.' };
       return { error: 'Playlist ma\'lumotlarini olishda xatolik.' };
