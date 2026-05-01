@@ -33,8 +33,8 @@ export function createMainWindow(): BrowserWindow {
 
   state.manage(win);
 
-  if (isDev) {
-    win.loadURL(process.env.VITE_DEV_SERVER_URL!);
+  if (!app.isPackaged && process.env.VITE_DEV_SERVER_URL) {
+    win.loadURL(process.env.VITE_DEV_SERVER_URL);
   } else {
     win.loadFile(join(__dirname, '../index.html'));
   }
