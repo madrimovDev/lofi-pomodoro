@@ -36,6 +36,7 @@ pub fn set_mini_mode(
       inner.normal_size = Some((size.width, size.height));
       inner.normal_min_size = Some((600.0, 400.0));
       inner.mini_was_always_on_top = inner.always_on_top;
+      inner.always_on_top = true;
       inner.mini_mode = true;
     }
     win.set_min_size(Some(Size::Logical(LogicalSize::new(200.0, 54.0)))).map_err(|e| e.to_string())?;
