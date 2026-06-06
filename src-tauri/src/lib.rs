@@ -60,6 +60,15 @@ pub fn run() {
           let _ = window.hide();
         }
       }
+      #[cfg(target_os = "linux")]
+      if let tauri::WindowEvent::Focused(false) = event {
+        use tauri::Manager;
+        let state = window.state::<app_state::AppState>();
+        let aot = state.inner.lock().unwrap().always_on_top;
+        if aot {
+          let _ = window.set_always_on_top(true);
+        }
+      }
     })
     .setup(move |app| {
       if cfg!(debug_assertions) {
@@ -93,7 +102,9 @@ pub fn run() {
       commands::store::get_music,
       commands::store::set_music,
       commands::store::get_stats,
-      commands::store::set_stats
+      commands::store::set_stats,
+      commands::window::set_always_on_top,
+      commands::window::set_mini_mode
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

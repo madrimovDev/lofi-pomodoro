@@ -21,6 +21,8 @@ pub struct AppStateInner {
   /// Mini-rejimga kirishdan oldingi always-on-top holati.
   pub mini_was_always_on_top: bool,
   /// Tray icon/menu'ni faqat o'zgarganda qayta qurish uchun oldingi holat.
+  #[allow(dead_code)] // Task 4 (tray) da ishlatiladi
   pub prev_mode: Option<String>,
+  #[allow(dead_code)] // Task 4 (tray) da ishlatiladi
   pub prev_running: Option<bool>,
 }
