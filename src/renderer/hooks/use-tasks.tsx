@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { type Subtask, type Task } from '@shared/types';
+import { api } from '@shared/tauri/api';
 
 interface TasksContextValue {
   tasks: Task[];
@@ -48,8 +49,8 @@ export function TasksProvider({ children }: { children: ReactNode }): ReactEleme
 
   useEffect(() => {
     Promise.all([
-      window.electronApi?.getTasks(),
-      window.electronApi?.getActiveTaskId(),
+      api.getTasks(),
+      api.getActiveTaskId(),
     ])
       .then(([t, id]) => {
         if (t) setTasksState(t);
@@ -62,12 +63,12 @@ export function TasksProvider({ children }: { children: ReactNode }): ReactEleme
   // State o'zgarganda persistlash — functional update'lar bilan stale-closure'siz.
   useEffect(() => {
     if (!hydratedRef.current) return;
-    window.electronApi?.setTasks(tasks);
+    api.setTasks(tasks).catch(err => console.error('setTasks failed:', err));
   }, [tasks]);
 
   useEffect(() => {
     if (!hydratedRef.current) return;
-    window.electronApi?.setActiveTaskId(activeTaskId);
+    api.setActiveTaskId(activeTaskId).catch(err => console.error('setActiveTaskId failed:', err));
   }, [activeTaskId]);
 
   const addTask = (name: string, description: string, estimatedPomodoros: number) => {

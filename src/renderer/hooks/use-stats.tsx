@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { type DailyStat } from '@shared/types';
 import { dateKey } from '@shared/lib/date';
+import { api } from '@shared/tauri/api';
 
 function todayKey(): string {
   return dateKey(new Date());
@@ -46,7 +47,7 @@ export function StatsProvider({ children }: { children: ReactNode }): ReactEleme
   const hydratedRef = useRef(false);
 
   useEffect(() => {
-    window.electronApi?.getStats()
+    api.getStats()
       .then((s) => { if (s) setStatsState(s); })
       .catch(err => console.error('getStats failed:', err))
       .finally(() => { hydratedRef.current = true; });
@@ -55,7 +56,7 @@ export function StatsProvider({ children }: { children: ReactNode }): ReactEleme
   // State o'zgarganda persistlash — functional update'lar bilan stale-closure'siz.
   useEffect(() => {
     if (!hydratedRef.current) return;
-    window.electronApi?.setStats(stats);
+    api.setStats(stats).catch(err => console.error('setStats failed:', err));
   }, [stats]);
 
   function upsertToday(patch: Partial<Omit<DailyStat, 'date'>>) {
