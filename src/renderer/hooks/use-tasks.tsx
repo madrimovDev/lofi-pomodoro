@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactElement, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { type Subtask, type Task } from '@shared/types';
 
 interface TasksContextValue {
@@ -42,6 +42,9 @@ const TasksContext = createContext<TasksContextValue>({
 export function TasksProvider({ children }: { children: ReactNode }): ReactElement {
   const [tasks, setTasksState] = useState<Task[]>([]);
   const [activeTaskId, setActiveTaskIdState] = useState<string | null>(null);
+  // Store'dan dastlabki yuklash tugaguncha persistlashni o'tkazib yuboramiz,
+  // aks holda hydration paytida bo'sh holat saqlangan ma'lumotni o'chiradi.
+  const hydratedRef = useRef(false);
 
   useEffect(() => {
     Promise.all([
@@ -52,18 +55,20 @@ export function TasksProvider({ children }: { children: ReactNode }): ReactEleme
         if (t) setTasksState(t);
         if (id !== undefined) setActiveTaskIdState(id ?? null);
       })
-      .catch(err => console.error('tasks init failed:', err));
+      .catch(err => console.error('tasks init failed:', err))
+      .finally(() => { hydratedRef.current = true; });
   }, []);
 
-  function saveTasks(next: Task[]) {
-    setTasksState(next);
-    window.electronApi?.setTasks(next);
-  }
+  // State o'zgarganda persistlash — functional update'lar bilan stale-closure'siz.
+  useEffect(() => {
+    if (!hydratedRef.current) return;
+    window.electronApi?.setTasks(tasks);
+  }, [tasks]);
 
-  function saveActiveTaskId(id: string | null) {
-    setActiveTaskIdState(id);
-    window.electronApi?.setActiveTaskId(id);
-  }
+  useEffect(() => {
+    if (!hydratedRef.current) return;
+    window.electronApi?.setActiveTaskId(activeTaskId);
+  }, [activeTaskId]);
 
   const addTask = (name: string, description: string, estimatedPomodoros: number) => {
     const task: Task = {
@@ -77,66 +82,68 @@ export function TasksProvider({ children }: { children: ReactNode }): ReactEleme
       dueDate: null,
       subtasks: [],
     };
-    saveTasks([...tasks, task]);
+    setTasksState(prev => [...prev, task]);
   };
 
   const editTask = (id: string, patch: Partial<Pick<Task, 'name' | 'description' | 'estimatedPomodoros' | 'priority' | 'dueDate'>>) => {
-    saveTasks(tasks.map(t => t.id === id ? { ...t, ...patch } : t));
+    setTasksState(prev => prev.map(t => t.id === id ? { ...t, ...patch } : t));
   };
 
   const removeTask = (id: string) => {
-    saveTasks(tasks.filter(t => t.id !== id));
-    if (activeTaskId === id) saveActiveTaskId(null);
+    setTasksState(prev => prev.filter(t => t.id !== id));
+    if (activeTaskId === id) setActiveTaskIdState(null);
   };
 
   const setActiveTask = (id: string | null) => {
-    saveActiveTaskId(id);
+    setActiveTaskIdState(id);
   };
 
   const completeTask = (id: string) => {
-    saveTasks(tasks.map(t => t.id === id ? { ...t, completedAt: Date.now() } : t));
-    if (activeTaskId === id) saveActiveTaskId(null);
+    setTasksState(prev => prev.map(t => t.id === id ? { ...t, completedAt: Date.now() } : t));
+    if (activeTaskId === id) setActiveTaskIdState(null);
   };
 
   const incrementPomodoro = (id: string) => {
-    saveTasks(tasks.map(t => t.id === id
+    setTasksState(prev => prev.map(t => t.id === id
       ? { ...t, completedPomodoros: t.completedPomodoros + 1 }
       : t
     ));
   };
 
   const moveTask = (id: string, direction: 'up' | 'down') => {
-    const pending = tasks.filter(t => !t.completedAt);
-    const completed = tasks.filter(t => !!t.completedAt);
-    const idx = pending.findIndex(t => t.id === id);
-    if (idx === -1) return;
-    const newIdx = direction === 'up' ? idx - 1 : idx + 1;
-    if (newIdx < 0 || newIdx >= pending.length) return;
-    const reordered = [...pending];
-    [reordered[idx], reordered[newIdx]] = [reordered[newIdx], reordered[idx]];
-    saveTasks([...reordered, ...completed]);
+    setTasksState(prev => {
+      const pending = prev.filter(t => !t.completedAt);
+      const completed = prev.filter(t => !!t.completedAt);
+      const idx = pending.findIndex(t => t.id === id);
+      if (idx === -1) return prev;
+      const newIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (newIdx < 0 || newIdx >= pending.length) return prev;
+      const reordered = [...pending];
+      [reordered[idx], reordered[newIdx]] = [reordered[newIdx], reordered[idx]];
+      return [...reordered, ...completed];
+    });
   };
 
   const clearCompleted = () => {
-    saveTasks(tasks.filter(t => !t.completedAt));
+    setTasksState(prev => prev.filter(t => !t.completedAt));
   };
 
   const replaceTasks = (newTasks: Task[]) => {
-    saveTasks(newTasks);
-    saveActiveTaskId(null);
+    setTasksState(newTasks);
+    setActiveTaskIdState(null);
   };
 
   const reorderTasks = (newOrder: Task[]) => {
-    saveTasks(newOrder);
+    setTasksState(newOrder);
   };
 
   const addSubtask = (taskId: string, text: string) => {
     const subtask: Subtask = { id: crypto.randomUUID(), text, done: false };
-    saveTasks(tasks.map(t => t.id === taskId ? { ...t, subtasks: [...(t.subtasks ?? []), subtask] } : t));
+    setTasksState(prev => prev.map(t => t.id === taskId ? { ...t, subtasks: [...(t.subtasks ?? []), subtask] } : t));
   };
 
   const toggleSubtask = (taskId: string, subtaskId: string) => {
-    saveTasks(tasks.map(t =>
+    setTasksState(prev => prev.map(t =>
       t.id === taskId
         ? { ...t, subtasks: (t.subtasks ?? []).map(s => s.id === subtaskId ? { ...s, done: !s.done } : s) }
         : t
@@ -144,7 +151,7 @@ export function TasksProvider({ children }: { children: ReactNode }): ReactEleme
   };
 
   const removeSubtask = (taskId: string, subtaskId: string) => {
-    saveTasks(tasks.map(t =>
+    setTasksState(prev => prev.map(t =>
       t.id === taskId
         ? { ...t, subtasks: (t.subtasks ?? []).filter(s => s.id !== subtaskId) }
         : t

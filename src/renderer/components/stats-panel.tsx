@@ -3,6 +3,7 @@ import { X, BarChart2 } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { useStats } from '@renderer/hooks/use-stats';
 import { useSettings } from '@renderer/hooks/use-settings';
+import { dateKey } from '@shared/lib/date';
 import type { DailyStat } from '@shared/types';
 
 interface StatsPanelProps {
@@ -18,7 +19,7 @@ function getLast7Days(): { date: string; label: string }[] {
     const d = new Date();
     d.setDate(d.getDate() - i);
     result.push({
-      date: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`,
+      date: dateKey(d),
       label: DAY_LABELS[d.getDay()],
     });
   }
@@ -34,9 +35,7 @@ function WeekBar({ days, stats }: { days: { date: string; label: string }[]; sta
         const stat = stats.find((s) => s.date === date);
         const sessions = stat?.focusSessions ?? 0;
         const heightPct = sessions === 0 ? 0 : Math.max(8, Math.round((sessions / maxSessions) * 100));
-        const td = new Date();
-        const todayStr = `${td.getFullYear()}-${String(td.getMonth() + 1).padStart(2, '0')}-${String(td.getDate()).padStart(2, '0')}`;
-        const isToday = date === todayStr;
+        const isToday = date === dateKey(new Date());
 
         return (
           <div key={date} className="flex flex-col items-center gap-1 flex-1">
