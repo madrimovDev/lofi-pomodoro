@@ -70,8 +70,8 @@ pub fn get_music(app: AppHandle) -> Result<MusicConfig, String> {
 }
 
 #[tauri::command]
-pub fn set_music(app: AppHandle, config: MusicConfig) -> Result<(), String> {
-  write_value(&app, "music", config)
+pub fn set_music(app: AppHandle, music: MusicConfig) -> Result<(), String> {
+  write_value(&app, "music", music)
 }
 
 #[tauri::command]
