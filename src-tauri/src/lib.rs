@@ -59,7 +59,6 @@ pub fn run() {
         let is_quitting = state.inner.lock().unwrap().is_quitting;
         if !is_quitting {
           api.prevent_close();
-          crate::window_util::restore_normal_before_exit(window.app_handle());
           let _ = window.hide();
         }
       }
