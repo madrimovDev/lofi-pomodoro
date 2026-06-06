@@ -1,16 +1,11 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Theme {
+  #[default]
   Dark,
   Light,
-}
-
-impl Default for Theme {
-  fn default() -> Self {
-    Theme::Dark
-  }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
