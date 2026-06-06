@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactElement, type ReactNode } from 'react';
 import { DEFAULT_TIMER_SETTINGS, type TimerSettings } from '@shared/types';
 import { getT, type TranslationKey } from '@shared/i18n';
+import { api } from '@shared/tauri/api';
 
 interface SettingsContextValue {
   settings: TimerSettings;
@@ -18,7 +19,7 @@ export function SettingsProvider({ children }: { children: ReactNode }): ReactEl
   const [settings, setSettings] = useState<TimerSettings>(DEFAULT_TIMER_SETTINGS);
 
   useEffect(() => {
-    window.electronApi?.getSettings()
+    api.getSettings()
       .then(s => { if (s) setSettings({ ...DEFAULT_TIMER_SETTINGS, ...s }); })
       .catch(err => console.error('getSettings failed:', err));
   }, []);
@@ -26,7 +27,7 @@ export function SettingsProvider({ children }: { children: ReactNode }): ReactEl
   const updateSettings = (patch: Partial<TimerSettings>) => {
     const next = { ...settings, ...patch };
     setSettings(next);
-    window.electronApi?.setSettings(next);
+    api.setSettings(next).catch(err => console.error('setSettings failed:', err));
   };
 
   const t = getT(settings.locale ?? 'uz');
