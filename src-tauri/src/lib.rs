@@ -3,6 +3,7 @@ mod commands;
 mod models;
 mod store_util;
 mod tray;
+mod window_util;
 
 /// Tizimda faol NVIDIA GPU borligini aniqlaydi (PCI vendor 0x10de).
 #[cfg(target_os = "linux")]
@@ -58,6 +59,7 @@ pub fn run() {
         let is_quitting = state.inner.lock().unwrap().is_quitting;
         if !is_quitting {
           api.prevent_close();
+          crate::window_util::restore_normal_before_exit(window.app_handle());
           let _ = window.hide();
         }
       }
@@ -89,6 +91,7 @@ pub fn run() {
           let _ = win.eval("document.documentElement.classList.add('no-backdrop-blur')");
         }
       }
+      tray::setup_tray(app.handle())?;
       Ok(())
     })
     .invoke_handler(tauri::generate_handler![
@@ -105,7 +108,8 @@ pub fn run() {
       commands::store::get_stats,
       commands::store::set_stats,
       commands::window::set_always_on_top,
-      commands::window::set_mini_mode
+      commands::window::set_mini_mode,
+      tray::update_tray_state
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

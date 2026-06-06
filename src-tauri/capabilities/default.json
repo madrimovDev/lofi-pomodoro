@@ -23,6 +23,7 @@
     "core:window:allow-set-min-size",
     "core:window:allow-set-max-size",
     "core:window:allow-unminimize",
-    "core:event:default"
+    "core:event:default",
+    "core:tray:default"
   ]
 }
