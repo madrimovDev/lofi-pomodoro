@@ -1,16 +1,16 @@
-import { createContext, useContext, useEffect, useState, type ReactElement, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { type DailyStat } from '@shared/types';
+import { dateKey } from '@shared/lib/date';
 
 function todayKey(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return dateKey(new Date());
 }
 
 function calculateStreak(stats: DailyStat[]): number {
   let streak = 0;
   const d = new Date();
   while (true) {
-    const key = d.toISOString().slice(0, 10);
+    const key = dateKey(d);
     const stat = stats.find(s => s.date === key);
     if (!stat || stat.focusSessions === 0) break;
     streak++;
@@ -41,29 +41,36 @@ const StatsContext = createContext<StatsContextValue>({
 
 export function StatsProvider({ children }: { children: ReactNode }): ReactElement {
   const [stats, setStatsState] = useState<DailyStat[]>([]);
+  // Store'dan dastlabki yuklash tugaguncha persistlashni o'tkazib yuboramiz,
+  // aks holda hydration paytida bo'sh massiv saqlangan ma'lumotni o'chirib yuboradi.
+  const hydratedRef = useRef(false);
 
   useEffect(() => {
     window.electronApi?.getStats()
       .then((s) => { if (s) setStatsState(s); })
-      .catch(err => console.error('getStats failed:', err));
+      .catch(err => console.error('getStats failed:', err))
+      .finally(() => { hydratedRef.current = true; });
   }, []);
 
-  function saveStats(next: DailyStat[]) {
-    setStatsState(next);
-    window.electronApi?.setStats(next);
-  }
+  // State o'zgarganda persistlash — functional update'lar bilan stale-closure'siz.
+  useEffect(() => {
+    if (!hydratedRef.current) return;
+    window.electronApi?.setStats(stats);
+  }, [stats]);
 
   function upsertToday(patch: Partial<Omit<DailyStat, 'date'>>) {
     const key = todayKey();
-    const existing = stats.find((s) => s.date === key) ?? { date: key, focusSessions: 0, focusMinutes: 0, tasksCompleted: 0 };
-    const updated: DailyStat = {
-      ...existing,
-      focusSessions: existing.focusSessions + (patch.focusSessions ?? 0),
-      focusMinutes: existing.focusMinutes + (patch.focusMinutes ?? 0),
-      tasksCompleted: existing.tasksCompleted + (patch.tasksCompleted ?? 0),
-      skippedSessions: (existing.skippedSessions ?? 0) + (patch.skippedSessions ?? 0),
-    };
-    saveStats([...stats.filter((s) => s.date !== key), updated]);
+    setStatsState((prev) => {
+      const existing = prev.find((s) => s.date === key) ?? { date: key, focusSessions: 0, focusMinutes: 0, tasksCompleted: 0 };
+      const updated: DailyStat = {
+        ...existing,
+        focusSessions: existing.focusSessions + (patch.focusSessions ?? 0),
+        focusMinutes: existing.focusMinutes + (patch.focusMinutes ?? 0),
+        tasksCompleted: existing.tasksCompleted + (patch.tasksCompleted ?? 0),
+        skippedSessions: (existing.skippedSessions ?? 0) + (patch.skippedSessions ?? 0),
+      };
+      return [...prev.filter((s) => s.date !== key), updated];
+    });
   }
 
   const addFocusSession = (minutes: number) => {
