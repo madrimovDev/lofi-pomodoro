@@ -28,6 +28,12 @@ pub fn set_mini_mode(
   use tauri::{LogicalSize, Size};
   let win = app.get_webview_window("main").ok_or("oyna topilmadi")?;
 
+  // Idempotent: allaqachon shu holatda bo'lsa hech narsa qilmaymiz
+  // (aks holda normal_size mini o'lcham bilan ustiga yozilib ketadi).
+  if state.inner.lock().unwrap().mini_mode == enabled {
+    return Ok(());
+  }
+
   if enabled {
     let scale = win.scale_factor().unwrap_or(1.0);
     let size = win.inner_size().map_err(|e| e.to_string())?.to_logical::<f64>(scale);
