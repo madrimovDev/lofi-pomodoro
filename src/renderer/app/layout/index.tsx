@@ -112,7 +112,8 @@ function MiniLayout({ sessionsBeforeLongBreak }: { sessionsBeforeLongBreak: numb
   return (
     <div
       className="h-full w-full flex flex-col select-none overflow-hidden relative"
-      style={{ WebkitAppRegion: 'drag', ...borderGlowStyle } as React.CSSProperties}
+      data-tauri-drag-region="deep"
+      style={borderGlowStyle}
     >
       {/* Aurora layer 1 — right side, next mode color, breathing */}
       <div className="absolute inset-0 pointer-events-none" style={ambientStyle} />
