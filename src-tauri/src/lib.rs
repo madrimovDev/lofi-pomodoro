@@ -2,6 +2,7 @@ mod app_state;
 mod commands;
 mod models;
 mod store_util;
+mod tray;
 
 /// Tizimda faol NVIDIA GPU borligini aniqlaydi (PCI vendor 0x10de).
 #[cfg(target_os = "linux")]
