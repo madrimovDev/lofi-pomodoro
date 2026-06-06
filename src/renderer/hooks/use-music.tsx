@@ -19,6 +19,7 @@ import {
   type YoutubePlaylistItem,
   type YoutubeStreamInfo,
 } from '@shared/types';
+import { api } from '@shared/tauri/api';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -154,7 +155,7 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
 
   // Load config on mount
   useEffect(() => {
-    window.electronApi?.getMusic()
+    api.getMusic()
       .then(c => { if (c) setConfig({ ...DEFAULT_MUSIC_CONFIG, ...c }); })
       .catch(err => console.error('getMusic failed:', err));
     window.electronApi?.ytCheck()
@@ -288,7 +289,7 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
   const updateConfig = (patch: Partial<MusicConfig>) => {
     const next = { ...config, ...patch };
     setConfig(next);
-    window.electronApi?.setMusic(next);
+    api.setMusic(next).catch(err => console.error('setMusic failed:', err));
   };
 
   const refreshFiles = async () => {
@@ -513,7 +514,7 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
 
       const next = { ...config, savedPlaylists: [...(config.savedPlaylists ?? []), newPlaylist] };
       setConfig(next);
-      window.electronApi?.setMusic(next);
+      api.setMusic(next).catch(err => console.error('setMusic failed:', err));
     } finally {
       setYtLoading(false);
     }
@@ -522,7 +523,7 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
   const removeSavedPlaylist = (id: string) => {
     const next = { ...config, savedPlaylists: (config.savedPlaylists ?? []).filter(p => p.id !== id) };
     setConfig(next);
-    window.electronApi?.setMusic(next);
+    api.setMusic(next).catch(err => console.error('setMusic failed:', err));
   };
 
   const loadSavedPlaylist = async (playlist: SavedYtPlaylist) => {
