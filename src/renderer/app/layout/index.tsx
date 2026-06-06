@@ -13,6 +13,7 @@ import { useTasks } from '@renderer/hooks/use-tasks';
 import { useMusic } from '@renderer/hooks/use-music';
 import { useTraySync } from '@renderer/hooks/use-tray-sync';
 import { Button } from '@shared/components/ui/button';
+import { winApi, winEvents } from '@shared/tauri/window';
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -45,7 +46,7 @@ function MiniLayout({ sessionsBeforeLongBreak }: { sessionsBeforeLongBreak: numb
 
   const activeTaskName = activeTask?.name ?? null;
 
-  const exitMini = () => window.electronApi?.setMiniMode(false);
+  const exitMini = () => winApi.setMiniMode(false).catch(err => console.error('setMiniMode failed:', err));
 
   // ── Aurora gradient: anticipates the next mode color ──────────────────────
   const currentHue = MODE_HUES[mode] ?? 120;
@@ -244,9 +245,8 @@ function LayoutInner() {
   const { settings } = useSettings();
 
   useEffect(() => {
-    return window.electronApi?.onMiniModeChanged((enabled) => {
-      setIsMiniMode(enabled);
-    });
+    const unlisten = winEvents.onMiniModeChanged((enabled) => setIsMiniMode(enabled));
+    return () => { unlisten.then((fn) => fn()); };
   }, []);
 
   const { timeLeft, isRunning, mode, toggle, skip } = useTimerContext();

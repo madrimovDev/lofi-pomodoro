@@ -5,6 +5,7 @@ import { Button } from '@shared/components/ui/button';
 import { useSettings } from '@renderer/hooks/use-settings';
 import { useUpdater } from '@renderer/hooks/use-updater';
 import { useTasks } from '@renderer/hooks/use-tasks';
+import { winApi } from '@shared/tauri/window';
 
 interface SettingsPanelProps {
   open: boolean;
@@ -158,7 +159,7 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
               <ToggleRow label={t('autoStartFocus')} checked={settings.autoStartFocus ?? false}
                 onCheckedChange={v => updateSettings({ autoStartFocus: v })} />
               <ToggleRow label={t('alwaysOnTop')} checked={settings.alwaysOnTop ?? false}
-                onCheckedChange={v => { updateSettings({ alwaysOnTop: v }); window.electronApi?.setAlwaysOnTop(v); }} />
+                onCheckedChange={v => { updateSettings({ alwaysOnTop: v }); winApi.setAlwaysOnTop(v).catch(err => console.error('setAlwaysOnTop failed:', err)); }} />
               <ToggleRow label={t('breakScreen')} checked={settings.showBreakScreen ?? true}
                 onCheckedChange={v => updateSettings({ showBreakScreen: v })} />
               <NumberInput label={t('dailyGoal')} value={settings.dailyGoal ?? 0} min={0} max={20}
@@ -166,7 +167,7 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
               <div className="flex items-center justify-between gap-4">
                 <label className="text-sm text-foreground/80 select-none">{t('miniMode')}</label>
                 <Button variant="outline" size="xs" className="text-xs gap-1.5"
-                  onClick={() => window.electronApi?.setMiniMode(true)}>
+                  onClick={() => winApi.setMiniMode(true).catch(err => console.error('setMiniMode failed:', err))}>
                   <Minimize2 className="size-3" />
                   {t('miniMode')}
                 </Button>

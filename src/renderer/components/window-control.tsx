@@ -4,15 +4,16 @@ import { ToggleTheme } from './toggle-theme';
 import { CurrentTime } from './current-time';
 import { useSettings } from '@renderer/hooks/use-settings';
 import { useStats } from '@renderer/hooks/use-stats';
+import { win, winApi } from '@shared/tauri/window';
 
 interface WindowControlProps {
   onOpenStats?: () => void;
 }
 
 export const WindowControl = ({ onOpenStats }: WindowControlProps) => {
-  const handleMinimize = () => window.electronApi?.minimizeWindow();
-  const handleMaximize = () => window.electronApi?.maximizeWindow();
-  const handleClose = () => window.electronApi?.closeWindow();
+  const handleMinimize = () => win.minimize();
+  const handleMaximize = () => win.toggleMaximize();
+  const handleClose = () => win.close();
   const { settings, updateSettings } = useSettings();
   const { streak } = useStats();
 
@@ -37,7 +38,7 @@ export const WindowControl = ({ onOpenStats }: WindowControlProps) => {
             </Button>
           )}
           <Button
-            onClick={() => window.electronApi?.setMiniMode(true)}
+            onClick={() => winApi.setMiniMode(true).catch(err => console.error('setMiniMode failed:', err))}
             variant="ghost" size="icon-xs" aria-label="Mini mode"
             title="Mini rejim"
           >
@@ -47,7 +48,7 @@ export const WindowControl = ({ onOpenStats }: WindowControlProps) => {
             onClick={() => {
               const next = !settings.alwaysOnTop;
               updateSettings({ alwaysOnTop: next });
-              window.electronApi?.setAlwaysOnTop(next);
+              winApi.setAlwaysOnTop(next).catch(err => console.error('setAlwaysOnTop failed:', err));
             }}
             variant={settings.alwaysOnTop ? 'outline' : 'ghost'}
             size="icon-xs"

@@ -13,6 +13,7 @@ import { useSettings } from '@renderer/hooks/use-settings';
 import { useAmbient } from '@renderer/hooks/use-ambient';
 import { useKeyboardShortcuts } from '@renderer/hooks/use-keyboard-shortcuts';
 import { useStats } from '@renderer/hooks/use-stats';
+import { winApi } from '@shared/tauri/window';
 
 const MODE_KEY = {
   focus: 'focus',
@@ -84,7 +85,7 @@ export const MainLayout = ({ onToggleMusic, musicOpen, isMiniMode, onBreakStart 
   // A2: Sync always-on-top from settings (skip in mini mode — it forces its own pin)
   useEffect(() => {
     if (!isMiniMode) {
-      window.electronApi?.setAlwaysOnTop(settings.alwaysOnTop);
+      winApi.setAlwaysOnTop(settings.alwaysOnTop).catch(err => console.error('setAlwaysOnTop failed:', err));
     }
   }, [settings.alwaysOnTop, isMiniMode]);
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { TrayTimerState } from '@shared/types';
 import type { TimerMode } from './use-timer';
+import { winApi, winEvents } from '@shared/tauri/window';
 
 interface TrayTimerHookProps {
   timeLeft: number;
@@ -11,31 +12,32 @@ interface TrayTimerHookProps {
 }
 
 export function useTraySync({ timeLeft, mode, isRunning, toggle, skip }: TrayTimerHookProps) {
-  // Keep stable refs so IPC listeners don't re-subscribe every render
   const toggleRef = useRef(toggle);
   const skipRef = useRef(skip);
   toggleRef.current = toggle;
   skipRef.current = skip;
 
-  // Send timer state to main process for tray updates
+  // Timer holatini tray'ga yuborish
   useEffect(() => {
     const state: TrayTimerState = { timeLeft, mode, isRunning };
-    window.electronApi?.updateTrayState(state);
+    winApi.updateTrayState(state).catch(err => console.error('updateTrayState failed:', err));
   }, [timeLeft, mode, isRunning]);
 
-  // Listen for toggle/skip commands from tray menu (subscribe once, use ref to call latest)
+  // Tray menyu hodisalari — Tauri listen() Promise<UnlistenFn> qaytaradi.
   useEffect(() => {
-    return window.electronApi?.onTrayToggle(() => toggleRef.current());
+    const unlisten = winEvents.onTrayToggle(() => toggleRef.current());
+    return () => { unlisten.then((fn) => fn()); };
   }, []);
 
   useEffect(() => {
-    return window.electronApi?.onTraySkip(() => skipRef.current());
+    const unlisten = winEvents.onTraySkip(() => skipRef.current());
+    return () => { unlisten.then((fn) => fn()); };
   }, []);
 
-  // Listen for mini mode from tray
   useEffect(() => {
-    return window.electronApi?.onTraySetMiniMode((enabled) => {
-      window.electronApi?.setMiniMode(enabled);
+    const unlisten = winEvents.onTraySetMiniMode((enabled) => {
+      winApi.setMiniMode(enabled).catch(err => console.error('setMiniMode failed:', err));
     });
+    return () => { unlisten.then((fn) => fn()); };
   }, []);
 }
