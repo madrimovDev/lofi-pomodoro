@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Dialog, Switch } from 'radix-ui';
-import { Loader2, RefreshCw, X, Minimize2, Pin } from 'lucide-react';
+import { Loader2, RefreshCw, X, Minimize2 } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { useSettings } from '@renderer/hooks/use-settings';
 import { useUpdater } from '@renderer/hooks/use-updater';
