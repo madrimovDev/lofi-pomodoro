@@ -1,3 +1,4 @@
+mod app_state;
 mod commands;
 mod models;
 mod store_util;
@@ -38,7 +39,28 @@ pub fn run() {
   }
 
   tauri::Builder::default()
+    .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
+      use tauri::Manager;
+      if let Some(win) = app.get_webview_window("main") {
+        let _ = win.show();
+        let _ = win.unminimize();
+        let _ = win.set_focus();
+      }
+    }))
     .plugin(tauri_plugin_store::Builder::default().build())
+    .plugin(tauri_plugin_window_state::Builder::default().build())
+    .manage(app_state::AppState::default())
+    .on_window_event(|window, event| {
+      if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+        use tauri::Manager;
+        let state = window.state::<app_state::AppState>();
+        let is_quitting = state.inner.lock().unwrap().is_quitting;
+        if !is_quitting {
+          api.prevent_close();
+          let _ = window.hide();
+        }
+      }
+    })
     .setup(move |app| {
       if cfg!(debug_assertions) {
         app.handle().plugin(
