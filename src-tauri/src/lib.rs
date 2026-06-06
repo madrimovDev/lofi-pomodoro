@@ -1,3 +1,5 @@
+mod models;
+
 /// Tizimda faol NVIDIA GPU borligini aniqlaydi (PCI vendor 0x10de).
 #[cfg(target_os = "linux")]
 fn has_nvidia_gpu() -> bool {
