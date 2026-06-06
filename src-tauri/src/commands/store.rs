@@ -60,8 +60,8 @@ pub fn get_active_task_id(app: AppHandle) -> Result<Option<String>, String> {
 }
 
 #[tauri::command]
-pub fn set_active_task_id(app: AppHandle, id: Option<String>) -> Result<(), String> {
-  write_value(&app, "activeTaskId", id)
+pub fn set_active_task_id(app: AppHandle, active_task_id: Option<String>) -> Result<(), String> {
+  write_value(&app, "activeTaskId", active_task_id)
 }
 
 #[tauri::command]
