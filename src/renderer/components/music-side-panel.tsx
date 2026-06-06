@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   FolderOpen, SkipBack, SkipForward, Play, Pause,
   RefreshCw, MonitorPlay, AlertCircle, Loader2, Shuffle, ArrowDownAZ,
   Volume2, Music2, ChevronRight, BookmarkPlus, Trash2, ListMusic,
-  Radio, Plus, X,
+  Radio, Plus, X, ArrowLeft,
 } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Drawer as DrawerPrimitive } from 'vaul';
@@ -77,6 +77,7 @@ function NowPlayingBar() {
             type="range" min={0} max={1} step={0.02}
             value={config.volume}
             onChange={e => setVolume(parseFloat(e.target.value))}
+            data-vaul-no-drag
             className="flex-1 h-1 accent-primary cursor-pointer"
           />
         </div>
@@ -89,7 +90,7 @@ function NowPlayingBar() {
 
 function FolderTab() {
   const { t } = useSettings();
-  const { config, updateConfig, files, currentFileIndex, pickFolder, refreshFiles, playFile, isPlaying, source, addFolder, removeFolder, loadFolder } = useMusic();
+  const { config, updateConfig, files, currentFileIndex, refreshFiles, playFile, isPlaying, source, addFolder, removeFolder, loadFolder } = useMusic();
 
   const savedFolders = config.savedFolders ?? [];
 
@@ -258,6 +259,7 @@ function RadioTab() {
             placeholder="Stansiya nomi..."
             value={newName}
             onChange={e => setNewName(e.target.value)}
+            data-vaul-no-drag
             className="bg-background/20 border border-border/50 rounded-lg px-3 py-1.5 text-xs placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary"
           />
           <div className="flex gap-1.5">
@@ -266,6 +268,7 @@ function RadioTab() {
               value={newUrl}
               onChange={e => setNewUrl(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleAdd()}
+              data-vaul-no-drag
               className="flex-1 bg-background/20 border border-border/50 rounded-lg px-3 py-1.5 text-xs placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary min-w-0"
             />
             <Button variant="outline" size="icon-xs" onClick={handleAdd} disabled={!newUrl.trim() || !newName.trim()}>
@@ -296,6 +299,15 @@ function YoutubeTab() {
 
   const [inputUrl, setInputUrl] = useState(config.youtubeUrl ?? '');
   const [saving, setSaving] = useState(false);
+  // Navigatsiya: 'list' = saqlangan playlistlar, 'tracks' = ochilgan playlist treklari
+  const [view, setView] = useState<'list' | 'tracks'>('list');
+
+  // Playlist endigina yuklanganda (bo'sh → to'la) avtomatik treklar ko'rinishiga o'tamiz
+  const prevLenRef = useRef(ytPlaylist.length);
+  useEffect(() => {
+    if (prevLenRef.current === 0 && ytPlaylist.length > 0) setView('tracks');
+    prevLenRef.current = ytPlaylist.length;
+  }, [ytPlaylist.length]);
 
   if (ytAvailable === null) {
     return (
@@ -328,6 +340,7 @@ function YoutubeTab() {
   };
 
   const savedPlaylists = config.savedPlaylists ?? [];
+  const showTracks = view === 'tracks' && ytPlaylist.length > 0;
 
   return (
     <div className="flex flex-col gap-3 flex-1 min-h-0">
@@ -338,6 +351,7 @@ function YoutubeTab() {
           onChange={e => setInputUrl(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && loadYoutube(inputUrl.trim())}
           placeholder="YouTube URL yoki playlist..."
+          data-vaul-no-drag
           className="flex-1 bg-background/20 border border-border/50 rounded-lg px-3 py-1.5 text-xs placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary min-w-0"
         />
         <Button
@@ -364,104 +378,130 @@ function YoutubeTab() {
         </p>
       )}
 
-      {/* Single stream info */}
-      {ytStreamInfo && ytPlaylist.length === 0 && (
-        <div className="flex items-center gap-2 px-2 py-2 rounded-lg bg-primary/10 border border-primary/20 shrink-0">
-          <MonitorPlay className="size-3.5 text-primary/50 shrink-0" />
-          <div className="min-w-0">
-            <p className="text-xs text-foreground/70 truncate">{ytStreamInfo.title}</p>
-            {ytStreamInfo.isLive && <p className="text-[10px] text-red-400/70">🔴 Live</p>}
-          </div>
-        </div>
-      )}
-
-      {/* Active playlist tracks */}
-      {ytPlaylist.length > 0 && (
-        <div className="flex-1 overflow-y-auto flex flex-col gap-0.5 pr-1">
-          {ytPlaylist.map((item, i) => {
-            const isActive = i === ytCurrentIndex && source === 'youtube';
-            return (
-              <button
-                key={item.id}
-                onClick={() => playYtTrack(i)}
-                className={cn(
-                  'flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-colors text-xs w-full',
-                  isActive
-                    ? 'bg-primary/10 text-foreground'
-                    : 'text-muted-foreground/50 hover:bg-border/20 hover:text-muted-foreground',
-                )}
-              >
-                <span className={cn(
-                  'shrink-0 text-[10px] w-4 tabular-nums',
-                  isActive ? 'text-primary' : 'text-muted-foreground/30',
-                )}>
-                  {isActive && isPlaying ? '♪' : i + 1}
-                </span>
-                <span className="truncate">{item.title}</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Saved playlists */}
-      {savedPlaylists.length > 0 && ytPlaylist.length === 0 && (
+      {showTracks ? (
+        /* ── Treklar ko'rinishi: orqaga tugmasi + ochilgan playlist treklari ── */
         <div className="flex-1 flex flex-col min-h-0">
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground/30 mb-2 shrink-0 flex items-center gap-1.5">
-            <ListMusic className="size-3" /> Saqlangan
-          </p>
-          <div className="flex-1 overflow-y-auto flex flex-col gap-1.5 pr-1">
-            {savedPlaylists.map(playlist => (
-              <div
-                key={playlist.id}
-                className="flex items-center gap-2.5 rounded-lg hover:bg-border/20 transition-colors p-1.5 group"
-              >
-                {/* Thumbnail */}
-                <div className="w-12 h-9 rounded-md bg-border/30 shrink-0 overflow-hidden flex items-center justify-center">
-                  {playlist.thumbnailUrl
-                    ? <img src={playlist.thumbnailUrl} alt="" className="w-full h-full object-cover" />
-                    : <Music2 className="size-3 text-muted-foreground/30" />
-                  }
-                </div>
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-foreground/70 truncate">{playlist.name}</p>
-                  <p className="text-[10px] text-muted-foreground/30">
-                    {playlist.itemCount > 0 ? `${playlist.itemCount} ta video` : '1 ta video'}
-                  </p>
-                </div>
-                {/* Actions */}
-                <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    variant="ghost" size="icon-xs"
-                    onClick={() => loadSavedPlaylist(playlist)}
-                    title="Ijro etish"
-                  >
-                    <Play className="size-3" />
-                  </Button>
-                  <Button
-                    variant="ghost" size="icon-xs"
-                    onClick={() => removeSavedPlaylist(playlist.id)}
-                    title="O'chirish"
-                    className="text-destructive/50 hover:text-destructive"
-                  >
-                    <Trash2 className="size-3" />
-                  </Button>
-                </div>
-              </div>
-            ))}
+          <button
+            onClick={() => setView('list')}
+            className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors mb-2 shrink-0"
+          >
+            <ArrowLeft className="size-3" /> Saqlanganlarga qaytish
+          </button>
+          <div className="flex-1 overflow-y-auto flex flex-col gap-0.5 pr-1">
+            {ytPlaylist.map((item, i) => {
+              const isActive = i === ytCurrentIndex && source === 'youtube';
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => playYtTrack(i)}
+                  className={cn(
+                    'flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-colors text-xs w-full',
+                    isActive
+                      ? 'bg-primary/10 text-foreground'
+                      : 'text-muted-foreground/50 hover:bg-border/20 hover:text-muted-foreground',
+                  )}
+                >
+                  <span className={cn(
+                    'shrink-0 text-[10px] w-4 tabular-nums',
+                    isActive ? 'text-primary' : 'text-muted-foreground/30',
+                  )}>
+                    {isActive && isPlaying ? '♪' : i + 1}
+                  </span>
+                  <span className="truncate">{item.title}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
-      )}
+      ) : (
+        /* ── Ro'yxat ko'rinishi: stream info / aktiv playlist banner / saqlanganlar ── */
+        <>
+          {/* Single stream info */}
+          {ytStreamInfo && ytPlaylist.length === 0 && (
+            <div className="flex items-center gap-2 px-2 py-2 rounded-lg bg-primary/10 border border-primary/20 shrink-0">
+              <MonitorPlay className="size-3.5 text-primary/50 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-xs text-foreground/70 truncate">{ytStreamInfo.title}</p>
+                {ytStreamInfo.isLive && <p className="text-[10px] text-red-400/70">🔴 Live</p>}
+              </div>
+            </div>
+          )}
 
-      {/* Empty state */}
-      {savedPlaylists.length === 0 && ytPlaylist.length === 0 && !ytStreamInfo && (
-        <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center">
-          <ListMusic className="size-6 text-muted-foreground/20" />
-          <p className="text-xs text-muted-foreground/30">
-            URL kiritib <BookmarkPlus className="size-3 inline" /> bosing
-          </p>
-        </div>
+          {/* Aktiv playlistga qaytish banneri */}
+          {ytPlaylist.length > 0 && (
+            <button
+              onClick={() => setView('tracks')}
+              className="flex items-center gap-2 px-2 py-2 rounded-lg bg-primary/10 border border-primary/20 shrink-0 text-left hover:bg-primary/15 transition-colors"
+            >
+              <ListMusic className="size-3.5 text-primary/50 shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-foreground/70 truncate">Ochilgan playlist</p>
+                <p className="text-[10px] text-muted-foreground/40">{ytPlaylist.length} ta video • ochish</p>
+              </div>
+              <ChevronRight className="size-3 text-muted-foreground/40 shrink-0" />
+            </button>
+          )}
+
+          {/* Saqlangan playlistlar */}
+          {savedPlaylists.length > 0 && (
+            <div className="flex-1 flex flex-col min-h-0">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/30 mb-2 shrink-0 flex items-center gap-1.5">
+                <ListMusic className="size-3" /> Saqlangan
+              </p>
+              <div className="flex-1 overflow-y-auto flex flex-col gap-1.5 pr-1">
+                {savedPlaylists.map(playlist => (
+                  <div
+                    key={playlist.id}
+                    className="flex items-center gap-2.5 rounded-lg hover:bg-border/20 transition-colors p-1.5 group"
+                  >
+                    {/* Thumbnail */}
+                    <div className="w-12 h-9 rounded-md bg-border/30 shrink-0 overflow-hidden flex items-center justify-center">
+                      {playlist.thumbnailUrl
+                        ? <img src={playlist.thumbnailUrl} alt="" className="w-full h-full object-cover" />
+                        : <Music2 className="size-3 text-muted-foreground/30" />
+                      }
+                    </div>
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-foreground/70 truncate">{playlist.name}</p>
+                      <p className="text-[10px] text-muted-foreground/30">
+                        {playlist.itemCount > 0 ? `${playlist.itemCount} ta video` : '1 ta video'}
+                      </p>
+                    </div>
+                    {/* Actions */}
+                    <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="ghost" size="icon-xs"
+                        onClick={() => loadSavedPlaylist(playlist)}
+                        title="Ijro etish"
+                      >
+                        <Play className="size-3" />
+                      </Button>
+                      <Button
+                        variant="ghost" size="icon-xs"
+                        onClick={() => removeSavedPlaylist(playlist.id)}
+                        title="O'chirish"
+                        className="text-destructive/50 hover:text-destructive"
+                      >
+                        <Trash2 className="size-3" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Empty state */}
+          {savedPlaylists.length === 0 && ytPlaylist.length === 0 && !ytStreamInfo && (
+            <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center">
+              <ListMusic className="size-6 text-muted-foreground/20" />
+              <p className="text-xs text-muted-foreground/30">
+                URL kiritib <BookmarkPlus className="size-3 inline" /> bosing
+              </p>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
