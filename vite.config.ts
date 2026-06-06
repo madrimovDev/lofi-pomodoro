@@ -1,10 +1,10 @@
 import { defineConfig } from 'vite';
-import electron from 'vite-plugin-electron/simple';
 import react from '@vitejs/plugin-react';
-import renderer from 'vite-plugin-electron-renderer';
+import tailwindcss from '@tailwindcss/vite';
 import { resolve } from 'path';
-import tailwindcss from "@tailwindcss/vite";
 
+// Tauri branch: frontend-only Vite config.
+// Electron plugin'lari (vite-plugin-electron) olib tashlandi — backend Rust'da (src-tauri/).
 const pathAliases = {
   '@shared': resolve(__dirname, 'src/shared'),
   '@renderer': resolve(__dirname, 'src/renderer'),
@@ -12,46 +12,23 @@ const pathAliases = {
 };
 
 export default defineConfig({
-  // 🎯 Public directory ni resources ga yo'naltiramiz
+  // Background, bell, ambient ovozlar — resources/ dan dist/ root ga ko'chiriladi
   publicDir: resolve(__dirname, 'resources'),
 
   resolve: { alias: pathAliases },
 
-  plugins: [
-    react(),
-    tailwindcss(),
-    electron({
-      main: {
-        entry: 'src/main/index.ts',
-        vite: {
-          build: {
-            outDir: 'dist/main',
-            rollupOptions: {
-              external: ['electron', 'electron-updater', 'electron-log'],
-              output: { format: 'cjs' },
-            },
-          },
-          resolve: { alias: pathAliases },
-        },
-      },
-      preload: {
-        input: 'src/preload/index.ts',
-        vite: {
-          build: {
-            outDir: 'dist/preload',
-            rollupOptions: {
-              external: ['electron'],
-              output: { format: 'cjs' },
-            },
-          },
-        },
-      },
-    }),
-    renderer(),
-  ],
+  plugins: [react(), tailwindcss()],
+
+  // Tauri CLI fixed portni kutadi
+  clearScreen: false,
+  server: {
+    port: 5173,
+    strictPort: true,
+    host: '127.0.0.1',
+  },
 
   build: {
-    // Public fayllarni copy qilishni ta'minlash
     copyPublicDir: true,
+    target: 'esnext',
   },
 });
