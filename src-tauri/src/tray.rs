@@ -145,15 +145,15 @@ pub fn update_tray(app: &AppHandle, time_left: i64, mode: &str, is_running: bool
     let _ = tray.set_title(Some(format_time(time_left)));
   }
 
-  let (changed, is_visible) = {
+  let changed = {
     let state = app.state::<AppState>();
     let mut inner = state.inner.lock().unwrap();
     let changed = inner.prev_mode.as_deref() != Some(mode) || inner.prev_running != Some(is_running);
     inner.prev_mode = Some(mode.to_string());
     inner.prev_running = Some(is_running);
-    let vis = app.get_webview_window("main").and_then(|w| w.is_visible().ok()).unwrap_or(true);
-    (changed, vis)
+    changed
   };
+  let is_visible = app.get_webview_window("main").and_then(|w| w.is_visible().ok()).unwrap_or(true);
 
   if changed {
     let _ = tray.set_icon(Some(create_mode_icon(mode, is_running)));
