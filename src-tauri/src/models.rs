@@ -1,3 +1,10 @@
+// Bu modeldagi ba'zi tuzilmalar (TimerPreset, YoutubeStreamInfo, YoutubePlaylistItem,
+// AudioFile, TrayTimerState, TrayMode, Subtask, RadioStation, SavedMusicFolder,
+// SavedYtPlaylist) hozircha faqat to'liq ma'lumotlar kontrakt sifatida mavjud —
+// ular Faza 5/6/7 commandlari tomonidan ishlatiladi. dead_code ogohlantirishini
+// modulning o'zida o'chiramiz (alohida struct'larga tegmaymiz).
+#![allow(dead_code)]
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
@@ -286,7 +293,7 @@ mod tests {
     // Yetishmayotgan kalitlar default'dan to'ladi
     assert_eq!(s.short_break_duration, 5);
     assert_eq!(s.daily_goal, 0);
-    assert_eq!(s.show_break_screen, true);
+    assert!(s.show_break_screen);
     assert_eq!(s.todoist_token, None);
   }
 

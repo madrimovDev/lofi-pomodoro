@@ -1,3 +1,4 @@
+mod commands;
 mod models;
 mod store_util;
 
@@ -58,6 +59,20 @@ pub fn run() {
       }
       Ok(())
     })
+    .invoke_handler(tauri::generate_handler![
+      commands::store::get_theme,
+      commands::store::set_theme,
+      commands::store::get_settings,
+      commands::store::set_settings,
+      commands::store::get_tasks,
+      commands::store::set_tasks,
+      commands::store::get_active_task_id,
+      commands::store::set_active_task_id,
+      commands::store::get_music,
+      commands::store::set_music,
+      commands::store::get_stats,
+      commands::store::set_stats
+    ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
