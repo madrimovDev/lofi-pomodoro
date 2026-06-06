@@ -19,6 +19,7 @@ export const WindowControl = ({ onOpenStats }: WindowControlProps) => {
   return (
     <div
       id="window-control"
+      data-tauri-drag-region="deep"
       className="fixed inset-x-0 z-50 grid grid-cols-[1fr_auto_1fr] items-center w-full px-2 py-2 h-10 bg-background/40 backdrop-blur-2xl"
     >
       <div className="flex items-center gap-1.5">

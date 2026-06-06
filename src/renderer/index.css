@@ -222,6 +222,40 @@ html::after {
             inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
 
+    /* ── Backdrop-filter fallback (NVIDIA/software render — blur ishlamaydi) ──
+       lib.rs <html>ga `no-backdrop-blur` class qo'shadi. Blur o'rniga opaque
+       glass — orqa fon o'tkir ko'rinib ketmasligi uchun. Capable mashinalarda
+       (class yo'q) original airy blur ko'rinishi to'liq saqlanadi. */
+    html.no-backdrop-blur .glass,
+    html.no-backdrop-blur #window-control {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    html.no-backdrop-blur.dark .glass {
+        background: linear-gradient(
+            to bottom right,
+            oklch(0.23 0.02 250 / 0.95),
+            oklch(0.19 0.02 250 / 0.9)
+        );
+    }
+
+    html.no-backdrop-blur:not(.dark) .glass {
+        background: linear-gradient(
+            to bottom right,
+            oklch(0.98 0.005 250 / 0.95),
+            oklch(0.95 0.008 250 / 0.9)
+        );
+    }
+
+    /* Titlebar ham yarim-shaffof + blur'ga tayanadi — opaque qilamiz */
+    html.no-backdrop-blur.dark #window-control {
+        background: oklch(0.2 0.02 250 / 0.97);
+    }
+    html.no-backdrop-blur:not(.dark) #window-control {
+        background: oklch(0.97 0.005 250 / 0.97);
+    }
+
     /* 🌲 Light reflection */
     .glass::before {
         content: "";
