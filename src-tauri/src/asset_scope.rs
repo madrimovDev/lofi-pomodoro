@@ -1,7 +1,7 @@
 use tauri::{AppHandle, Manager};
 use tauri_plugin_store::StoreExt;
 
-use crate::models::MusicConfig;
+use crate::models::{MusicConfig, TimerSettings};
 use crate::store_util::deserialize_or_default;
 
 const STORE_FILE: &str = "config.json";
@@ -36,10 +36,9 @@ pub fn reregister_from_store(app: &AppHandle) {
     allow_path(app, &f.path);
   }
 
-  // Custom bildirishnoma ovozi settings.notificationSoundPath ichida.
-  if let Some(settings) = store.get("settings") {
-    if let Some(path) = settings.get("notificationSoundPath").and_then(|v| v.as_str()) {
-      allow_path(app, path);
-    }
+  // Custom bildirishnoma ovozi (typed model orqali — yagona manba).
+  let settings: TimerSettings = deserialize_or_default("settings", store.get("settings"));
+  if let Some(path) = &settings.notification_sound_path {
+    allow_path(app, path);
   }
 }
