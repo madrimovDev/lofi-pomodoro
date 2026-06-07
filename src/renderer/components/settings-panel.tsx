@@ -6,6 +6,7 @@ import { useSettings } from '@renderer/hooks/use-settings';
 import { useUpdater } from '@renderer/hooks/use-updater';
 import { useTasks } from '@renderer/hooks/use-tasks';
 import { winApi } from '@shared/tauri/window';
+import { dialogApi } from '@shared/tauri/dialog';
 
 interface SettingsPanelProps {
   open: boolean;
@@ -129,7 +130,7 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
                       size="xs"
                       className="text-xs"
                       onClick={async () => {
-                        const p = await window.electronApi?.pickNotificationSound();
+                        const p = await dialogApi.pickNotificationSound();
                         if (p) updateSettings({ notificationSoundPath: p });
                       }}
                     >

@@ -15,6 +15,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Button } from '@shared/components/ui/button';
+import { dialogApi } from '@shared/tauri/dialog';
 import { useTasks } from '@renderer/hooks/use-tasks';
 import { useStats } from '@renderer/hooks/use-stats';
 import { cn } from '@shared/lib/utils';
@@ -573,11 +574,11 @@ export function TaskPanel({ open, onOpenChange }: TaskPanelProps) {
   };
 
   const handleExport = async () => {
-    await window.electronApi?.exportTasks();
+    await dialogApi.exportTasks();
   };
 
   const handleImport = async () => {
-    const imported = await window.electronApi?.importTasks();
+    const imported = await dialogApi.importTasks();
     if (imported) replaceTasks(imported);
   };
 

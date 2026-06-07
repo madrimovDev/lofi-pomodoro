@@ -20,6 +20,7 @@ import {
   type YoutubeStreamInfo,
 } from '@shared/types';
 import { api } from '@shared/tauri/api';
+import { musicApi } from '@shared/tauri/music';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -166,7 +167,7 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
   // Load files when folder changes
   useEffect(() => {
     if (config.folderPath) {
-      window.electronApi?.listMusicFiles(config.folderPath)
+      musicApi.listMusicFiles(config.folderPath)
         .then(f => {
           setFiles(sortFiles(f, config.sortMode));
           setCurrentFileIndex(0);
@@ -294,16 +295,16 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
 
   const refreshFiles = async () => {
     if (!config.folderPath) return;
-    const f = await window.electronApi?.listMusicFiles(config.folderPath) ?? [];
+    const f = await musicApi.listMusicFiles(config.folderPath);
     setFiles(sortFiles(f, config.sortMode));
     setCurrentFileIndex(0);
   };
 
   const pickFolder = async () => {
-    const path = await window.electronApi?.pickMusicFolder();
+    const path = await musicApi.pickMusicFolder();
     if (!path) return;
     updateConfig({ folderPath: path });
-    const f = await window.electronApi?.listMusicFiles(path) ?? [];
+    const f = await musicApi.listMusicFiles(path);
     const sorted = sortFiles(f, config.sortMode);
     setFiles(sorted);
     setCurrentFileIndex(0);
@@ -386,13 +387,13 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
   // ── D2: Multiple folders ──────────────────────────────────────────────────
 
   const addFolder = async () => {
-    const path = await window.electronApi?.pickMusicFolder();
+    const path = await musicApi.pickMusicFolder();
     if (!path) return;
     const name = path.split('/').pop() ?? path;
     const newFolder: SavedMusicFolder = { id: crypto.randomUUID(), path, name };
     const savedFolders = [...(config.savedFolders ?? []), newFolder];
     updateConfig({ folderPath: path, savedFolders });
-    const f = await window.electronApi?.listMusicFiles(path) ?? [];
+    const f = await musicApi.listMusicFiles(path);
     setFiles(sortFiles(f, config.sortMode));
     setCurrentFileIndex(0);
   };
@@ -404,7 +405,7 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
 
   const loadFolder = async (folder: SavedMusicFolder) => {
     updateConfig({ folderPath: folder.path });
-    const f = await window.electronApi?.listMusicFiles(folder.path) ?? [];
+    const f = await musicApi.listMusicFiles(folder.path);
     setFiles(sortFiles(f, config.sortMode));
     setCurrentFileIndex(0);
   };

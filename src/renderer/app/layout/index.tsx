@@ -14,6 +14,7 @@ import { useMusic } from '@renderer/hooks/use-music';
 import { useTraySync } from '@renderer/hooks/use-tray-sync';
 import { Button } from '@shared/components/ui/button';
 import { winApi, winEvents } from '@shared/tauri/window';
+import { convertFileSrc } from '@tauri-apps/api/core';
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -311,7 +312,7 @@ export const Layout = () => {
   const handleSessionComplete = (completedMode: TimerMode) => {
     if (settings.soundEnabled) {
       const soundSrc = settings.notificationSoundPath
-        ? `localfile://${settings.notificationSoundPath}`
+        ? convertFileSrc(settings.notificationSoundPath)
         : '/bell.mp3';
       new Audio(soundSrc).play().catch(() => {});
     }
