@@ -111,6 +111,8 @@ pub fn run() {
       commands::store::set_stats,
       commands::music::pick_music_folder,
       commands::music::list_music_files,
+      commands::tasks::export_tasks,
+      commands::tasks::import_tasks,
       commands::window::set_always_on_top,
       commands::window::set_mini_mode,
       tray::update_tray_state
