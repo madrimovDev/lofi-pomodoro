@@ -16,12 +16,15 @@ fn validate_imported_tasks(raw: &str) -> Option<Vec<Task>> {
   let arr = value.as_array()?;
   let tasks = arr
     .iter()
-    .filter(|item| {
-      item.is_object()
-        && item.get("id").and_then(|v| v.as_str()).is_some()
-        && item.get("name").and_then(|v| v.as_str()).is_some()
+    .filter_map(|item| {
+      let has_id = item.get("id").and_then(|v| v.as_str()).is_some();
+      let has_name = item.get("name").and_then(|v| v.as_str()).is_some();
+      if has_id && has_name {
+        serde_json::from_value::<Task>(item.clone()).ok()
+      } else {
+        None
+      }
     })
-    .filter_map(|item| serde_json::from_value::<Task>(item.clone()).ok())
     .collect();
   Some(tasks)
 }
@@ -30,6 +33,7 @@ fn validate_imported_tasks(raw: &str) -> Option<Vec<Task>> {
 #[tauri::command]
 pub async fn export_tasks(app: AppHandle) -> bool {
   let Ok(store) = app.store(STORE_FILE) else {
+    log::error!("export_tasks: store ochilmadi");
     return false;
   };
   let tasks: Vec<Task> = deserialize_or_default("tasks", store.get("tasks"));
