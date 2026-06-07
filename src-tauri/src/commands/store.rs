@@ -1,7 +1,9 @@
+use crate::asset_scope;
 use crate::models::{DailyStat, MusicConfig, Task, Theme, TimerSettings};
 use crate::store_util::deserialize_or_default;
 use serde::Serialize;
 use tauri::AppHandle;
+use tauri_plugin_dialog::DialogExt;
 use tauri_plugin_store::StoreExt;
 
 const STORE_FILE: &str = "config.json";
@@ -82,4 +84,19 @@ pub fn get_stats(app: AppHandle) -> Result<Vec<DailyStat>, String> {
 #[tauri::command]
 pub fn set_stats(app: AppHandle, stats: Vec<DailyStat>) -> Result<(), String> {
   write_value(&app, "stats", stats)
+}
+
+/// Custom bildirishnoma ovozi faylini tanlash. Xom yo'l qaytaradi (None=bekor).
+/// async — blocking dialog uchun.
+#[tauri::command]
+pub async fn pick_notification_sound(app: AppHandle) -> Option<String> {
+  let file = app
+    .dialog()
+    .file()
+    .add_filter("Audio", &["mp3", "wav", "ogg", "flac", "m4a"])
+    .blocking_pick_file();
+  let path = file.and_then(|f| f.into_path().ok())?;
+  let path_str = path.to_string_lossy().to_string();
+  asset_scope::allow_path(&app, &path_str);
+  Some(path_str)
 }
