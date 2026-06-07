@@ -1,4 +1,5 @@
 mod app_state;
+mod asset_scope;
 mod commands;
 mod models;
 mod store_util;
@@ -91,6 +92,7 @@ pub fn run() {
           let _ = win.eval("document.documentElement.classList.add('no-backdrop-blur')");
         }
       }
+      asset_scope::reregister_from_store(app.handle());
       tray::setup_tray(app.handle())?;
       Ok(())
     })
