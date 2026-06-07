@@ -295,7 +295,7 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
 
   const refreshFiles = async () => {
     if (!config.folderPath) return;
-    const f = await musicApi.listMusicFiles(config.folderPath);
+    const f = await musicApi.listMusicFiles(config.folderPath).catch(() => []);
     setFiles(sortFiles(f, config.sortMode));
     setCurrentFileIndex(0);
   };
@@ -304,7 +304,7 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
     const path = await musicApi.pickMusicFolder();
     if (!path) return;
     updateConfig({ folderPath: path });
-    const f = await musicApi.listMusicFiles(path);
+    const f = await musicApi.listMusicFiles(path).catch(() => []);
     const sorted = sortFiles(f, config.sortMode);
     setFiles(sorted);
     setCurrentFileIndex(0);
@@ -393,7 +393,7 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
     const newFolder: SavedMusicFolder = { id: crypto.randomUUID(), path, name };
     const savedFolders = [...(config.savedFolders ?? []), newFolder];
     updateConfig({ folderPath: path, savedFolders });
-    const f = await musicApi.listMusicFiles(path);
+    const f = await musicApi.listMusicFiles(path).catch(() => []);
     setFiles(sortFiles(f, config.sortMode));
     setCurrentFileIndex(0);
   };
@@ -405,7 +405,7 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
 
   const loadFolder = async (folder: SavedMusicFolder) => {
     updateConfig({ folderPath: folder.path });
-    const f = await musicApi.listMusicFiles(folder.path);
+    const f = await musicApi.listMusicFiles(folder.path).catch(() => []);
     setFiles(sortFiles(f, config.sortMode));
     setCurrentFileIndex(0);
   };
