@@ -194,6 +194,14 @@ pub struct AudioFile {
   pub url: String,
 }
 
+/// list_music_files xom natijasi — frontend convertFileSrc bilan AudioFile{name,url} hosil qiladi.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AudioFileRaw {
+  pub name: String,
+  pub path: String,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Subtask {
