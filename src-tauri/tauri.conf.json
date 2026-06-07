@@ -26,7 +26,7 @@
     "security": {
       "assetProtocol": {
         "enable": true,
-        "scope": ["$HOME/**"]
+        "scope": []
       },
       "csp": "default-src 'self'; img-src 'self' asset: https: data: https://img.youtube.com; media-src 'self' asset: https: blob:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' asset: https://api.todoist.com ipc: http://ipc.localhost"
     }
