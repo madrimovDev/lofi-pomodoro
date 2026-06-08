@@ -8,6 +8,8 @@ on:
 jobs:
   release-linux:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -15,33 +17,31 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
+      - uses: dtolnay/rust-toolchain@stable
 
-      - name: Download yt-dlp
-        run: bun run download-ytdlp
-
-      - name: Build & publish (Linux)
-        run: bun run publish:linux
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-
-  release-windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: oven-sh/setup-bun@v2
+      - uses: Swatinem/rust-cache@v2
         with:
-          bun-version: latest
+          workspaces: src-tauri
 
-      - name: Install dependencies
+      - name: Linux build + GStreamer deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev \
+            gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav
+
+      - name: Install JS deps
         run: bun install --frozen-lockfile
 
-      - name: Download yt-dlp
+      - name: Download yt-dlp sidecar
         run: bun run download-ytdlp
 
-      - name: Build & publish (Windows)
-        run: bun run publish:win
+      - name: Build & release (AppImage)
+        uses: tauri-apps/tauri-action@v0
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: 'ZenFocus ${{ github.ref_name }}'
+          releaseDraft: true
+          args: --bundles appimage
