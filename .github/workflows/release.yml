@@ -27,7 +27,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev \
+            libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev patchelf \
             gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav
 
       - name: Install JS deps
@@ -40,6 +40,10 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # bundleMediaFramework gstreamer plugin'ini patchelf bilan ishlatadi;
+          # GSTREAMER_INCLUDE_BAD_PLUGINS=1 — live AAC/HLS uchun faad/hlsdemux/tsdemux
+          # (plugins-bad) AppImage'ga kiritiladi (default disabled — busiz live jim buziladi).
+          GSTREAMER_INCLUDE_BAD_PLUGINS: '1'
         with:
           tagName: ${{ github.ref_name }}
           releaseName: 'ZenFocus ${{ github.ref_name }}'
