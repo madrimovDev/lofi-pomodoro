@@ -81,16 +81,21 @@ fn build_stream_info(stream_out: &str, title_out: &str, live_out: &str) -> Youtu
   }
 }
 
-/// Bitta sidecar yt-dlp chaqiruvi → trim qilingan stdout. Status fail → Err (stderr).
-async fn run_yt_dlp(app: &AppHandle, args: &[&str]) -> Result<String, String> {
-  let output = app
+/// Bitta sidecar yt-dlp chaqiruvi → trim qilingan stdout.
+/// timeout_secs ichida tugamasa yoki status fail → Err.
+async fn run_yt_dlp(app: &AppHandle, args: &[&str], timeout_secs: u64) -> Result<String, String> {
+  let command = app
     .shell()
     .sidecar("yt-dlp")
     .map_err(|e| format!("sidecar: {e}"))?
-    .args(args)
-    .output()
-    .await
-    .map_err(|e| format!("yt-dlp exec: {e}"))?;
+    .args(args);
+  let output = tokio::time::timeout(
+    std::time::Duration::from_secs(timeout_secs),
+    command.output(),
+  )
+  .await
+  .map_err(|_| "yt-dlp timeout".to_string())?
+  .map_err(|e| format!("yt-dlp exec: {e}"))?;
   if !output.status.success() {
     return Err(String::from_utf8_lossy(&output.stderr).trim().to_string());
   }
@@ -100,7 +105,7 @@ async fn run_yt_dlp(app: &AppHandle, args: &[&str]) -> Result<String, String> {
 /// yt-dlp sidecar mavjudligini tekshirish (--version).
 #[tauri::command]
 pub async fn yt_check(app: AppHandle) -> bool {
-  run_yt_dlp(&app, &["--version"]).await.is_ok()
+  run_yt_dlp(&app, &["--version"], 8).await.is_ok()
 }
 
 /// Bitta video/jonli oqim uchun stream URL + sarlavha + isLive.
@@ -111,9 +116,9 @@ pub async fn yt_get_stream(app: AppHandle, url: String) -> Result<YoutubeStreamI
   let live_args = ["--print", "%(is_live)s", "--no-playlist", &url];
 
   let (stream, title, live) = tokio::join!(
-    run_yt_dlp(&app, &stream_args),
-    run_yt_dlp(&app, &title_args),
-    run_yt_dlp(&app, &live_args),
+    run_yt_dlp(&app, &stream_args, 30),
+    run_yt_dlp(&app, &title_args, 30),
+    run_yt_dlp(&app, &live_args, 30),
   );
 
   let stream = stream.map_err(|e| {
@@ -132,6 +137,7 @@ pub async fn yt_get_playlist(app: AppHandle, url: String) -> Result<Vec<YoutubeP
   let out = run_yt_dlp(
     &app,
     &["--flat-playlist", "--print", "%(id)s\t%(title)s", &url],
+    60,
   )
   .await
   .map_err(|e| {
