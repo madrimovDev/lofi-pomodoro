@@ -134,6 +134,7 @@ pub fn run() {
       commands::store::pick_notification_sound,
       commands::window::set_always_on_top,
       commands::window::set_mini_mode,
+      commands::window::set_break_overlay,
       tray::update_tray_state
     ])
     .on_page_load(|webview, payload| {

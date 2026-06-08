@@ -24,6 +24,5 @@ pub struct AppStateInner {
   pub prev_mode: Option<String>,
   pub prev_running: Option<bool>,
   /// Tanaffus overlay'idan oldingi holat: (was_hidden, was_mini, was_aot). None = overlay faol emas.
-  #[allow(dead_code)] // Task 4 (set_break_overlay) ishlatadi — keyin olib tashlanadi
   pub pre_break: Option<(bool, bool, bool)>,
 }
