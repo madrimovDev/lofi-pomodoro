@@ -49,6 +49,16 @@ export function useTimer(
     return { timeLeft: durations.focus, isRunning: false, mode: 'focus' as TimerMode, completedInCycle: 0 };
   });
 
+  const workerRef = useRef<Worker | null>(null);
+  useEffect(() => {
+    const w = new Worker(new URL('../workers/timer-worker.ts', import.meta.url), { type: 'module' });
+    workerRef.current = w;
+    return () => {
+      w.terminate();
+      workerRef.current = null;
+    };
+  }, []);
+
   const prevModeRef = useRef<TimerMode>(state.mode);
   const onSessionCompleteRef = useRef(onSessionComplete);
   onSessionCompleteRef.current = onSessionComplete;
@@ -93,12 +103,14 @@ export function useTimer(
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config.focusDuration, config.shortBreakDuration, config.longBreakDuration]);
 
-  // Date.now()-based interval — eliminates setInterval drift accumulation
+  // Worker-based tick — visibilityState='hidden' da ham throttle bo'lmaydi
   useEffect(() => {
     if (!state.isRunning) return;
+    const worker = workerRef.current;
+    if (!worker) return;
     const startAt = Date.now();
     const startTimeLeft = state.timeLeft;
-    const id = setInterval(() => {
+    const onTick = () => {
       const elapsed = Math.round((Date.now() - startAt) / 1000);
       const newTimeLeft = startTimeLeft - elapsed;
       setState(prev => {
@@ -106,8 +118,13 @@ export function useTimer(
         if (newTimeLeft <= 0) return nextState(prev, config);
         return newTimeLeft === prev.timeLeft ? prev : { ...prev, timeLeft: newTimeLeft };
       });
-    }, 500);
-    return () => clearInterval(id);
+    };
+    worker.addEventListener('message', onTick);
+    worker.postMessage('start');
+    return () => {
+      worker.postMessage('stop');
+      worker.removeEventListener('message', onTick);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.isRunning, config.focusDuration, config.shortBreakDuration, config.longBreakDuration, config.sessionsBeforeLongBreak]);
 
