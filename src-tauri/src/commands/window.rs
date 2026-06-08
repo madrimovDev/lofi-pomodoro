@@ -141,6 +141,9 @@ pub fn set_break_overlay(
     win.set_fullscreen(true).map_err(|e| e.to_string())?;
     win.set_always_on_top(true).map_err(|e| e.to_string())?;
     let _ = win.set_focus();
+    // inner.always_on_top=true: Focused(false) reapply keep_above'ni saqlaydi (mini-rejim kabi),
+    // aks holda KWin/Wayland'da overlay fonда qolib ketadi.
+    state.inner.lock().unwrap().always_on_top = true;
   } else {
     let pre = state.inner.lock().unwrap().pre_break;
     let Some((was_hidden, was_mini, was_aot)) = pre else {
@@ -170,7 +173,13 @@ pub fn set_break_overlay(
     if was_hidden {
       win.hide().map_err(|e| e.to_string())?;
     }
-    state.inner.lock().unwrap().pre_break = None;
+    // always_on_top'ni haqiqiy holatga sinxronlash: mini → true (mini AOT majburlaydi),
+    // aks holda was_aot. Aks holda reapply handler restore bilan kurashadi.
+    {
+      let mut inner = state.inner.lock().unwrap();
+      inner.always_on_top = if was_mini { true } else { was_aot };
+      inner.pre_break = None;
+    }
   }
   Ok(())
 }
