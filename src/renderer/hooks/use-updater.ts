@@ -1,16 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { UpdaterStatus } from '@shared/types';
 
+/** Auto-update Faza 12'gacha qoldirilgan — no-op stub. UI qobig'i saqlanadi. */
 export function useUpdater() {
-  const [status, setStatus] = useState<UpdaterStatus | null>(null);
-
-  useEffect(() => {
-    const unsubscribe = window.electronApi?.onUpdateStatus(setStatus);
-    return () => unsubscribe?.();
-  }, []);
-
-  const check = () => window.electronApi?.checkForUpdates();
-  const install = () => window.electronApi?.installUpdate();
-
+  const [status] = useState<UpdaterStatus | null>(null);
+  const check = () => {};
+  const install = () => {};
   return { status, check, install };
 }
