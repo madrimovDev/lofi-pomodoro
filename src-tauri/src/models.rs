@@ -252,13 +252,25 @@ mod tests {
   #[test]
   fn enum_values_match_ts() {
     assert_eq!(serde_json::to_value(Theme::Dark).unwrap(), json!("dark"));
-    assert_eq!(serde_json::to_value(AmbientSound::Cafe).unwrap(), json!("cafe"));
-    assert_eq!(serde_json::to_value(MusicSortMode::Shuffle).unwrap(), json!("shuffle"));
+    assert_eq!(
+      serde_json::to_value(AmbientSound::Cafe).unwrap(),
+      json!("cafe")
+    );
+    assert_eq!(
+      serde_json::to_value(MusicSortMode::Shuffle).unwrap(),
+      json!("shuffle")
+    );
     assert_eq!(serde_json::to_value(Locale::Uz).unwrap(), json!("uz"));
     assert_eq!(serde_json::to_value(Priority::High).unwrap(), json!("high"));
     // kebab-case — eng muhim trap
-    assert_eq!(serde_json::to_value(TrayMode::ShortBreak).unwrap(), json!("short-break"));
-    assert_eq!(serde_json::to_value(TrayMode::LongBreak).unwrap(), json!("long-break"));
+    assert_eq!(
+      serde_json::to_value(TrayMode::ShortBreak).unwrap(),
+      json!("short-break")
+    );
+    assert_eq!(
+      serde_json::to_value(TrayMode::LongBreak).unwrap(),
+      json!("long-break")
+    );
   }
 
   #[test]

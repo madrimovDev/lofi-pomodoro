@@ -3,7 +3,7 @@ use tauri_plugin_dialog::DialogExt;
 use tauri_plugin_shell::ShellExt;
 
 use crate::asset_scope;
-use crate::models::{AudioFileRaw, YoutubeStreamInfo, YoutubePlaylistItem};
+use crate::models::{AudioFileRaw, YoutubePlaylistItem, YoutubeStreamInfo};
 
 /// Musiqa papkasini tanlash dialogi. Bekor qilinsa None.
 /// async — blocking dialog asosiy thread'da ishlamasligi uchun.
@@ -133,7 +133,10 @@ pub async fn yt_get_stream(app: AppHandle, url: String) -> Result<YoutubeStreamI
 
 /// Flat playlist elementlari (yuklab olmasdan).
 #[tauri::command]
-pub async fn yt_get_playlist(app: AppHandle, url: String) -> Result<Vec<YoutubePlaylistItem>, String> {
+pub async fn yt_get_playlist(
+  app: AppHandle,
+  url: String,
+) -> Result<Vec<YoutubePlaylistItem>, String> {
   let out = run_yt_dlp(
     &app,
     &["--flat-playlist", "--print", "%(id)s\t%(title)s", &url],

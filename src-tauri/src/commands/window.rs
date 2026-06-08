@@ -36,7 +36,10 @@ pub fn set_mini_mode(
 
   if enabled {
     let scale = win.scale_factor().unwrap_or(1.0);
-    let size = win.inner_size().map_err(|e| e.to_string())?.to_logical::<f64>(scale);
+    let size = win
+      .inner_size()
+      .map_err(|e| e.to_string())?
+      .to_logical::<f64>(scale);
     {
       let mut inner = state.inner.lock().unwrap();
       inner.normal_size = Some((size.width, size.height));
@@ -45,22 +48,40 @@ pub fn set_mini_mode(
       inner.always_on_top = true;
       inner.mini_mode = true;
     }
-    win.set_min_size(Some(Size::Logical(LogicalSize::new(200.0, 54.0)))).map_err(|e| e.to_string())?;
-    win.set_max_size(Some(Size::Logical(LogicalSize::new(800.0, 200.0)))).map_err(|e| e.to_string())?;
-    win.set_size(Size::Logical(LogicalSize::new(320.0, 72.0))).map_err(|e| e.to_string())?;
+    win
+      .set_min_size(Some(Size::Logical(LogicalSize::new(200.0, 54.0))))
+      .map_err(|e| e.to_string())?;
+    win
+      .set_max_size(Some(Size::Logical(LogicalSize::new(800.0, 200.0))))
+      .map_err(|e| e.to_string())?;
+    win
+      .set_size(Size::Logical(LogicalSize::new(320.0, 72.0)))
+      .map_err(|e| e.to_string())?;
     win.set_always_on_top(true).map_err(|e| e.to_string())?;
   } else {
-    win.set_min_size(Some(Size::Logical(LogicalSize::new(0.0, 0.0)))).map_err(|e| e.to_string())?;
-    win.set_max_size(Some(Size::Logical(LogicalSize::new(9999.0, 9999.0)))).map_err(|e| e.to_string())?;
+    win
+      .set_min_size(Some(Size::Logical(LogicalSize::new(0.0, 0.0))))
+      .map_err(|e| e.to_string())?;
+    win
+      .set_max_size(Some(Size::Logical(LogicalSize::new(9999.0, 9999.0))))
+      .map_err(|e| e.to_string())?;
     let (normal_size, normal_min, was_aot) = {
       let inner = state.inner.lock().unwrap();
-      (inner.normal_size, inner.normal_min_size, inner.mini_was_always_on_top)
+      (
+        inner.normal_size,
+        inner.normal_min_size,
+        inner.mini_was_always_on_top,
+      )
     };
     if let Some((mw, mh)) = normal_min {
-      win.set_min_size(Some(Size::Logical(LogicalSize::new(mw, mh)))).map_err(|e| e.to_string())?;
+      win
+        .set_min_size(Some(Size::Logical(LogicalSize::new(mw, mh))))
+        .map_err(|e| e.to_string())?;
     }
     if let Some((w, h)) = normal_size {
-      win.set_size(Size::Logical(LogicalSize::new(w, h))).map_err(|e| e.to_string())?;
+      win
+        .set_size(Size::Logical(LogicalSize::new(w, h)))
+        .map_err(|e| e.to_string())?;
     }
     win.set_always_on_top(was_aot).map_err(|e| e.to_string())?;
     {
@@ -69,6 +90,8 @@ pub fn set_mini_mode(
       inner.always_on_top = was_aot;
     }
   }
-  win.emit("window:mini-mode-changed", enabled).map_err(|e| e.to_string())?;
+  win
+    .emit("window:mini-mode-changed", enabled)
+    .map_err(|e| e.to_string())?;
   Ok(())
 }

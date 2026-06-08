@@ -72,16 +72,55 @@ fn build_menu(
   is_running: bool,
   is_visible: bool,
 ) -> tauri::Result<Menu<tauri::Wry>> {
-  let status = MenuItem::with_id(app, "status", format!("{}  •  {}", format_time(time_left), mode_label(mode)), false, None::<&str>)?;
-  let toggle = MenuItem::with_id(app, "toggle", if is_running { "⏸  To'xtatish" } else { "▶  Boshlash" }, true, None::<&str>)?;
+  let status = MenuItem::with_id(
+    app,
+    "status",
+    format!("{}  •  {}", format_time(time_left), mode_label(mode)),
+    false,
+    None::<&str>,
+  )?;
+  let toggle = MenuItem::with_id(
+    app,
+    "toggle",
+    if is_running {
+      "⏸  To'xtatish"
+    } else {
+      "▶  Boshlash"
+    },
+    true,
+    None::<&str>,
+  )?;
   let skip = MenuItem::with_id(app, "skip", "⏭  Keyingisiga o'tish", true, None::<&str>)?;
   let mini = MenuItem::with_id(app, "mini", "📌  Mini rejim", true, None::<&str>)?;
-  let toggle_vis = MenuItem::with_id(app, "toggle_visibility", if is_visible { "🙈  Yashirish" } else { "👁  Ko'rsatish" }, true, None::<&str>)?;
+  let toggle_vis = MenuItem::with_id(
+    app,
+    "toggle_visibility",
+    if is_visible {
+      "🙈  Yashirish"
+    } else {
+      "👁  Ko'rsatish"
+    },
+    true,
+    None::<&str>,
+  )?;
   let quit = MenuItem::with_id(app, "quit", "Chiqish", true, None::<&str>)?;
   let sep1 = PredefinedMenuItem::separator(app)?;
   let sep2 = PredefinedMenuItem::separator(app)?;
   let sep3 = PredefinedMenuItem::separator(app)?;
-  Menu::with_items(app, &[&status, &sep1, &toggle, &skip, &sep2, &mini, &toggle_vis, &sep3, &quit])
+  Menu::with_items(
+    app,
+    &[
+      &status,
+      &sep1,
+      &toggle,
+      &skip,
+      &sep2,
+      &mini,
+      &toggle_vis,
+      &sep3,
+      &quit,
+    ],
+  )
 }
 
 /// Ilk tray'ni yaratadi (setup'da bir marta).
@@ -121,9 +160,15 @@ fn toggle_window_visibility(app: &AppHandle) {
 
 fn handle_menu_event(app: &AppHandle, id: &str) {
   match id {
-    "toggle" => { let _ = app.emit("tray:toggle-timer", ()); }
-    "skip" => { let _ = app.emit("tray:skip", ()); }
-    "mini" => { let _ = app.emit("tray:set-mini-mode", true); }
+    "toggle" => {
+      let _ = app.emit("tray:toggle-timer", ());
+    }
+    "skip" => {
+      let _ = app.emit("tray:skip", ());
+    }
+    "mini" => {
+      let _ = app.emit("tray:set-mini-mode", true);
+    }
     "toggle_visibility" => toggle_window_visibility(app),
     "quit" => {
       let state = app.state::<AppState>();
@@ -137,9 +182,15 @@ fn handle_menu_event(app: &AppHandle, id: &str) {
 
 /// Tray holatini yangilaydi: tooltip har chaqiruvda; icon+menu faqat mode/running o'zgarganda.
 pub fn update_tray(app: &AppHandle, time_left: i64, mode: &str, is_running: bool) {
-  let Some(tray) = app.tray_by_id("main-tray") else { return };
+  let Some(tray) = app.tray_by_id("main-tray") else {
+    return;
+  };
 
-  let _ = tray.set_tooltip(Some(format!("ZenFocus  |  {}  |  {}", format_time(time_left), mode_label(mode))));
+  let _ = tray.set_tooltip(Some(format!(
+    "ZenFocus  |  {}  |  {}",
+    format_time(time_left),
+    mode_label(mode)
+  )));
   #[cfg(target_os = "macos")]
   {
     let _ = tray.set_title(Some(format_time(time_left)));
@@ -148,12 +199,16 @@ pub fn update_tray(app: &AppHandle, time_left: i64, mode: &str, is_running: bool
   let changed = {
     let state = app.state::<AppState>();
     let mut inner = state.inner.lock().unwrap();
-    let changed = inner.prev_mode.as_deref() != Some(mode) || inner.prev_running != Some(is_running);
+    let changed =
+      inner.prev_mode.as_deref() != Some(mode) || inner.prev_running != Some(is_running);
     inner.prev_mode = Some(mode.to_string());
     inner.prev_running = Some(is_running);
     changed
   };
-  let is_visible = app.get_webview_window("main").and_then(|w| w.is_visible().ok()).unwrap_or(true);
+  let is_visible = app
+    .get_webview_window("main")
+    .and_then(|w| w.is_visible().ok())
+    .unwrap_or(true);
 
   if changed {
     let _ = tray.set_icon(Some(create_mode_icon(mode, is_running)));
