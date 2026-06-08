@@ -54,7 +54,16 @@ pub fn run() {
       }
     }))
     .plugin(tauri_plugin_store::Builder::default().build())
-    .plugin(tauri_plugin_window_state::Builder::default().build())
+    .plugin(
+      // VISIBLE flag o'chirilgan: visible:false config bilan on_page_load show() konfliktlashmasligi uchun.
+      // Oynani faqat on_page_load ko'rsatadi — DOM tayyor bo'lgach.
+      tauri_plugin_window_state::Builder::default()
+        .with_state_flags(
+          tauri_plugin_window_state::StateFlags::all()
+            & !tauri_plugin_window_state::StateFlags::VISIBLE,
+        )
+        .build(),
+    )
     .plugin(tauri_plugin_dialog::init())
     .plugin(tauri_plugin_shell::init())
     .manage(app_state::AppState::default())
@@ -127,6 +136,10 @@ pub fn run() {
       commands::window::set_mini_mode,
       tray::update_tray_state
     ])
+    .on_page_load(|webview, _payload| {
+      // DOM tayyor bo'lgach oynani ko'rsatamiz — visible:false flash'ini oldini oladi.
+      let _ = webview.window().show();
+    })
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
