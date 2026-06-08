@@ -14,6 +14,7 @@ import { useMusic } from '@renderer/hooks/use-music';
 import { useTraySync } from '@renderer/hooks/use-tray-sync';
 import { Button } from '@shared/components/ui/button';
 import { winApi, winEvents } from '@shared/tauri/window';
+import { ResizeHandles } from '@renderer/components/resize-handles';
 import { convertFileSrc } from '@tauri-apps/api/core';
 
 function formatTime(seconds: number): string {
@@ -276,6 +277,7 @@ function LayoutInner() {
       {/* MainLayout is ALWAYS mounted so its effects (ambient, shortcuts, title) keep running.
           Hidden visually in mini mode. */}
       <div className={`h-full flex flex-col ${isMiniMode ? 'hidden' : ''}`}>
+        {!isMiniMode && <ResizeHandles />}
         <WindowControl onOpenStats={() => setStatsOpen(true)} />
         <main className="flex-1 flex pt-10 min-h-0 overflow-hidden relative">
           <MainLayout
