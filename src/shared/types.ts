@@ -24,7 +24,6 @@ export interface TimerSettings {
   activePreset: string | null;
   dailyGoal: number;
   showBreakScreen: boolean;
-  todoistToken: string | null;
 }
 
 export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
@@ -45,7 +44,6 @@ export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
   activePreset: null,
   dailyGoal: 0,
   showBreakScreen: true,
-  todoistToken: null,
 };
 
 export interface TimerPreset {
@@ -197,8 +195,6 @@ export const IPC_CHANNELS = {
   // Window control
   WINDOW_SET_ALWAYS_ON_TOP: 'window:set-always-on-top',
   WINDOW_SET_MINI_MODE: 'window:set-mini-mode',
-  // Todoist
-  TODOIST_IMPORT: 'todoist:import',
   // Tray
   TRAY_UPDATE_STATE: 'tray:update-state',
   TRAY_TOGGLE_TIMER: 'tray:toggle-timer',

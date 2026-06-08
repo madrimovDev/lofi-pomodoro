@@ -60,23 +60,7 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
   const { settings, updateSettings, t } = useSettings();
   const { status, check, install } = useUpdater();
   const { replaceTasks } = useTasks();
-  const [todoistToken, setTodoistToken] = useState(settings.todoistToken ?? '');
-  const [todoistImporting, setTodoistImporting] = useState(false);
-  const [todoistMsg, setTodoistMsg] = useState('');
-
   const isBusy = status?.type === 'checking' || status?.type === 'downloading';
-
-  const handleTodoistImport = async () => {
-    updateSettings({ todoistToken: todoistToken.trim() || null });
-    setTodoistImporting(true);
-    setTodoistMsg('');
-    const result = await window.electronApi?.todoistImport();
-    setTodoistImporting(false);
-    if (!result) { setTodoistMsg('Xatolik'); return; }
-    if ('error' in result) { setTodoistMsg(result.error); return; }
-    replaceTasks(result as Parameters<typeof replaceTasks>[0]);
-    setTodoistMsg(`${result.length} ta task import qilindi ✓`);
-  };
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -172,34 +156,6 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
                   <Minimize2 className="size-3" />
                   {t('miniMode')}
                 </Button>
-              </div>
-            </div>
-
-            <div className="h-px bg-border/50" />
-
-            <div className="flex flex-col gap-3">
-              <p className="text-xs uppercase tracking-widest text-muted-foreground/60">{t('todoist')}</p>
-              <div className="flex flex-col gap-2">
-                <input
-                  type="password"
-                  placeholder={t('todoistToken')}
-                  value={todoistToken}
-                  onChange={e => setTodoistToken(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-background/30 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-                <Button
-                  variant="outline"
-                  size="xs"
-                  onClick={handleTodoistImport}
-                  disabled={todoistImporting || !todoistToken.trim()}
-                  className="gap-1.5 text-xs"
-                >
-                  {todoistImporting && <Loader2 className="size-3 animate-spin" />}
-                  {t('todoistImport')}
-                </Button>
-                {todoistMsg && (
-                  <p className="text-xs text-muted-foreground/50">{todoistMsg}</p>
-                )}
               </div>
             </div>
 

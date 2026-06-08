@@ -78,7 +78,6 @@ pub struct TimerSettings {
   pub active_preset: Option<String>,
   pub daily_goal: u32,
   pub show_break_screen: bool,
-  pub todoist_token: Option<String>,
 }
 
 impl Default for TimerSettings {
@@ -101,7 +100,6 @@ impl Default for TimerSettings {
       active_preset: None,
       daily_goal: 0,
       show_break_screen: true,
-      todoist_token: None,
     }
   }
 }
@@ -280,14 +278,13 @@ mod tests {
     assert_eq!(v["locale"], json!("uz"));
     assert_eq!(v["dailyGoal"], json!(0));
     assert_eq!(v["showBreakScreen"], json!(true));
-    assert_eq!(v["todoistToken"], json!(null));
   }
 
   #[test]
   fn timer_settings_forward_migration() {
     // Eski Electron config: faqat bir nechta kalit bor, yangilari yo'q.
     // Container-darajadagi #[serde(default)] tufayli yetishmayotgan kalitlar
-    // (dailyGoal, todoistToken, showBreakScreen, ...) default'dan to'ladi.
+    // (dailyGoal, showBreakScreen, ...) default'dan to'ladi.
     let partial = json!({
       "focusDuration": 30,
       "ambientSound": "rain",
@@ -302,7 +299,6 @@ mod tests {
     assert_eq!(s.short_break_duration, 5);
     assert_eq!(s.daily_goal, 0);
     assert!(s.show_break_screen);
-    assert_eq!(s.todoist_token, None);
   }
 
   #[test]
