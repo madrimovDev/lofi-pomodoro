@@ -24,6 +24,12 @@
     "core:window:allow-set-max-size",
     "core:window:allow-unminimize",
     "core:event:default",
-    "core:tray:default"
+    "core:tray:default",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        { "name": "bin/yt-dlp", "sidecar": true, "args": true }
+      ]
+    }
   ]
 }
