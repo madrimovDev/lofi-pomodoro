@@ -149,6 +149,11 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
               <ToggleRow label={t('breakScreen')} checked={settings.showBreakScreen ?? true}
                 onCheckedChange={v => updateSettings({ showBreakScreen: v })} />
               <ToggleRow
+                label={t('forceBreakFullscreen')}
+                checked={settings.forceBreakFullscreen}
+                onCheckedChange={v => updateSettings({ forceBreakFullscreen: v })}
+              />
+              <ToggleRow
                 label={t('animations')}
                 checked={settings.animationsEnabled}
                 onCheckedChange={v => updateSettings({ animationsEnabled: v })}

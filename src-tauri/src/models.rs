@@ -79,6 +79,7 @@ pub struct TimerSettings {
   pub daily_goal: u32,
   pub show_break_screen: bool,
   pub animations_enabled: bool,
+  pub force_break_fullscreen: bool,
 }
 
 impl Default for TimerSettings {
@@ -102,6 +103,7 @@ impl Default for TimerSettings {
       daily_goal: 0,
       show_break_screen: true,
       animations_enabled: true,
+      force_break_fullscreen: true,
     }
   }
 }
@@ -293,6 +295,7 @@ mod tests {
     assert_eq!(v["dailyGoal"], json!(0));
     assert_eq!(v["showBreakScreen"], json!(true));
     assert_eq!(v["animationsEnabled"], json!(true));
+    assert_eq!(v["forceBreakFullscreen"], json!(true));
   }
 
   #[test]

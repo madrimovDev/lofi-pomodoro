@@ -68,6 +68,7 @@ export default {
   streak: 'day streak',
   animations: 'Animations',
   breakScreen: 'Break screen',
+  forceBreakFullscreen: 'Force fullscreen on break',
   breakScreenTitle: 'Take a break',
   skipBreak: 'Skip',
   breatheIn: 'Breathe in',

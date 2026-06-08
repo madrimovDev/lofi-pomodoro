@@ -68,6 +68,7 @@ export default {
   streak: 'дн. подряд',
   animations: 'Анимации',
   breakScreen: 'Экран перерыва',
+  forceBreakFullscreen: 'Полный экран на перерыве',
   breakScreenTitle: 'Отдохните',
   skipBreak: 'Пропустить',
   breatheIn: 'Вдох',

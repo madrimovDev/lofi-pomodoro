@@ -86,6 +86,7 @@ export default {
   animations: 'Animatsiyalar',
   // Break screen
   breakScreen: 'Dam olish ekrani',
+  forceBreakFullscreen: 'Tanaffusda majburiy fullscreen',
   breakScreenTitle: 'Dam olin',
   skipBreak: 'O\'tkazib yuborish',
   breatheIn: 'Nafas oling',

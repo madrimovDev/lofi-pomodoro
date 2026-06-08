@@ -25,6 +25,7 @@ export interface TimerSettings {
   dailyGoal: number;
   showBreakScreen: boolean;
   animationsEnabled: boolean;
+  forceBreakFullscreen: boolean;
 }
 
 export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
@@ -46,6 +47,7 @@ export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
   dailyGoal: 0,
   showBreakScreen: true,
   animationsEnabled: true,
+  forceBreakFullscreen: true,
 };
 
 export interface TimerPreset {
