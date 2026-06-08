@@ -1,8 +1,7 @@
 {
   "name": "zenfocus-pomodoro",
   "version": "1.0.1",
-  "description": "ZenFocus — lofi Pomodoro timer, glassmorphism dizayn, Electron desktop app",
-  "main": "dist/main/index.js",
+  "description": "ZenFocus — lofi Pomodoro timer, glassmorphism dizayn, Tauri desktop app",
   "private": true,
   "scripts": {
     "dev": "tauri dev",
@@ -20,17 +19,12 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@fontsource-variable/geist": "^5.2.8",
-    "@madrimov/electron-store-typed": "^1.0.0",
-    "@madrimov/electron-window-state": "^1.0.0",
     "@tailwindcss/vite": "^4.2.4",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-store": "^2.4.3",
     "@vitejs/plugin-react": "^6.0.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "dotenv": "^17.4.2",
-    "electron-log": "^5.4.3",
-    "electron-updater": "^6.8.3",
     "lucide-react": "^1.14.0",
     "radix-ui": "^1.4.3",
     "react": "^19.2.5",
@@ -47,16 +41,12 @@
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.59.1",
     "@typescript-eslint/parser": "^8.59.1",
-    "electron": "^41.3.0",
-    "electron-builder": "^26.0.0",
     "eslint": "^10.2.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "prettier": "^3.8.3",
     "typescript": "^6.0.3",
-    "vite": "^8.0.10",
-    "vite-plugin-electron": "^0.29.1",
-    "vite-plugin-electron-renderer": "^0.14.7"
+    "vite": "^8.0.10"
   }
 }

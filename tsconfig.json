@@ -13,12 +13,10 @@
     "noEmit": true,
     "outDir": "dist",
     "paths": {
-      "@main/*": ["./src/main/*"],
       "@renderer/*": ["./src/renderer/*"],
-      "@preload/*": ["./src/preload/*"],
-      "@shared/*": ["./src/shared/*"],
-    },
+      "@shared/*": ["./src/shared/*"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "index.html"],
-  "exclude": ["node_modules", "dist"],
+  "exclude": ["node_modules", "dist"]
 }

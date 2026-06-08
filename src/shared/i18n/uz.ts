@@ -105,11 +105,6 @@ export default {
   addSubtask: 'Kichik ish qo\'shish...',
   search: 'Qidirish',
   searchPlaceholder: 'Ish nomi...',
-  // Todoist
-  todoist: 'Todoist',
-  todoistToken: 'API token',
-  todoistImport: 'Todoist\'dan import',
-  todoistSave: 'Saqlash',
   // Radio
   radio: 'Radio',
   radioAddUrl: 'URL qo\'shish',
