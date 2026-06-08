@@ -34,7 +34,12 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["appimage", "nsis", "dmg"],
+    "targets": ["appimage"],
+    "linux": {
+      "appimage": {
+        "bundleMediaFramework": true
+      }
+    },
     "externalBin": ["bin/yt-dlp"],
     "icon": [
       "icons/32x32.png",
