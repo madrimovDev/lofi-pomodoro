@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getVersion } from '@tauri-apps/api/app';
-import { Dialog, Switch } from 'radix-ui';
+import { Switch } from 'radix-ui';
+import { Sheet, SheetContent, SheetClose } from '@shared/components/ui/sheet';
 import { Loader2, RefreshCw, X, Minimize2 } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { useSettings } from '@renderer/hooks/use-settings';
@@ -67,21 +68,17 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
   }, []);
 
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <Dialog.Content
-          className="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 glass w-80 rounded-2xl p-6 focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
-        >
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="bottom" title="Sozlamalar" className="glass overflow-y-auto p-6 focus:outline-none">
           <div className="flex items-center justify-between mb-6">
-            <Dialog.Title className="text-sm font-medium tracking-widest uppercase text-muted-foreground">
+            <span className="text-sm font-medium tracking-widest uppercase text-muted-foreground">
               {t('settings')}
-            </Dialog.Title>
-            <Dialog.Close asChild>
+            </span>
+            <SheetClose asChild>
               <Button variant="ghost" size="icon-xs" aria-label={t('close')}>
                 <X className="size-3.5" />
               </Button>
-            </Dialog.Close>
+            </SheetClose>
           </div>
 
           <div className="flex flex-col gap-5">
@@ -233,8 +230,7 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
               )}
             </div>
           </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+      </SheetContent>
+    </Sheet>
   );
 }
