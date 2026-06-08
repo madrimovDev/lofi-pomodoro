@@ -98,4 +98,5 @@ export default {
   // Music loading states
   loadingTrack: 'Загрузка...',
   noAudioFiles: 'Аудиофайлы не найдены',
+  back: 'Назад',
 } as const;

@@ -3,7 +3,7 @@ import {
   FolderOpen, SkipBack, SkipForward, Play, Pause,
   RefreshCw, MonitorPlay, AlertCircle, Loader2, Shuffle, ArrowDownAZ,
   Volume2, Music2, ChevronRight, BookmarkPlus, Trash2, ListMusic,
-  Radio, Plus, X,
+  Radio, Plus, X, ArrowLeft,
 } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Sheet, SheetContent } from '@shared/components/ui/sheet';
@@ -290,8 +290,10 @@ function YoutubeTab() {
   const {
     config, ytAvailable, ytPlaylist, ytCurrentIndex, ytStreamInfo,
     ytLoading, ytError, loadYoutube, playYtTrack, source, isPlaying,
-    addSavedPlaylist, removeSavedPlaylist, loadSavedPlaylist,
+    addSavedPlaylist, removeSavedPlaylist, loadSavedPlaylist, exitYtPlaylist,
   } = useMusic();
+
+  const { t } = useSettings();
 
   const [inputUrl, setInputUrl] = useState(config.youtubeUrl ?? '');
   const [saving, setSaving] = useState(false);
@@ -377,6 +379,13 @@ function YoutubeTab() {
       {/* Active playlist tracks */}
       {ytPlaylist.length > 0 && (
         <div className="flex-1 overflow-y-auto flex flex-col gap-0.5 pr-1">
+          <button
+            onClick={exitYtPlaylist}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mb-1"
+            aria-label="Ortga"
+          >
+            <ArrowLeft className="size-3.5" /> {t('back')}
+          </button>
           {ytPlaylist.map((item, i) => {
             const isActive = i === ytCurrentIndex && source === 'youtube';
             return (

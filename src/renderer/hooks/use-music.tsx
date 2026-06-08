@@ -50,6 +50,7 @@ interface MusicContextValue {
   ytError: string | null;
   loadYoutube: (url: string) => Promise<void>;
   playYtTrack: (index: number) => Promise<void>;
+  exitYtPlaylist: () => void;
 
   // Radio
   currentRadio: RadioStation | null;
@@ -97,6 +98,7 @@ const MusicContext = createContext<MusicContextValue>({
   ytError: null,
   loadYoutube: async () => {},
   playYtTrack: async () => {},
+  exitYtPlaylist: () => {},
   currentRadio: null,
   radioError: null,
   playRadio: () => {},
@@ -531,6 +533,17 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
     await loadYoutube(playlist.url);
   };
 
+  const exitYtPlaylist = useCallback(() => {
+    audioRef.current?.pause();
+    setIsPlaying(false);
+    setYtPlaylist([]);
+    setYtCurrentIndex(0);
+    setYtStreamInfo(null);
+    setYtError(null);
+    setYtLoading(false);
+    setSource(null);
+  }, []);
+
   // Cleanup
   useEffect(() => {
     return () => {
@@ -545,7 +558,7 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
       files, currentFileIndex, refreshFiles, pickFolder, playFile,
       addFolder, removeFolder, loadFolder,
       ytAvailable, ytPlaylist, ytCurrentIndex, ytStreamInfo, ytLoading, ytError,
-      loadYoutube, playYtTrack,
+      loadYoutube, playYtTrack, exitYtPlaylist,
       currentRadio, radioError, playRadio, addRadioStation, removeRadioStation,
       source, isPlaying, play, pause, next, prev, setVolume,
       addSavedPlaylist, removeSavedPlaylist, loadSavedPlaylist,

@@ -98,4 +98,5 @@ export default {
   // Music loading states
   loadingTrack: 'Loading...',
   noAudioFiles: 'No audio files found',
+  back: 'Back',
 } as const;

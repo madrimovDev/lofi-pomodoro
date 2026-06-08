@@ -120,6 +120,7 @@ export default {
   // Music loading states
   loadingTrack: 'Yuklanmoqda...',
   noAudioFiles: 'Audio fayllar topilmadi',
+  back: 'Ortga',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;
