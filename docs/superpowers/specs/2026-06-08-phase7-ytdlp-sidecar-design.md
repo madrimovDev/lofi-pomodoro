@@ -46,11 +46,25 @@ Bu **dev mashinada** `faad`, `fdkaac`, `libav` (`avdec_aac`) **bor** — ya'ni A
 3. **Dekod muhitini xarakterlash** — `gst-inspect-1.0 | grep -iE 'opus|aac|faad|libav'` natijasini hujjatlash. Dev mashinada hammasi mavjud → xulosa = toza AppImage uchun kerakli plagin'lar ro'yxati (kelgusi CI faza uchun).
 4. **Oddiy video VA jonli oqim (`isLive`)** — jonli oqimlar ko'pincha HLS/m4a (AAC), VOD'dan boshqa format yo'li. Ikkalasi ham sinaladi (kod `isLive` shoxiga ega).
 
-### Spike deliverable
+### Spike deliverable (BAJARILDI — 2026-06-08)
 
-Hujjatlangan qaror:
-- Production `yt_get_stream` qaysi format argumentlarini ishlatadi (default `-x --audio-quality 0`, yoki majburiy format flagi).
-- AppImage qaysi GStreamer plagin'larini talab qiladi (kelgusi CI/packaging faza uchun eslatma).
+Empirik natija (yt-dlp + gst-launch dekod proxy, WebKitGTK GStreamer stack'i):
+
+| Manba | Format | Kodek | Dekod |
+|---|---|---|---|
+| VOD (musiqa) | itag 251, WebM | **Opus** | ✓ (`opusdec`, plugins-base) |
+| LIVE | format 96, HLS/mpegts | **AAC-LC** (mp4a.40.2) | ✓ (faqat zararsiz TS continuity warning) |
+
+**Qaror:**
+1. **Production `yt_get_stream` argumentlari: default `-g -x --audio-quality 0 --no-playlist` (Electron mirror) — format majburlanmaydi.** Sabab: VOD default `bestaudio` allaqachon Opus/WebM (eng kam bog'liqlik); YouTube **live'da Opus yo'q** (faqat AAC/HLS), shuning uchun `-f bestaudio[ext=webm]` majburlash live'ni buzardi.
+2. **Toza AppImage uchun kerakli GStreamer plagin'lari** (kelgusi CI/packaging faza — hujjatlash):
+   - `gstreamer1.0-plugins-base` (opus, audioconvert, yadro)
+   - `gstreamer1.0-plugins-good` (WebM/matroska demux; MP3 lokal/radio)
+   - `gstreamer1.0-plugins-bad` (live uchun: HLS `hlsdemux`/`adaptivedemux`, `tsdemux`, `aacparse`)
+   - `gstreamer1.0-libav` (`avdec_aac` fallback)
+   - **Live AAC/HLS toza mashinada `plugins-bad` + `libav` busiz jimgina ishlamaydi** — TZ §9.1 riski tasdiqlandi.
+3. **Forward-risk:** yt-dlp endi YouTube extraction uchun JS runtime (deno) tavsiya qiladi ("some formats may be missing" warning, stderr'ga). Hozir extraction ishladi (Opus + AAC olindi), lekin kelajakda degradatsiya yoki deno sidecar talabi bo'lishi mumkin. Bloklamaydi; kuzatiladi.
+4. **Sidecar implementatsiya eslatmasi:** yt-dlp JS warning'ni **stderr**'ga yozadi; parse faqat **stdout**'dan o'qiladi (`output.stdout` — `run_yt_dlp` shunday qiladi). title/is_live stdout'da to'g'ri keladi.
 
 ---
 
