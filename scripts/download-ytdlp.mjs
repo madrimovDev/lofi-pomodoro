@@ -1,21 +1,18 @@
 #!/usr/bin/env node
 /**
- * Downloads the latest yt-dlp binaries for Linux and Windows.
+ * Tauri sidecar uchun yt-dlp Linux binary'sini yuklaydi.
+ * Tauri sidecar binary'ni target-triple suffiks bilan talab qiladi (dev'da ham).
  * Run: node scripts/download-ytdlp.mjs
  */
 import { createWriteStream, mkdirSync, chmodSync } from 'fs';
 import { pipeline } from 'stream/promises';
 
+// Faqat Linux (dev + acceptance shu mashinada). Windows/macOS keyingi CI fazasida.
 const BINARIES = [
   {
     url: 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp',
-    dest: 'bin/linux/yt-dlp',
+    dest: 'src-tauri/bin/yt-dlp-x86_64-unknown-linux-gnu',
     chmod: true,
-  },
-  {
-    url: 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe',
-    dest: 'bin/win/yt-dlp.exe',
-    chmod: false,
   },
 ];
 
@@ -32,4 +29,4 @@ async function download({ url, dest, chmod }) {
 for (const bin of BINARIES) {
   await download(bin);
 }
-console.log('\n✅ yt-dlp binaries ready.');
+console.log('\n✅ yt-dlp Linux sidecar binary tayyor.');
