@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, Maximize2, SkipForward } from 'lucide-react';
 import { WindowControl } from '@renderer/components/window-control';
 import { MusicSidePanel } from '@renderer/components/music-side-panel';
@@ -256,16 +256,29 @@ function LayoutInner() {
     document.documentElement.classList.toggle('no-animations', !settings.animationsEnabled);
   }, [settings.animationsEnabled]);
 
+  const overlayActiveRef = useRef(false);
   const { timeLeft, isRunning, mode, toggle, skip } = useTimerContext();
   useTraySync({ timeLeft, mode, isRunning, toggle, skip });
 
   // Auto-close break screen when focus resumes (handles autoStartFocus case)
   useEffect(() => {
-    if (mode === 'focus') setShowBreak(false);
+    if (mode === 'focus') {
+      setShowBreak(false);
+      if (overlayActiveRef.current) {
+        winApi.setBreakOverlay(false).catch(err => console.error('setBreakOverlay(false) failed:', err));
+        overlayActiveRef.current = false;
+      }
+    }
   }, [mode]);
 
   const handleBreakStart = (breakMode: 'short-break' | 'long-break') => {
-    if (settings.showBreakScreen) {
+    if (!settings.showBreakScreen) return;
+    if (settings.forceBreakFullscreen) {
+      winApi.setBreakOverlay(true).catch(err => console.error('setBreakOverlay failed:', err));
+      overlayActiveRef.current = true;
+      setCurrentBreakMode(breakMode);
+      setShowBreak(true);
+    } else if (!isMiniMode) {
       setCurrentBreakMode(breakMode);
       setShowBreak(true);
     }
@@ -288,15 +301,24 @@ function LayoutInner() {
             onToggleMusic={() => setMusicOpen((o) => !o)}
             musicOpen={musicOpen}
             isMiniMode={isMiniMode}
-            onBreakStart={isMiniMode ? undefined : handleBreakStart}
+            onBreakStart={handleBreakStart}
           />
           <MusicSidePanel open={musicOpen} onOpenChange={setMusicOpen} />
-          {showBreak && currentBreakMode && (
-            <BreakScreen onSkip={() => setShowBreak(false)} timeLeft={timeLeft} />
-          )}
         </main>
         <StatsPanel open={statsOpen} onOpenChange={setStatsOpen} />
       </div>
+      {showBreak && currentBreakMode && (
+        <BreakScreen
+          onSkip={() => {
+            setShowBreak(false);
+            if (overlayActiveRef.current) {
+              winApi.setBreakOverlay(false).catch(err => console.error('setBreakOverlay(false) failed:', err));
+              overlayActiveRef.current = false;
+            }
+          }}
+          timeLeft={timeLeft}
+        />
+      )}
     </>
   );
 }
