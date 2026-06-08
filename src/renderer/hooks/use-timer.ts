@@ -125,8 +125,11 @@ export function useTimer(
       worker.postMessage('stop');
       worker.removeEventListener('message', onTick);
     };
+  // state.mode deps'da: auto-start fokus→tanaffus o'tishida (isRunning o'zgarmaydi) anchor
+  // qayta o'rnatiladi — aks holda eski fokus anchor'i tanaffusni ~500ms da "yutadi".
+  // timeLeft ATAYLAB chiqarilgan (har tickda re-anchor wall-clock to'g'irlashni buzardi).
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.isRunning, config.focusDuration, config.shortBreakDuration, config.longBreakDuration, config.sessionsBeforeLongBreak]);
+  }, [state.isRunning, state.mode, config.focusDuration, config.shortBreakDuration, config.longBreakDuration, config.sessionsBeforeLongBreak]);
 
   const toggle = () => setState(prev => ({ ...prev, isRunning: !prev.isRunning }));
   const skip = () => {
