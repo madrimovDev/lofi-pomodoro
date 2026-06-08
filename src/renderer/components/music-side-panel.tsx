@@ -6,8 +6,7 @@ import {
   Radio, Plus, X,
 } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
-import { Drawer as DrawerPrimitive } from 'vaul';
-import { DrawerPortal } from '@shared/components/ui/drawer';
+import { Sheet, SheetContent } from '@shared/components/ui/sheet';
 import { useMusic } from '@renderer/hooks/use-music';
 import { useSettings } from '@renderer/hooks/use-settings';
 import { cn } from '@shared/lib/utils';
@@ -475,12 +474,8 @@ export function MusicSidePanel({ open, onOpenChange }: { open: boolean; onOpenCh
   const [tab, setTab] = useState<Tab>('folder');
 
   return (
-    <DrawerPrimitive.Root open={open} onOpenChange={onOpenChange} direction="right">
-      <DrawerPortal>
-        <DrawerPrimitive.Content
-          style={{ top: '40px' }}
-          className="fixed z-50 right-0 bottom-0 w-[360px] bg-background border-l border-border/30 shadow-xl flex flex-col outline-none"
-        >
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" title="Musiqa" className="w-[360px] bg-background border-l border-border/30 shadow-xl flex flex-col outline-none">
         <div className="flex-1 flex flex-col gap-4 p-5 min-h-0">
 
           {/* Header */}
@@ -520,8 +515,7 @@ export function MusicSidePanel({ open, onOpenChange }: { open: boolean; onOpenCh
           {/* Now playing + controls */}
           <NowPlayingBar />
         </div>
-        </DrawerPrimitive.Content>
-      </DrawerPortal>
-    </DrawerPrimitive.Root>
+      </SheetContent>
+    </Sheet>
   );
 }
