@@ -252,6 +252,10 @@ function LayoutInner() {
     return () => { unlisten.then((fn) => fn()); };
   }, []);
 
+  useEffect(() => {
+    document.documentElement.classList.toggle('no-animations', !settings.animationsEnabled);
+  }, [settings.animationsEnabled]);
+
   const { timeLeft, isRunning, mode, toggle, skip } = useTimerContext();
   useTraySync({ timeLeft, mode, isRunning, toggle, skip });
 

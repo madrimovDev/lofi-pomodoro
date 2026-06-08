@@ -148,6 +148,11 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
                 onCheckedChange={v => { updateSettings({ alwaysOnTop: v }); winApi.setAlwaysOnTop(v).catch(err => console.error('setAlwaysOnTop failed:', err)); }} />
               <ToggleRow label={t('breakScreen')} checked={settings.showBreakScreen ?? true}
                 onCheckedChange={v => updateSettings({ showBreakScreen: v })} />
+              <ToggleRow
+                label={t('animations')}
+                checked={settings.animationsEnabled}
+                onCheckedChange={v => updateSettings({ animationsEnabled: v })}
+              />
               <NumberInput label={t('dailyGoal')} value={settings.dailyGoal ?? 0} min={0} max={20}
                 onChange={v => updateSettings({ dailyGoal: v })} />
               <div className="flex items-center justify-between gap-4">

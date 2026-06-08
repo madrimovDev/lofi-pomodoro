@@ -66,6 +66,7 @@ export default {
   dailyGoal: 'Дневная цель (0 = выкл)',
   goalReached: 'Цель достигнута!',
   streak: 'дн. подряд',
+  animations: 'Анимации',
   breakScreen: 'Экран перерыва',
   breakScreenTitle: 'Отдохните',
   skipBreak: 'Пропустить',

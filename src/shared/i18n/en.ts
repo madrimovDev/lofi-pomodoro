@@ -66,6 +66,7 @@ export default {
   dailyGoal: 'Daily goal (0 = off)',
   goalReached: 'Goal reached!',
   streak: 'day streak',
+  animations: 'Animations',
   breakScreen: 'Break screen',
   breakScreenTitle: 'Take a break',
   skipBreak: 'Skip',

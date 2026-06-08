@@ -82,6 +82,8 @@ export default {
   goalReached: 'Maqsadga yetdingiz!',
   // Streak
   streak: 'kun ketma-ket',
+  // Animations
+  animations: 'Animatsiyalar',
   // Break screen
   breakScreen: 'Dam olish ekrani',
   breakScreenTitle: 'Dam olin',

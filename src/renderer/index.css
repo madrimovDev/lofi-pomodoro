@@ -379,3 +379,10 @@ input[type="number"] {
 .marquee-text {
     animation: marquee 18s ease-in-out infinite alternate;
 }
+
+html.no-animations *,
+html.no-animations *::before,
+html.no-animations *::after {
+  animation: none !important;
+  transition: none !important;
+}
