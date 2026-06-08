@@ -159,7 +159,7 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
     api.getMusic()
       .then(c => { if (c) setConfig({ ...DEFAULT_MUSIC_CONFIG, ...c }); })
       .catch(err => console.error('getMusic failed:', err));
-    window.electronApi?.ytCheck()
+    musicApi.ytCheck()
       .then(ok => setYtAvailable(ok))
       .catch(() => setYtAvailable(false));
   }, []);
@@ -242,7 +242,7 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
     if (!item) return;
     setYtLoading(true);
     setYtError(null);
-    const result = await window.electronApi?.ytGetStream(
+    const result = await musicApi.ytGetStream(
       `https://www.youtube.com/watch?v=${item.id}`,
     );
     setYtLoading(false);
@@ -324,7 +324,7 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
     setYtStreamInfo(null);
 
     // Try to get playlist info
-    const playlistResult = await window.electronApi?.ytGetPlaylist(url);
+    const playlistResult = await musicApi.ytGetPlaylist(url);
     if (playlistResult && !('error' in playlistResult) && playlistResult.length > 1) {
       setYtPlaylist(playlistResult);
       updateConfig({ youtubeUrl: url });
@@ -337,7 +337,7 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
     }
 
     // Single video or live stream
-    const result = await window.electronApi?.ytGetStream(url);
+    const result = await musicApi.ytGetStream(url);
     setYtLoading(false);
     if (!result || 'error' in result) {
       setYtError((result as { error: string })?.error ?? 'Xatolik yuz berdi');
@@ -478,20 +478,20 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
       let itemCount = 0;
       let firstVideoId: string | null = null;
 
-      const playlistResult = await window.electronApi?.ytGetPlaylist(url);
+      const playlistResult = await musicApi.ytGetPlaylist(url);
       if (playlistResult && !('error' in playlistResult) && playlistResult.length > 0) {
         itemCount = playlistResult.length;
         name = url; // will be overridden if stream info available
         firstVideoId = playlistResult[0].id;
         // Try to get a title from first video
-        const streamResult = await window.electronApi?.ytGetStream(
+        const streamResult = await musicApi.ytGetStream(
           `https://www.youtube.com/watch?v=${firstVideoId}`,
         );
         if (streamResult && !('error' in streamResult)) {
           name = streamResult.title.replace(/\s*[-–|].*$/, '').trim(); // strip channel suffix
         }
       } else {
-        const streamResult = await window.electronApi?.ytGetStream(url);
+        const streamResult = await musicApi.ytGetStream(url);
         if (!streamResult || 'error' in streamResult) {
           setYtError((streamResult as { error: string })?.error ?? 'Xatolik');
           return;
