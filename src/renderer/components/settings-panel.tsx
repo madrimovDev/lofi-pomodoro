@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getVersion } from '@tauri-apps/api/app';
 import { Dialog, Switch } from 'radix-ui';
 import { Loader2, RefreshCw, X, Minimize2 } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { useSettings } from '@renderer/hooks/use-settings';
 import { useUpdater } from '@renderer/hooks/use-updater';
-import { useTasks } from '@renderer/hooks/use-tasks';
 import { winApi } from '@shared/tauri/window';
 import { dialogApi } from '@shared/tauri/dialog';
 
@@ -59,8 +59,12 @@ function ToggleRow({
 export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
   const { settings, updateSettings, t } = useSettings();
   const { status, check, install } = useUpdater();
-  const { replaceTasks } = useTasks();
   const isBusy = status?.type === 'checking' || status?.type === 'downloading';
+
+  const [appVersion, setAppVersion] = useState<string>('');
+  useEffect(() => {
+    getVersion().then(setAppVersion).catch(() => {});
+  }, []);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -183,7 +187,10 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
             <div className="h-px bg-border/50" />
 
             <div className="flex flex-col gap-3">
-              <p className="text-xs uppercase tracking-widest text-muted-foreground/60">{t('app')}</p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs uppercase tracking-widest text-muted-foreground/60">{t('app')}</p>
+                {appVersion && <span className="text-xs opacity-60">v{appVersion}</span>}
+              </div>
               <div className="flex items-center justify-between gap-4">
                 <Button
                   variant="outline"
