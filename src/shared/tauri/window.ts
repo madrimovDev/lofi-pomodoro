@@ -21,6 +21,7 @@ export const win = {
 export const winApi = {
   setAlwaysOnTop: (enabled: boolean) => invoke<void>('set_always_on_top', { enabled }),
   setMiniMode: (enabled: boolean) => invoke<void>('set_mini_mode', { enabled }),
+  setBreakOverlay: (active: boolean) => invoke<void>('set_break_overlay', { active }),
   updateTrayState: (state: TrayTimerState) => invoke<void>('update_tray_state', { state }),
   startResizeDragging: (direction: ResizeDir) =>
     appWindow.startResizeDragging(direction),
