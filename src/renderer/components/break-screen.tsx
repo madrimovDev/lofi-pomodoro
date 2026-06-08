@@ -104,7 +104,7 @@ export function BreakScreen({ onSkip, timeLeft }: BreakScreenProps) {
   const activity = ACTIVITIES[activityIndex];
 
   return (
-    <div className="absolute inset-0 z-30 bg-background/90 backdrop-blur-md flex flex-col items-center justify-center gap-8">
+    <div className="fixed inset-0 z-30 bg-background/90 backdrop-blur-md flex flex-col items-center justify-center gap-8">
       <p className="text-xs uppercase tracking-widest text-muted-foreground/40 select-none">
         {t('breakScreenTitle')}
       </p>
