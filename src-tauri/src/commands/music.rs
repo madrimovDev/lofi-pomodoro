@@ -1,5 +1,6 @@
 use tauri::AppHandle;
 use tauri_plugin_dialog::DialogExt;
+use tauri_plugin_shell::ShellExt;
 
 use crate::asset_scope;
 use crate::models::{AudioFileRaw, YoutubeStreamInfo, YoutubePlaylistItem};
@@ -56,9 +57,7 @@ fn is_audio_file(name: &str) -> bool {
 
 /// yt-dlp `--flat-playlist --print %(id)s\t%(title)s` chiqishini parse qiladi.
 /// Bo'sh satrlar tashlanadi; birinchi tab id'ni title'dan ajratadi.
-/// Keyingi task (sidecar command'lari) tomonidan chaqiriladi.
-#[allow(dead_code)]
-pub(crate) fn parse_playlist(stdout: &str) -> Vec<YoutubePlaylistItem> {
+fn parse_playlist(stdout: &str) -> Vec<YoutubePlaylistItem> {
   stdout
     .lines()
     .filter(|l| !l.is_empty())
@@ -74,14 +73,72 @@ pub(crate) fn parse_playlist(stdout: &str) -> Vec<YoutubePlaylistItem> {
 
 /// stream/title/is_live xom chiqishlaridan YoutubeStreamInfo yig'adi.
 /// Ko'p satrli chiqishdan birinchi satr olinadi (Electron xulqi).
-/// Keyingi task (sidecar command'lari) tomonidan chaqiriladi.
-#[allow(dead_code)]
-pub(crate) fn build_stream_info(stream_out: &str, title_out: &str, live_out: &str) -> YoutubeStreamInfo {
+fn build_stream_info(stream_out: &str, title_out: &str, live_out: &str) -> YoutubeStreamInfo {
   YoutubeStreamInfo {
     stream_url: stream_out.lines().next().unwrap_or("").to_string(),
     title: title_out.lines().next().unwrap_or("").to_string(),
     is_live: live_out.trim().to_lowercase().starts_with("true"),
   }
+}
+
+/// Bitta sidecar yt-dlp chaqiruvi → trim qilingan stdout. Status fail → Err (stderr).
+async fn run_yt_dlp(app: &AppHandle, args: &[&str]) -> Result<String, String> {
+  let output = app
+    .shell()
+    .sidecar("yt-dlp")
+    .map_err(|e| format!("sidecar: {e}"))?
+    .args(args)
+    .output()
+    .await
+    .map_err(|e| format!("yt-dlp exec: {e}"))?;
+  if !output.status.success() {
+    return Err(String::from_utf8_lossy(&output.stderr).trim().to_string());
+  }
+  Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
+}
+
+/// yt-dlp sidecar mavjudligini tekshirish (--version).
+#[tauri::command]
+pub async fn yt_check(app: AppHandle) -> bool {
+  run_yt_dlp(&app, &["--version"]).await.is_ok()
+}
+
+/// Bitta video/jonli oqim uchun stream URL + sarlavha + isLive.
+#[tauri::command]
+pub async fn yt_get_stream(app: AppHandle, url: String) -> Result<YoutubeStreamInfo, String> {
+  let stream_args = ["-g", "-x", "--audio-quality", "0", "--no-playlist", &url];
+  let title_args = ["--get-title", "--no-playlist", &url];
+  let live_args = ["--print", "%(is_live)s", "--no-playlist", &url];
+
+  let (stream, title, live) = tokio::join!(
+    run_yt_dlp(&app, &stream_args),
+    run_yt_dlp(&app, &title_args),
+    run_yt_dlp(&app, &live_args),
+  );
+
+  let stream = stream.map_err(|e| {
+    log::error!("yt-dlp stream error: {e}");
+    "URL dan stream olishda xatolik yuz berdi.".to_string()
+  })?;
+  let title = title.unwrap_or_default();
+  let live = live.unwrap_or_else(|_| "False".to_string());
+
+  Ok(build_stream_info(&stream, &title, &live))
+}
+
+/// Flat playlist elementlari (yuklab olmasdan).
+#[tauri::command]
+pub async fn yt_get_playlist(app: AppHandle, url: String) -> Result<Vec<YoutubePlaylistItem>, String> {
+  let out = run_yt_dlp(
+    &app,
+    &["--flat-playlist", "--print", "%(id)s\t%(title)s", &url],
+  )
+  .await
+  .map_err(|e| {
+    log::error!("yt-dlp playlist error: {e}");
+    "Playlist ma'lumotlarini olishda xatolik.".to_string()
+  })?;
+  Ok(parse_playlist(&out))
 }
 
 #[cfg(test)]
