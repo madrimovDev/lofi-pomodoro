@@ -43,7 +43,7 @@ pub fn set_mini_mode(
     {
       let mut inner = state.inner.lock().unwrap();
       inner.normal_size = Some((size.width, size.height));
-      inner.normal_min_size = Some((600.0, 400.0));
+      inner.normal_min_size = Some((570.0, 780.0));
       inner.mini_was_always_on_top = inner.always_on_top;
       inner.always_on_top = true;
       inner.mini_mode = true;
