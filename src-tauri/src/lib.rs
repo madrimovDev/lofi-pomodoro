@@ -136,9 +136,12 @@ pub fn run() {
       commands::window::set_mini_mode,
       tray::update_tray_state
     ])
-    .on_page_load(|webview, _payload| {
-      // DOM tayyor bo'lgach oynani ko'rsatamiz — visible:false flash'ini oldini oladi.
-      let _ = webview.window().show();
+    .on_page_load(|webview, payload| {
+      // on_page_load IKKI marta ishlaydi (Started + Finished). Faqat Finished'da —
+      // DOM to'liq yuklanib chizilgach — oynani ko'rsatamiz, aks holda flash qaytadi.
+      if payload.event() == tauri::webview::PageLoadEvent::Finished {
+        let _ = webview.window().show();
+      }
     })
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
