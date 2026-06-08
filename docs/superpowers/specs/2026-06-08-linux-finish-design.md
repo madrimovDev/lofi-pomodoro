@@ -160,6 +160,15 @@ export function useUpdater() {
 
 ---
 
+### E.1 Verifikatsiya natijasi (BAJARILDI — 2026-06-08)
+
+AppImage qurildi (`ZenFocus_0.1.0_amd64.AppImage`, 181MB) va ICHIDAN tekshirildi. **Task 10 ikkita kritik kamchilikni ushladi** (aynan false-pass tuzog'i):
+
+1. **`patchelf` SHART** — `linuxdeploy-plugin-gstreamer.sh` uni talab qiladi; busiz butun AppImage bundling fail bo'ladi (`Error: patchelf not found`). release.yml'ga `patchelf` apt-deps'ga qo'shildi; lokal uchun README'da hujjatlandi.
+2. **`GSTREAMER_INCLUDE_BAD_PLUGINS=1` SHART** — bu flag DEFAULT DISABLED. Busiz `plugins-bad` (faad/hlsdemux/mpegtsdemux) bundllanmaydi → AppImage muvaffaqiyatli qurilsa ham **live AAC/HLS jimgina ishlamaydi** (toza mashinada). release.yml build step env'iga qo'shildi.
+
+Flag bilan qayta qurilgach, artifakt ichida tasdiqlandi (253 plugin): `libgstfaad.so`, `libgstfdkaac.so` (AAC dekod), `libgsthls.so` + `libgstmpegtsdemux.so` (live HLS/MPEG-TS), `libgstisomp4.so` (m4a), `libgstmatroska.so` + `libgstopus.so` + `libgstopusparse.so` (VOD Opus). **Live AAC/HLS yo'li to'liq qoplangan: hls → mpegtsdemux → faad.** (libav bundllanmadi, lekin faad/fdkaac AAC dekodni qoplaydi.)
+
 ## Risklar va eslatmalar
 
 - **GStreamer bundllash false-pass (eng muhim):** E bo'limidagi artifakt-introspeksiya majburiy — aks holda faza "yashil" da o'tib, toza mashinada jim buziladi.

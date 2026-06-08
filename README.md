@@ -105,14 +105,21 @@ bun run format       # Prettier
 ## Paketlash (build artifact)
 
 ```bash
-bun run build        # tauri build — AppImage/deb (Linux), exe (Windows)
+# AppImage build uchun patchelf SHART + bad plugins flag'i (live AAC/HLS uchun)
+GSTREAMER_INCLUDE_BAD_PLUGINS=1 bun run build
 ```
 
-Build natijasi `src-tauri/target/release/bundle/` ichida.
+Build natijasi `src-tauri/target/release/bundle/appimage/` ichida (`*.AppImage`).
+
+**Build mashinasida kerak:**
+- `patchelf` (`sudo dnf install patchelf` / `sudo apt install patchelf`) — `bundleMediaFramework` GStreamer plaginini ishlatadi; busiz `linuxdeploy` fail bo'ladi.
+- `GSTREAMER_INCLUDE_BAD_PLUGINS=1` env — `faad`/`hlsdemux`/`mpegtsdemux` (plugins-bad) AppImage'ga kiritiladi. **Busiz** AppImage muvaffaqiyatli qurilsa ham YouTube **live (AAC/HLS) oqimlari jimgina ishlamaydi** (default disabled).
+- Tizimda GStreamer plaginlari o'rnatilgan bo'lishi kerak (bundllash uchun manba): `gstreamer1.0-plugins-good/bad gstreamer1.0-libav`.
+- FUSE muammosi bo'lsa: `APPIMAGE_EXTRACT_AND_RUN=1` qo'shing.
 
 ### Linux runtime eslatmasi
 
-**AppImage** GStreamer plaginlarini o'z ichiga oladi — qo'shimcha o'rnatish shart emas.
+**AppImage** GStreamer plaginlarini o'z ichiga oladi (faad/hls/mpegts/opus/matroska — VOD Opus + live AAC/HLS) — foydalanuvchi mashinasiga qo'shimcha o'rnatish shart emas.
 
 Manbadan build (AppImage emas) qilayotgan bo'lsangiz, quyidagi paketlar kerak:
 
