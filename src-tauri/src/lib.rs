@@ -26,6 +26,9 @@ fn has_nvidia_gpu() -> bool {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+  std::panic::set_hook(Box::new(|info| {
+    log::error!("PANIC: {info}");
+  }));
   // NVIDIA aniqlash — DMABUF disable va frontend glass fallback signali uchun.
   #[cfg(target_os = "linux")]
   let is_nvidia = has_nvidia_gpu();
@@ -76,13 +79,15 @@ pub fn run() {
       }
     })
     .setup(move |app| {
-      if cfg!(debug_assertions) {
-        app.handle().plugin(
-          tauri_plugin_log::Builder::default()
-            .level(log::LevelFilter::Info)
-            .build(),
-        )?;
-      }
+      app.handle().plugin(
+        tauri_plugin_log::Builder::default()
+          .level(log::LevelFilter::Info)
+          .targets([
+            tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::LogDir { file_name: None }),
+            tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Stdout),
+          ])
+          .build(),
+      )?;
       // NVIDIA software render'da backdrop-filter (blur) ishlamaydi — frontendga
       // signal beramiz: <html>ga `no-backdrop-blur` class qo'shiladi va CSS
       // opaque glass fallback'ga o'tadi. Capable mashinalar (Intel/AMD) tegilmaydi.
