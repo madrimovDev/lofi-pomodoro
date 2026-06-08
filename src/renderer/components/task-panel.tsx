@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Drawer as DrawerPrimitive } from 'vaul';
-import { DrawerPortal } from '@shared/components/ui/drawer';
+import { Sheet, SheetContent } from '@shared/components/ui/sheet';
 import {
   Plus, Trash2, CheckCircle2, ClipboardList,
   ChevronDown, ChevronUp, Pencil, Check, X,
@@ -614,12 +613,8 @@ export function TaskPanel({ open, onOpenChange }: TaskPanelProps) {
   const showEmpty = !activeTask && pending.length === 0;
 
   return (
-    <DrawerPrimitive.Root open={open} onOpenChange={onOpenChange} direction="left">
-      <DrawerPortal>
-        <DrawerPrimitive.Content
-          style={{ top: '40px' }}
-          className="fixed z-50 left-0 bottom-0 w-[360px] bg-background border-r border-border/30 shadow-xl flex flex-col outline-none"
-        >
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="left" title="Ishlar" className="fixed z-50 left-0 bottom-0 w-[360px] bg-background border-r border-border/30 shadow-xl flex flex-col outline-none">
           <div className="flex-1 flex flex-col min-h-0 p-5 gap-4">
 
             {/* Header */}
@@ -699,8 +694,7 @@ export function TaskPanel({ open, onOpenChange }: TaskPanelProps) {
             <AddTaskFormFixed onAdd={(name, desc, est) => addTask(name, desc, est)} />
 
           </div>
-        </DrawerPrimitive.Content>
-      </DrawerPortal>
-    </DrawerPrimitive.Root>
+      </SheetContent>
+    </Sheet>
   );
 }
