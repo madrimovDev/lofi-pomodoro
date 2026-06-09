@@ -19,16 +19,10 @@ type BreakActivity = 'breathing' | 'stretch' | 'hydration' | 'eye-rest';
 
 const ACTIVITIES: BreakActivity[] = ['breathing', 'stretch', 'hydration', 'eye-rest'];
 
-const STRETCH_TIPS = [
-  'Yelkangizni orqaga tortib, ko\'ksingizni kering',
-  'Boshingizni asta-sekin chap va o\'ngga burting',
-  'Qo\'llaringizni yuqoriga ko\'tarib cho\'zing',
-  'O\'rnatingizdan turib, oyoqlaringizni silking',
-  'Ko\'zingizni yumib, yuzingizni bo\'shashtirang',
-  'Barmoqlaringizni burging va yozing',
-  'Belingizni asta-sekin burang',
-  'Chuqur nafas olib, asta chiqaring',
-];
+const STRETCH_TIP_KEYS = [
+  'stretchTip1', 'stretchTip2', 'stretchTip3', 'stretchTip4',
+  'stretchTip5', 'stretchTip6', 'stretchTip7', 'stretchTip8',
+] as const;
 
 function BreathingCircle({ t }: { t: (key: TranslationKey) => string }) {
   const [phase, setPhase] = useState<'in' | 'hold' | 'out'>('in');
@@ -68,11 +62,11 @@ function BreathingCircle({ t }: { t: (key: TranslationKey) => string }) {
   );
 }
 
-function StretchScreen({ tip }: { tip: string }) {
+function StretchScreen({ t, tipKey }: { t: (key: TranslationKey) => string; tipKey: TranslationKey }) {
   return (
     <div className="flex flex-col items-center gap-4">
       <div className="text-5xl">🧘</div>
-      <p className="text-sm text-center text-foreground/70 max-w-[200px] leading-relaxed">{tip}</p>
+      <p className="text-sm text-center text-foreground/70 max-w-[200px] leading-relaxed">{t(tipKey)}</p>
     </div>
   );
 }
@@ -99,7 +93,7 @@ function EyeRestScreen({ t }: { t: (key: TranslationKey) => string }) {
 export function BreakScreen({ onSkip, timeLeft }: BreakScreenProps) {
   const { t } = useSettings();
   const [activityIndex] = useState(() => Math.floor(Math.random() * ACTIVITIES.length));
-  const [stretchTipIndex] = useState(() => Math.floor(Math.random() * STRETCH_TIPS.length));
+  const [stretchTipIndex] = useState(() => Math.floor(Math.random() * STRETCH_TIP_KEYS.length));
 
   const activity = ACTIVITIES[activityIndex];
 
@@ -110,7 +104,7 @@ export function BreakScreen({ onSkip, timeLeft }: BreakScreenProps) {
       </p>
 
       {activity === 'breathing' && <BreathingCircle t={t} />}
-      {activity === 'stretch' && <StretchScreen tip={STRETCH_TIPS[stretchTipIndex]} />}
+      {activity === 'stretch' && <StretchScreen t={t} tipKey={STRETCH_TIP_KEYS[stretchTipIndex]} />}
       {activity === 'hydration' && <HydrationScreen t={t} />}
       {activity === 'eye-rest' && <EyeRestScreen t={t} />}
 
