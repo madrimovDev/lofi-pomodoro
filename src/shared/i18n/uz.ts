@@ -198,6 +198,15 @@ export default {
   newPreset: 'Yangi preset',
   presetNamePlaceholder: 'Preset nomi...',
   savePreset: 'Saqlash',
+  keyboardShortcuts: 'Klavish yorliqlari',
+  scToggleTimer: 'Boshlash / Pauza',
+  scSkip: "O'tkazib yuborish",
+  scToggleMusic: 'Musiqa',
+  scToggleTasks: 'Ishlar',
+  scToggleSettings: 'Sozlamalar',
+  scToggleStats: 'Statistika',
+  scToggleFocusMode: 'Focus mode',
+  scHelp: 'Yordam',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;

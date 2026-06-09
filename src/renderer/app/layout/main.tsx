@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { KeyboardHelp } from '@renderer/components/keyboard-help';
 import { Play, Pause, SkipForward, Settings, ClipboardList, Music2, Moon } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { TimerRing } from '@renderer/components/timer-ring';
@@ -14,6 +15,7 @@ import { useAmbient } from '@renderer/hooks/use-ambient';
 import { useKeyboardShortcuts } from '@renderer/hooks/use-keyboard-shortcuts';
 import { useStats } from '@renderer/hooks/use-stats';
 import { winApi } from '@shared/tauri/window';
+import { DEFAULT_KEYBINDINGS } from '@shared/types';
 
 const MODE_KEY = {
   focus: 'focus',
@@ -32,13 +34,16 @@ interface MainLayoutProps {
   musicOpen: boolean;
   isMiniMode?: boolean;
   onBreakStart?: (mode: 'short-break' | 'long-break') => void;
+  onToggleStats: () => void;
+  statsOpen: boolean;
 }
 
-export const MainLayout = ({ onToggleMusic, musicOpen, isMiniMode, onBreakStart }: MainLayoutProps) => {
+export const MainLayout = ({ onToggleMusic, musicOpen, isMiniMode, onBreakStart, onToggleStats, statsOpen }: MainLayoutProps) => {
   const { settings, updateSettings, t } = useSettings();
   const { todayStat } = useStats();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [taskPanelOpen, setTaskPanelOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   // Timer state comes from TimerProvider (in Layout), shared with MiniLayout
   const { timeLeft, isRunning, mode, completedInCycle, progress, toggle, skip } = useTimerContext();
@@ -50,10 +55,18 @@ export const MainLayout = ({ onToggleMusic, musicOpen, isMiniMode, onBreakStart 
   );
 
   useKeyboardShortcuts({
-    onToggleTimer: toggle,
-    onSkip: skip,
-    onToggleMusic,
-    onToggleTasks: () => setTaskPanelOpen((o) => !o),
+    handlers: {
+      toggleTimer: toggle,
+      skip,
+      toggleMusic: onToggleMusic,
+      toggleTasks: () => setTaskPanelOpen(o => !o),
+      toggleSettings: () => setSettingsOpen(o => !o),
+      toggleStats: onToggleStats,
+      toggleFocusMode: () => updateSettings({ focusMode: !settings.focusMode }),
+    },
+    bindings: settings.keybindings ?? DEFAULT_KEYBINDINGS,
+    onHelp: () => setHelpOpen(true),
+    enabled: !(settingsOpen || taskPanelOpen || musicOpen || statsOpen || helpOpen),
   });
 
   // A1: Update window title with timer
@@ -166,6 +179,7 @@ export const MainLayout = ({ onToggleMusic, musicOpen, isMiniMode, onBreakStart 
 
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
       <TaskPanel open={taskPanelOpen} onOpenChange={setTaskPanelOpen} />
+      <KeyboardHelp open={helpOpen} onOpenChange={setHelpOpen} />
     </div>
   );
 };

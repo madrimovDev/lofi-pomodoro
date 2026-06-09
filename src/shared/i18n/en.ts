@@ -173,4 +173,13 @@ export default {
   newPreset: 'New preset',
   presetNamePlaceholder: 'Preset name...',
   savePreset: 'Save',
+  keyboardShortcuts: 'Keyboard shortcuts',
+  scToggleTimer: 'Start / Pause',
+  scSkip: 'Skip',
+  scToggleMusic: 'Music',
+  scToggleTasks: 'Tasks',
+  scToggleSettings: 'Settings',
+  scToggleStats: 'Statistics',
+  scToggleFocusMode: 'Focus mode',
+  scHelp: 'Help',
 } as const;

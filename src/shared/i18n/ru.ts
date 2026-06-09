@@ -176,4 +176,13 @@ export default {
   newPreset: 'Новый пресет',
   presetNamePlaceholder: 'Название пресета...',
   savePreset: 'Сохранить',
+  keyboardShortcuts: 'Горячие клавиши',
+  scToggleTimer: 'Старт / Пауза',
+  scSkip: 'Пропустить',
+  scToggleMusic: 'Музыка',
+  scToggleTasks: 'Задачи',
+  scToggleSettings: 'Настройки',
+  scToggleStats: 'Статистика',
+  scToggleFocusMode: 'Focus mode',
+  scHelp: 'Помощь',
 } as const;

@@ -301,6 +301,8 @@ function LayoutInner() {
             musicOpen={musicOpen}
             isMiniMode={isMiniMode}
             onBreakStart={handleBreakStart}
+            statsOpen={statsOpen}
+            onToggleStats={() => setStatsOpen(o => !o)}
           />
           <MusicSidePanel open={musicOpen} onOpenChange={setMusicOpen} />
         </main>
