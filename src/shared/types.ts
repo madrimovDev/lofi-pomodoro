@@ -1,5 +1,19 @@
 export type Theme = 'dark' | 'light';
 
+export type ShortcutAction =
+  | 'toggleTimer' | 'skip' | 'toggleMusic' | 'toggleTasks'
+  | 'toggleSettings' | 'toggleStats' | 'toggleFocusMode';
+
+export const DEFAULT_KEYBINDINGS: Record<ShortcutAction, string> = {
+  toggleTimer: 'Space',
+  skip: 'KeyS',
+  toggleMusic: 'KeyM',
+  toggleTasks: 'KeyT',
+  toggleSettings: 'Comma',
+  toggleStats: 'KeyB',
+  toggleFocusMode: 'KeyF',
+};
+
 export type AmbientSound = 'none' | 'rain' | 'forest' | 'cafe';
 
 export type MusicSortMode = 'shuffle' | 'alphabetical';
@@ -29,6 +43,7 @@ export interface TimerSettings {
   restoreWindowMinutes: number; // 0 = never restore, -1 = always, else minutes
   breathingPattern: BreathingPatternId;
   customPresets: TimerPreset[];
+  keybindings: Record<ShortcutAction, string>;
 }
 
 export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
@@ -54,6 +69,7 @@ export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
   restoreWindowMinutes: 120,
   breathingPattern: '478',
   customPresets: [],
+  keybindings: DEFAULT_KEYBINDINGS,
 };
 
 export interface TimerPreset {
