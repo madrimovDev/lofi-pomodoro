@@ -1,12 +1,12 @@
 import { createContext, useContext, useEffect, useState, type ReactElement, type ReactNode } from 'react';
 import { DEFAULT_TIMER_SETTINGS, type TimerSettings } from '@shared/types';
-import { getT, type TranslationKey } from '@shared/i18n';
+import { getT, type TFunc } from '@shared/i18n';
 import { api } from '@shared/tauri/api';
 
 interface SettingsContextValue {
   settings: TimerSettings;
   updateSettings: (patch: Partial<TimerSettings>) => void;
-  t: (key: TranslationKey) => string;
+  t: TFunc;
 }
 
 const SettingsContext = createContext<SettingsContextValue>({
