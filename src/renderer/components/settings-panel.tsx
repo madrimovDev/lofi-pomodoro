@@ -69,7 +69,7 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" title="Sozlamalar" className="glass overflow-y-auto p-6 focus:outline-none">
+      <SheetContent side="bottom" title={t('settings')} className="glass overflow-y-auto p-6 focus:outline-none">
           <div className="flex items-center justify-between mb-6">
             <span className="text-sm font-medium tracking-widest uppercase text-muted-foreground">
               {t('settings')}
@@ -126,7 +126,7 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
                         variant="ghost"
                         size="icon-xs"
                         onClick={() => updateSettings({ notificationSoundPath: null })}
-                        aria-label="Reset"
+                        aria-label={t('reset')}
                       >
                         <X className="size-3" />
                       </Button>

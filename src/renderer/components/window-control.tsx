@@ -14,7 +14,7 @@ export const WindowControl = ({ onOpenStats }: WindowControlProps) => {
   const handleMinimize = () => win.minimize();
   const handleMaximize = () => win.toggleMaximize();
   const handleClose = () => win.close();
-  const { settings, updateSettings } = useSettings();
+  const { settings, updateSettings, t } = useSettings();
   const { streak } = useStats();
 
   return (
@@ -33,14 +33,14 @@ export const WindowControl = ({ onOpenStats }: WindowControlProps) => {
       <div className="flex justify-end">
         <div id="window-controls-button">
           {onOpenStats && (
-            <Button onClick={onOpenStats} variant="ghost" size="icon-xs" aria-label="Statistika">
+            <Button onClick={onOpenStats} variant="ghost" size="icon-xs" aria-label={t('statistics')}>
               <BarChart2 className="size-3.5" />
             </Button>
           )}
           <Button
             onClick={() => winApi.setMiniMode(true).catch(err => console.error('setMiniMode failed:', err))}
-            variant="ghost" size="icon-xs" aria-label="Mini mode"
-            title="Mini rejim"
+            variant="ghost" size="icon-xs" aria-label={t('miniMode')}
+            title={t('miniMode')}
           >
             <Minimize2 className="size-3.5" />
           </Button>
@@ -52,8 +52,8 @@ export const WindowControl = ({ onOpenStats }: WindowControlProps) => {
             }}
             variant={settings.alwaysOnTop ? 'outline' : 'ghost'}
             size="icon-xs"
-            aria-label="Always on top"
-            title={settings.alwaysOnTop ? 'Har doim ustda: yoqiq' : 'Har doim ustda: o\'chiq'}
+            aria-label={t('alwaysOnTop')}
+            title={t('alwaysOnTop')}
           >
             <Pin className="size-3.5" />
           </Button>

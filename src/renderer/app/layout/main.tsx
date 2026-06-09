@@ -120,17 +120,17 @@ export const MainLayout = ({ onToggleMusic, musicOpen, isMiniMode, onBreakStart 
               : <Play className="size-5 translate-x-0.5" />
             }
           </Button>
-          <Button variant="ghost" size="icon-sm" onClick={skip} aria-label="Skip">
+          <Button variant="ghost" size="icon-sm" onClick={skip} aria-label={t('skip')}>
             <SkipForward className="size-4" />
           </Button>
-          <Button variant="ghost" size="icon-sm" onClick={() => setTaskPanelOpen(true)} aria-label="Ishlar">
+          <Button variant="ghost" size="icon-sm" onClick={() => setTaskPanelOpen(true)} aria-label={t('tasks')}>
             <ClipboardList className="size-4" />
           </Button>
           <Button
             variant={musicOpen ? 'outline' : 'ghost'}
             size="icon-sm"
             onClick={onToggleMusic}
-            aria-label="Musiqa"
+            aria-label={t('music')}
           >
             <Music2 className="size-4" />
           </Button>
@@ -138,12 +138,12 @@ export const MainLayout = ({ onToggleMusic, musicOpen, isMiniMode, onBreakStart 
             variant={settings.focusMode ? 'outline' : 'ghost'}
             size="icon-sm"
             onClick={() => updateSettings({ focusMode: !settings.focusMode })}
-            aria-label="Focus mode"
-            title={settings.focusMode ? 'Focus mode: yoqiq' : 'Focus mode: o\'chiq'}
+            aria-label={t('focusModeLabel')}
+            title={settings.focusMode ? t('focusModeOn') : t('focusModeOff')}
           >
             <Moon className="size-4" />
           </Button>
-          <Button variant="ghost" size="icon-sm" onClick={() => setSettingsOpen(true)} aria-label="Sozlamalar">
+          <Button variant="ghost" size="icon-sm" onClick={() => setSettingsOpen(true)} aria-label={t('settings')}>
             <Settings className="size-4" />
           </Button>
         </div>

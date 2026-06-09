@@ -16,6 +16,7 @@ import { Button } from '@shared/components/ui/button';
 import { winApi, winEvents } from '@shared/tauri/window';
 import { ResizeHandles } from '@renderer/components/resize-handles';
 import { convertFileSrc } from '@tauri-apps/api/core';
+import type { TFunc } from '@shared/i18n';
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -23,11 +24,8 @@ function formatTime(seconds: number): string {
   return `${m}:${s}`;
 }
 
-const MINI_MODE_LABELS: Record<string, string> = {
-  focus: 'Fokus',
-  'short-break': 'Tanaffus',
-  'long-break': 'Uzoq tanaffus',
-};
+const miniModeLabel = (mode: string, t: TFunc) =>
+  mode === 'focus' ? t('miniFocus') : mode === 'short-break' ? t('miniShortBreak') : t('miniLongBreak');
 
 // MiniLayout reads timer state from the TimerContext provided by MainLayout
 // (which is kept mounted but hidden). This prevents timer resets on mode switch.
@@ -36,6 +34,7 @@ const MODE_HUES: Record<string, number> = { focus: 120, 'short-break': 185, 'lon
 
 function MiniLayout({ sessionsBeforeLongBreak }: { sessionsBeforeLongBreak: number }) {
   const { timeLeft, isRunning, mode, completedInCycle, progress, toggle, skip } = useTimerContext();
+  const { t } = useSettings();
   const { source, files, currentFileIndex, ytStreamInfo, currentRadio } = useMusic();
   const { activeTask } = useTasks();
 
@@ -55,28 +54,28 @@ function MiniLayout({ sessionsBeforeLongBreak }: { sessionsBeforeLongBreak: numb
   const nextModeIsLong = mode === 'focus' && completedInCycle === sessionsBeforeLongBreak - 1;
   const nextHue = mode === 'focus' ? (nextModeIsLong ? 285 : 185) : 120;
 
-  // Primary t: cubic ease-in starting at 60% — dramatic buildup near end
+  // Primary easeT: cubic ease-in starting at 60% — dramatic buildup near end
   const EASE_START = 0.60;
   const rawT = progress < EASE_START ? 0 : (progress - EASE_START) / (1 - EASE_START);
-  const t = rawT * rawT * rawT;
+  const easeT = rawT * rawT * rawT;
 
   // Text tint t: quadratic ease starting at 70%
   const rawTText = progress < 0.70 ? 0 : (progress - 0.70) / 0.30;
   const tText = rawTText * rawTText;
 
-  const blendedHue = currentHue + (nextHue - currentHue) * t;
+  const blendedHue = currentHue + (nextHue - currentHue) * easeT;
 
   // 1. First aurora layer — right side, next mode color, breathing
   const ambientStyle: React.CSSProperties = {
-    background: `radial-gradient(ellipse 85% 135% at 115% 50%, oklch(0.67 0.10 ${blendedHue} / ${(t * 0.08).toFixed(3)}) 0%, transparent 62%)`,
+    background: `radial-gradient(ellipse 85% 135% at 115% 50%, oklch(0.67 0.10 ${blendedHue} / ${(easeT * 0.08).toFixed(3)}) 0%, transparent 62%)`,
     animation: `mini-aurora-breath ${mode === 'focus' ? '3.5s' : '5s'} ease-in-out infinite`,
-    animationPlayState: isRunning && t > 0 ? 'running' : 'paused',
+    animationPlayState: isRunning && easeT > 0 ? 'running' : 'paused',
     transformOrigin: 'right center',
   };
 
   // 2. Second aurora layer — bottom-left, current mode color (subtle base presence)
   const aurora2Style: React.CSSProperties = {
-    background: `radial-gradient(ellipse 65% 85% at -10% 90%, oklch(0.67 0.09 ${currentHue} / ${(progress * 0.022 + t * 0.018).toFixed(3)}) 0%, transparent 58%)`,
+    background: `radial-gradient(ellipse 65% 85% at -10% 90%, oklch(0.67 0.09 ${currentHue} / ${(progress * 0.022 + easeT * 0.018).toFixed(3)}) 0%, transparent 58%)`,
     animation: `mini-aurora-breath ${mode === 'focus' ? '4.5s' : '6.5s'} ease-in-out infinite reverse`,
     animationPlayState: isRunning ? 'running' : 'paused',
     transformOrigin: 'left bottom',
@@ -90,18 +89,18 @@ function MiniLayout({ sessionsBeforeLongBreak }: { sessionsBeforeLongBreak: numb
       : undefined,
   };
 
-  // 4. Glowing tip dot — intensifies with t
-  const tipGlow = t > 0 ? 4 + t * 9 : 3;
+  // 4. Glowing tip dot — intensifies with easeT
+  const tipGlow = easeT > 0 ? 4 + easeT * 9 : 3;
   const tipStyle: React.CSSProperties = {
     background: `oklch(0.78 0.12 ${blendedHue})`,
-    boxShadow: `0 0 ${tipGlow.toFixed(1)}px ${(tipGlow * 0.5).toFixed(1)}px oklch(0.67 0.10 ${blendedHue} / ${(0.55 + t * 0.40).toFixed(2)})`,
+    boxShadow: `0 0 ${tipGlow.toFixed(1)}px ${(tipGlow * 0.5).toFixed(1)}px oklch(0.67 0.10 ${blendedHue} / ${(0.55 + easeT * 0.40).toFixed(2)})`,
   };
 
-  // 5. Border glow — inset shadow grows with t
-  const borderGlow = t * 10;
+  // 5. Border glow — inset shadow grows with easeT
+  const borderGlow = easeT * 10;
   const borderGlowStyle: React.CSSProperties = {
-    boxShadow: t > 0
-      ? `inset 0 0 ${borderGlow.toFixed(1)}px ${(borderGlow * 0.35).toFixed(1)}px oklch(0.67 0.10 ${blendedHue} / ${(t * 0.22).toFixed(3)})`
+    boxShadow: easeT > 0
+      ? `inset 0 0 ${borderGlow.toFixed(1)}px ${(borderGlow * 0.35).toFixed(1)}px oklch(0.67 0.10 ${blendedHue} / ${(easeT * 0.22).toFixed(3)})`
       : undefined,
   };
 
@@ -140,7 +139,7 @@ function MiniLayout({ sessionsBeforeLongBreak }: { sessionsBeforeLongBreak: numb
           className="text-[10px] text-muted-foreground/40 uppercase tracking-widest leading-none shrink-0 hidden min-[260px]:block"
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         >
-          {MINI_MODE_LABELS[mode]}
+          {miniModeLabel(mode, t)}
         </span>
 
         {/* Active task or track name (fills remaining space; task takes priority) */}
@@ -165,8 +164,8 @@ function MiniLayout({ sessionsBeforeLongBreak }: { sessionsBeforeLongBreak: numb
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         >
           {Array.from({ length: sessionsBeforeLongBreak }, (_, i) => {
-            const isNextDot = i === completedInCycle && t > 0.5;
-            const dotT = isNextDot ? (t - 0.5) * 2 : 0;
+            const isNextDot = i === completedInCycle && easeT > 0.5;
+            const dotT = isNextDot ? (easeT - 0.5) * 2 : 0;
             return (
               <div
                 key={i}
@@ -202,8 +201,8 @@ function MiniLayout({ sessionsBeforeLongBreak }: { sessionsBeforeLongBreak: numb
             variant="ghost"
             size="icon-xs"
             onClick={skip}
-            aria-label="Skip"
-            title="Keyingiga o'tish"
+            aria-label={t('skip')}
+            title={t('skip')}
             className="hidden min-[280px]:flex"
           >
             <SkipForward className="size-3.5" />
@@ -212,8 +211,8 @@ function MiniLayout({ sessionsBeforeLongBreak }: { sessionsBeforeLongBreak: numb
             variant="ghost"
             size="icon-xs"
             onClick={exitMini}
-            aria-label="Normal rejimga qaytish"
-            title="Normal rejimga qaytish"
+            aria-label={t('normalMode')}
+            title={t('normalMode')}
           >
             <Maximize2 className="size-3.5" />
           </Button>

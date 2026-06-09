@@ -1,18 +1,13 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from 'react';
+import { useSettings } from '@renderer/hooks/use-settings';
+import { formatTime } from '@shared/lib/format';
 
 export const CurrentTime = () => {
-  const [time, setTime] = useState(new Date())
-
+  const { settings } = useSettings();
+  const [time, setTime] = useState(new Date());
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTime(new Date())
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [])
-
-  return (
-    <span className="text-xs">
-      {time.toLocaleTimeString()}
-    </span>
-  )
-}
+    const id = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  return <span className="text-xs">{formatTime(settings.locale, time)}</span>;
+};
