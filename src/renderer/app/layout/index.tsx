@@ -325,9 +325,11 @@ function LayoutInner() {
 }
 
 export const Layout = () => {
-  const { settings, t } = useSettings();
+  const { settings, t, loaded } = useSettings();
   const { addFocusSession, addSkippedSession } = useStats();
   const { activeTaskId, incrementPomodoro } = useTasks();
+
+  if (!loaded) return null;
 
   const timerConfig = {
     focusDuration: settings.focusDuration,

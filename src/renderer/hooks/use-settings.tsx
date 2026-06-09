@@ -7,21 +7,25 @@ interface SettingsContextValue {
   settings: TimerSettings;
   updateSettings: (patch: Partial<TimerSettings>) => void;
   t: TFunc;
+  loaded: boolean;
 }
 
 const SettingsContext = createContext<SettingsContextValue>({
   settings: DEFAULT_TIMER_SETTINGS,
   updateSettings: () => {},
   t: (key) => key,
+  loaded: true,
 });
 
 export function SettingsProvider({ children }: { children: ReactNode }): ReactElement {
   const [settings, setSettings] = useState<TimerSettings>(DEFAULT_TIMER_SETTINGS);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     api.getSettings()
       .then(s => { if (s) setSettings({ ...DEFAULT_TIMER_SETTINGS, ...s }); })
-      .catch(err => console.error('getSettings failed:', err));
+      .catch(err => console.error('getSettings failed:', err))
+      .finally(() => setLoaded(true));
   }, []);
 
   const updateSettings = (patch: Partial<TimerSettings>) => {
@@ -33,7 +37,7 @@ export function SettingsProvider({ children }: { children: ReactNode }): ReactEl
   const t = getT(settings.locale ?? 'uz');
 
   return (
-    <SettingsContext.Provider value={{ settings, updateSettings, t }}>
+    <SettingsContext.Provider value={{ settings, updateSettings, t, loaded }}>
       {children}
     </SettingsContext.Provider>
   );
