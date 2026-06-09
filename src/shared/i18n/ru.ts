@@ -130,4 +130,5 @@ export default {
   streakDay_one: 'день подряд',
   streakDay_few: 'дня подряд',
   streakDay_many: 'дней подряд',
+  emptyStepsTitle: '3 шага для начала:',
 } as const;

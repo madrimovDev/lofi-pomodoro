@@ -128,4 +128,5 @@ export default {
   videoCount_other: '{count} videos',
   streakDay_one: 'day streak',
   streakDay_other: 'day streak',
+  emptyStepsTitle: '3 steps to start:',
 } as const;

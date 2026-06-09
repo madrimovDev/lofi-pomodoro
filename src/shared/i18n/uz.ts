@@ -154,6 +154,7 @@ export default {
   videoCount_other: '{count} ta video',
   // Plural: streak day label
   streakDay_other: 'kun ketma-ket',
+  emptyStepsTitle: 'Boshlash uchun 3 ta qadam:',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;

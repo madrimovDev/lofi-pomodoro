@@ -422,7 +422,7 @@ function EmptyState() {
       <div className="text-4xl opacity-30">📋</div>
       <div className="text-center">
         <p className="text-sm text-foreground/50 font-medium mb-1">{tr('emptyTitle')}</p>
-        <p className="text-xs text-muted-foreground/40">Boshlash uchun 3 ta qadam:</p>
+        <p className="text-xs text-muted-foreground/40">{tr('emptyStepsTitle')}</p>
       </div>
       <div className="flex flex-col gap-3 w-full max-w-[220px]">
         {[
