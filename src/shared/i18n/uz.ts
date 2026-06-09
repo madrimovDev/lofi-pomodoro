@@ -122,6 +122,38 @@ export default {
   loadingTrack: 'Yuklanmoqda...',
   noAudioFiles: 'Audio fayllar topilmadi',
   back: 'Ortga',
+  // Break stretch tips (moved as-is from break-screen.tsx)
+  stretchTip1: 'Yelkangizni orqaga tortib, ko\'ksingizni kering',
+  stretchTip2: 'Boshingizni asta-sekin chap va o\'ngga burting',
+  stretchTip3: 'Qo\'llaringizni yuqoriga ko\'tarib cho\'zing',
+  stretchTip4: 'O\'rnatingizdan turib, oyoqlaringizni silking',
+  stretchTip5: 'Ko\'zingizni yumib, yuzingizni bo\'shashtirang',
+  stretchTip6: 'Barmoqlaringizni burging va yozing',
+  stretchTip7: 'Belingizni asta-sekin burang',
+  stretchTip8: 'Chuqur nafas olib, asta chiqaring',
+  // Mini-mode mode labels
+  miniFocus: 'Fokus',
+  miniShortBreak: 'Tanaffus',
+  miniLongBreak: 'Uzoq tanaffus',
+  // Tasks
+  confirmClearTasks: 'Ishonchingiz komilmi?',
+  clearCompleted: 'Barchasini o\'chirish',
+  dateYesterday: 'Kecha',
+  // Generic aria / actions
+  edit: 'Tahrirlash',
+  delete: 'O\'chirish',
+  reset: 'Reset',
+  normalMode: 'Normal rejimga qaytish',
+  focusModeLabel: 'Focus mode',
+  // Music
+  tabFolder: 'Papka',
+  changeFolder: 'Papkani o\'zgartirish',
+  selectFolder: 'Papka tanlash',
+  ytUrlPlaceholder: 'YouTube URL yoki playlist...',
+  // Plural: video count (uz has a single form)
+  videoCount_other: '{count} ta video',
+  // Plural: streak day label
+  streakDay_other: 'kun ketma-ket',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;

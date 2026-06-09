@@ -12,7 +12,7 @@ function extractKeys(locale) {
   const src = readFileSync(join(i18nDir, `${locale}.ts`), 'utf8');
   const keys = new Set();
   for (const m of src.matchAll(/^\s*([A-Za-z][A-Za-z0-9_]*)\s*:/gm)) {
-    keys.add(m[1]);
+    keys.add(m[1].replace(/_(one|few|many|other)$/, ''));
   }
   return keys;
 }
