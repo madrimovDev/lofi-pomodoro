@@ -166,4 +166,8 @@ export default {
   eyeTip3: 'Поводите глазами и дайте им отдохнуть',
   stretchTip9: 'Мягко потяните шею',
   stretchTip10: 'Повращайте запястьями',
+  breathingPattern: 'Дыхание',
+  pattern478: '4-7-8',
+  patternBox: 'Бокс 4-4-4-4',
+  patternCoherent: 'Когерентное 5-5',
 } as const;

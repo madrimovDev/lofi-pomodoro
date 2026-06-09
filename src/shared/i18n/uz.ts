@@ -188,6 +188,10 @@ export default {
   eyeTip3: 'Ko\'zingizni aylantiring va dam bering',
   stretchTip9: 'Bo\'yningizni asta cho\'zing',
   stretchTip10: 'Bilaklaringizni aylantiring',
+  breathingPattern: 'Nafas patterni',
+  pattern478: '4-7-8',
+  patternBox: 'Box 4-4-4-4',
+  patternCoherent: 'Coherent 5-5',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;

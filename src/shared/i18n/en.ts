@@ -163,4 +163,8 @@ export default {
   eyeTip3: 'Roll your eyes and let them rest',
   stretchTip9: 'Gently stretch your neck',
   stretchTip10: 'Rotate your wrists',
+  breathingPattern: 'Breathing pattern',
+  pattern478: '4-7-8',
+  patternBox: 'Box 4-4-4-4',
+  patternCoherent: 'Coherent 5-5',
 } as const;

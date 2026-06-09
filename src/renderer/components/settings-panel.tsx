@@ -153,6 +153,28 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
                 checked={settings.forceBreakFullscreen}
                 onCheckedChange={v => updateSettings({ forceBreakFullscreen: v })}
               />
+              <div className="flex items-center justify-between gap-4">
+                <label className="text-sm text-foreground/80 select-none">{t('breathingPattern')}</label>
+                <div className="flex gap-1">
+                  {([
+                    { v: '478' as const, key: 'pattern478' as const },
+                    { v: 'box' as const, key: 'patternBox' as const },
+                    { v: 'coherent' as const, key: 'patternCoherent' as const },
+                  ]).map(opt => (
+                    <button
+                      key={opt.v}
+                      onClick={() => updateSettings({ breathingPattern: opt.v })}
+                      className={`px-2 py-0.5 rounded-md text-[10px] transition-colors duration-150 border ${
+                        (settings.breathingPattern ?? '478') === opt.v
+                          ? 'bg-primary/20 border-primary/40 text-foreground'
+                          : 'border-border/50 text-muted-foreground/60 hover:border-border hover:text-muted-foreground'
+                      }`}
+                    >
+                      {t(opt.key)}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <ToggleRow
                 label={t('animations')}
                 checked={settings.animationsEnabled}
