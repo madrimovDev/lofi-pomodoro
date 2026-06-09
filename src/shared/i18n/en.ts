@@ -144,4 +144,8 @@ export default {
   skippedSessionsCount: '{count} session skipped',
   skippedSessionsCount_one: '{count} session skipped',
   skippedSessionsCount_other: '{count} sessions skipped',
+  selectTask: 'Select a task...',
+  shuffle: 'Shuffle',
+  alphabetical: 'Alphabetical',
+  sessionsProgress: '{completed} of {total} sessions completed',
 } as const;

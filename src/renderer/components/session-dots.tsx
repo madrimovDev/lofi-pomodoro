@@ -1,4 +1,5 @@
 import { cn } from '@shared/lib/utils';
+import { useSettings } from '@renderer/hooks/use-settings';
 
 interface SessionDotsProps {
   completed: number;
@@ -6,8 +7,9 @@ interface SessionDotsProps {
 }
 
 export const SessionDots = ({ completed, total = 4 }: SessionDotsProps) => {
+  const { t } = useSettings();
   return (
-    <div className="flex items-center gap-2" aria-label={`${completed} of ${total} sessions completed`}>
+    <div className="flex items-center gap-2" aria-label={t('sessionsProgress', { completed, total })}>
       {Array.from({ length: total }).map((_, i) => (
         <div
           key={i}

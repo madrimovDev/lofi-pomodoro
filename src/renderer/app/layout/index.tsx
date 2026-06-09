@@ -190,7 +190,7 @@ function MiniLayout({ sessionsBeforeLongBreak }: { sessionsBeforeLongBreak: numb
             variant="ghost"
             size="icon-xs"
             onClick={toggle}
-            aria-label={isRunning ? 'Pause' : 'Play'}
+            aria-label={isRunning ? t('pause') : t('start')}
           >
             {isRunning
               ? <Pause className="size-3.5" />

@@ -107,7 +107,7 @@ function FolderTab() {
             <Button
               variant="ghost" size="icon-xs"
               onClick={() => updateConfig({ sortMode: sortMode === 'shuffle' ? 'alphabetical' : 'shuffle' })}
-              title={sortMode === 'shuffle' ? 'Shuffle' : 'Alifbo'}
+              title={sortMode === 'shuffle' ? tFn('shuffle') : tFn('alphabetical')}
             >
               {sortMode === 'shuffle'
                 ? <Shuffle className="size-3.5" />

@@ -169,6 +169,10 @@ export default {
   // Plural: skipped sessions count (uz has a single form); base key for TypeScript
   skippedSessionsCount: '{count} ta sessiya o\'tkazib yuborildi',
   skippedSessionsCount_other: '{count} ta sessiya o\'tkazib yuborildi',
+  selectTask: 'Ish tanlash...',
+  shuffle: 'Aralash',
+  alphabetical: 'Alifbo',
+  sessionsProgress: '{completed} / {total} sessiya bajarildi',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;

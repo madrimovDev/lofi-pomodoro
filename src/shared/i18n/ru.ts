@@ -147,4 +147,8 @@ export default {
   skippedSessionsCount_one: '{count} сессия пропущена',
   skippedSessionsCount_few: '{count} сессии пропущено',
   skippedSessionsCount_many: '{count} сессий пропущено',
+  selectTask: 'Выбрать задачу...',
+  shuffle: 'Перемешать',
+  alphabetical: 'По алфавиту',
+  sessionsProgress: '{completed} из {total} сессий завершено',
 } as const;

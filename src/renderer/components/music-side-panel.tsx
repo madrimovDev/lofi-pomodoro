@@ -132,7 +132,7 @@ function FolderTab() {
           <>
             <Button
               variant="ghost" size="icon-xs"
-              title={config.sortMode === 'shuffle' ? 'Shuffle' : 'Alifbo'}
+              title={config.sortMode === 'shuffle' ? t('shuffle') : t('alphabetical')}
               onClick={() => updateConfig({ sortMode: config.sortMode === 'shuffle' ? 'alphabetical' : 'shuffle' })}
             >
               {config.sortMode === 'shuffle'

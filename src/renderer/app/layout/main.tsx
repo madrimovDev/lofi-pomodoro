@@ -113,7 +113,7 @@ export const MainLayout = ({ onToggleMusic, musicOpen, isMiniMode, onBreakStart 
             size="icon"
             className="size-12 rounded-full"
             onClick={toggle}
-            aria-label={isRunning ? 'Pause' : 'Start'}
+            aria-label={isRunning ? t('pause') : t('start')}
           >
             {isRunning
               ? <Pause className="size-5" />

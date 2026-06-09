@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ClipboardList } from 'lucide-react';
 import { useTasks } from '@renderer/hooks/use-tasks';
+import { useSettings } from '@renderer/hooks/use-settings';
 import { cn } from '@shared/lib/utils';
 
 interface TaskDisplayProps {
@@ -8,6 +9,7 @@ interface TaskDisplayProps {
 }
 
 export function TaskDisplay({ onOpenPanel }: TaskDisplayProps) {
+  const { t } = useSettings();
   const { activeTask } = useTasks();
   const completedPomodoros = activeTask?.completedPomodoros ?? 0;
 
@@ -31,7 +33,7 @@ export function TaskDisplay({ onOpenPanel }: TaskDisplayProps) {
         className="flex items-center gap-2 text-muted-foreground/50 hover:text-muted-foreground transition-colors duration-200 text-xs select-none cursor-pointer"
       >
         <ClipboardList className="size-3.5" />
-        <span>Ish tanlash...</span>
+        <span>{t('selectTask')}</span>
       </button>
     );
   }
