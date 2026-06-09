@@ -182,4 +182,8 @@ export default {
   scToggleStats: 'Statistics',
   scToggleFocusMode: 'Focus mode',
   scHelp: 'Help',
+  shortcuts: 'Keyboard shortcuts',
+  pressKey: 'Press a key...',
+  keyConflict: 'Key already in use',
+  resetShortcuts: 'Reset to defaults',
 } as const;

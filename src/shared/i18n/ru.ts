@@ -185,4 +185,8 @@ export default {
   scToggleStats: 'Статистика',
   scToggleFocusMode: 'Focus mode',
   scHelp: 'Помощь',
+  shortcuts: 'Горячие клавиши',
+  pressKey: 'Нажмите клавишу...',
+  keyConflict: 'Клавиша занята',
+  resetShortcuts: 'Сбросить',
 } as const;

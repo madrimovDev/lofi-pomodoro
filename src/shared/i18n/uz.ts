@@ -207,6 +207,10 @@ export default {
   scToggleStats: 'Statistika',
   scToggleFocusMode: 'Focus mode',
   scHelp: 'Yordam',
+  shortcuts: 'Klavish yorliqlari',
+  pressKey: 'Klavishani bosing...',
+  keyConflict: 'Bu klavisha band',
+  resetShortcuts: 'Standartga qaytarish',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;

@@ -8,6 +8,9 @@ import { useSettings } from '@renderer/hooks/use-settings';
 import { useUpdater } from '@renderer/hooks/use-updater';
 import { winApi } from '@shared/tauri/window';
 import { dialogApi } from '@shared/tauri/dialog';
+import { DEFAULT_KEYBINDINGS, type ShortcutAction } from '@shared/types';
+import { formatKeyCode } from '@shared/lib/keys';
+import type { TranslationKey } from '@shared/i18n';
 
 interface SettingsPanelProps {
   open: boolean;
@@ -115,6 +118,63 @@ function PresetManager() {
           {t('savePreset')}
         </Button>
       </div>
+    </div>
+  );
+}
+
+const SC_LABEL_KEYS: Record<ShortcutAction, TranslationKey> = {
+  toggleTimer: 'scToggleTimer', skip: 'scSkip', toggleMusic: 'scToggleMusic',
+  toggleTasks: 'scToggleTasks', toggleSettings: 'scToggleSettings',
+  toggleStats: 'scToggleStats', toggleFocusMode: 'scToggleFocusMode',
+};
+
+function ShortcutEditor() {
+  const { settings, updateSettings, t } = useSettings();
+  const bindings = { ...DEFAULT_KEYBINDINGS, ...(settings.keybindings ?? {}) };
+  const [capturing, setCapturing] = useState<ShortcutAction | null>(null);
+  const [conflict, setConflict] = useState(false);
+
+  useEffect(() => {
+    if (!capturing) return;
+    setConflict(false);
+    const onKey = (e: KeyboardEvent) => {
+      e.preventDefault();
+      if (e.key === 'Escape') { setCapturing(null); return; }
+      if (e.ctrlKey || e.metaKey || e.altKey) return; // plain keys only
+      const code = e.code;
+      const taken = (Object.keys(bindings) as ShortcutAction[])
+        .some(a => a !== capturing && bindings[a] === code);
+      if (taken) { setConflict(true); return; }
+      updateSettings({ keybindings: { ...bindings, [capturing]: code } });
+      setCapturing(null);
+    };
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  }, [capturing, bindings, updateSettings]);
+
+  const actions = Object.keys(SC_LABEL_KEYS) as ShortcutAction[];
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground/60">{t('shortcuts')}</p>
+        <Button variant="ghost" size="xs" className="text-[10px]" onClick={() => updateSettings({ keybindings: DEFAULT_KEYBINDINGS })}>
+          {t('resetShortcuts')}
+        </Button>
+      </div>
+      {conflict && <p className="text-[10px] text-destructive/70">{t('keyConflict')}</p>}
+      {actions.map(a => (
+        <div key={a} className="flex items-center justify-between gap-4">
+          <label className="text-sm text-foreground/80 select-none">{t(SC_LABEL_KEYS[a])}</label>
+          <Button
+            variant={capturing === a ? 'outline' : 'ghost'}
+            size="xs"
+            className="text-[10px] min-w-[64px] gap-1"
+            onClick={() => setCapturing(a)}
+          >
+            {capturing === a ? t('pressKey') : formatKeyCode(bindings[a])}
+          </Button>
+        </div>
+      ))}
     </div>
   );
 }
@@ -281,6 +341,10 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
                 </div>
               </div>
             </div>
+
+            <div className="h-px bg-border/50" />
+
+            <ShortcutEditor />
 
             <div className="h-px bg-border/50" />
 
