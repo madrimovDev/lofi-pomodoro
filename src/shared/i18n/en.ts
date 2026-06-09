@@ -154,4 +154,13 @@ export default {
   restore2h: '2 hours',
   restore8h: '8 hours',
   restoreAlways: 'Always',
+  eye2020: '20-20-20: every 20 min, look 20 m away for 20 s',
+  hydrationTip1: 'Drink a glass of water',
+  hydrationTip2: 'Hydrate — take a few sips',
+  hydrationTip3: 'Have some water or tea',
+  eyeTip1: 'Close your eyes for 20 seconds',
+  eyeTip2: 'Focus on something far away',
+  eyeTip3: 'Roll your eyes and let them rest',
+  stretchTip9: 'Gently stretch your neck',
+  stretchTip10: 'Rotate your wrists',
 } as const;

@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { useSettings } from '@renderer/hooks/use-settings';
 import type { TranslationKey } from '@shared/i18n/uz';
+import { BREATHING_PATTERNS, type BreathingPatternId } from '@shared/types';
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -20,35 +21,36 @@ type BreakActivity = 'breathing' | 'stretch' | 'hydration' | 'eye-rest';
 const ACTIVITIES: BreakActivity[] = ['breathing', 'stretch', 'hydration', 'eye-rest'];
 
 const STRETCH_TIP_KEYS = [
-  'stretchTip1', 'stretchTip2', 'stretchTip3', 'stretchTip4',
-  'stretchTip5', 'stretchTip6', 'stretchTip7', 'stretchTip8',
+  'stretchTip1', 'stretchTip2', 'stretchTip3', 'stretchTip4', 'stretchTip5',
+  'stretchTip6', 'stretchTip7', 'stretchTip8', 'stretchTip9', 'stretchTip10',
 ] as const;
+const HYDRATION_TIP_KEYS = ['hydrationTip1', 'hydrationTip2', 'hydrationTip3'] as const;
+const EYE_TIP_KEYS = ['eyeTip1', 'eyeTip2', 'eyeTip3'] as const;
 
-function BreathingCircle({ t }: { t: (key: TranslationKey) => string }) {
-  const [phase, setPhase] = useState<'in' | 'hold' | 'out'>('in');
-  const [count, setCount] = useState(4);
+function BreathingCircle({ t, pattern }: { t: (key: TranslationKey) => string; pattern: BreathingPatternId }) {
+  const phases = BREATHING_PATTERNS[pattern];
+  const [phaseIndex, setPhaseIndex] = useState(0);
+  const [count, setCount] = useState(phases[0].seconds);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    const durations: Record<typeof phase, number> = { in: 4, hold: 7, out: 8 };
-
-    let remaining = durations[phase];
+    const phase = phases[phaseIndex];
+    let remaining = phase.seconds;
     setCount(remaining);
-
     intervalRef.current = setInterval(() => {
       remaining--;
       setCount(remaining);
       if (remaining <= 0) {
         clearInterval(intervalRef.current!);
-        setPhase(p => p === 'in' ? 'hold' : p === 'hold' ? 'out' : 'in');
+        setPhaseIndex(i => (i + 1) % phases.length);
       }
     }, 1000);
-
     return () => clearInterval(intervalRef.current!);
-  }, [phase]);
+  }, [phaseIndex, phases]);
 
-  const phaseLabel = phase === 'in' ? t('breatheIn') : phase === 'hold' ? t('breatheHold') : t('breatheOut');
-  const scale = phase === 'in' ? 'scale-110' : phase === 'hold' ? 'scale-110' : 'scale-90';
+  const phase = phases[phaseIndex];
+  const phaseLabel = t(phase.labelKey);
+  const scale = phase.scale === 'out' ? 'scale-90' : 'scale-110';
 
   return (
     <div className="flex flex-col items-center gap-6">
@@ -71,29 +73,31 @@ function StretchScreen({ t, tipKey }: { t: (key: TranslationKey) => string; tipK
   );
 }
 
-function HydrationScreen({ t }: { t: (key: TranslationKey) => string }) {
+function HydrationScreen({ t, tipKey }: { t: (key: TranslationKey) => string; tipKey: TranslationKey }) {
   return (
     <div className="flex flex-col items-center gap-4">
       <div className="text-5xl">💧</div>
-      <p className="text-sm text-center text-foreground/70">{t('hydration')}</p>
+      <p className="text-sm text-center text-foreground/70">{t(tipKey)}</p>
     </div>
   );
 }
 
-function EyeRestScreen({ t }: { t: (key: TranslationKey) => string }) {
+function EyeRestScreen({ t, tipKey }: { t: (key: TranslationKey) => string; tipKey: TranslationKey }) {
   return (
     <div className="flex flex-col items-center gap-4">
       <div className="text-5xl">👁️</div>
-      <p className="text-sm text-center text-foreground/70 max-w-[200px] leading-relaxed">{t('eyeRest')}</p>
-      <p className="text-xs text-muted-foreground/40 text-center max-w-[200px]">20-20-20: 20 daqiqa ishlagach, 20 metr uzoqqa 20 soniya qarang</p>
+      <p className="text-sm text-center text-foreground/70 max-w-[200px] leading-relaxed">{t(tipKey)}</p>
+      <p className="text-xs text-muted-foreground/40 text-center max-w-[200px]">{t('eye2020')}</p>
     </div>
   );
 }
 
 export function BreakScreen({ onSkip, timeLeft }: BreakScreenProps) {
-  const { t } = useSettings();
+  const { settings, t } = useSettings();
   const [activityIndex] = useState(() => Math.floor(Math.random() * ACTIVITIES.length));
   const [stretchTipIndex] = useState(() => Math.floor(Math.random() * STRETCH_TIP_KEYS.length));
+  const [hydrationTipIndex] = useState(() => Math.floor(Math.random() * HYDRATION_TIP_KEYS.length));
+  const [eyeTipIndex] = useState(() => Math.floor(Math.random() * EYE_TIP_KEYS.length));
 
   const activity = ACTIVITIES[activityIndex];
 
@@ -103,10 +107,10 @@ export function BreakScreen({ onSkip, timeLeft }: BreakScreenProps) {
         {t('breakScreenTitle')}
       </p>
 
-      {activity === 'breathing' && <BreathingCircle t={t} />}
+      {activity === 'breathing' && <BreathingCircle t={t} pattern={settings.breathingPattern} />}
       {activity === 'stretch' && <StretchScreen t={t} tipKey={STRETCH_TIP_KEYS[stretchTipIndex]} />}
-      {activity === 'hydration' && <HydrationScreen t={t} />}
-      {activity === 'eye-rest' && <EyeRestScreen t={t} />}
+      {activity === 'hydration' && <HydrationScreen t={t} tipKey={HYDRATION_TIP_KEYS[hydrationTipIndex]} />}
+      {activity === 'eye-rest' && <EyeRestScreen t={t} tipKey={EYE_TIP_KEYS[eyeTipIndex]} />}
 
       <div className="flex flex-col items-center gap-3">
         <span className="text-sm tabular-nums text-muted-foreground/30 font-light tracking-widest">

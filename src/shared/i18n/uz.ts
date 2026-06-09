@@ -179,6 +179,15 @@ export default {
   restore2h: '2 soat',
   restore8h: '8 soat',
   restoreAlways: 'Doim',
+  eye2020: '20-20-20: har 20 daqiqada 20 soniya 20 metr uzoqqa qarang',
+  hydrationTip1: 'Bir stakan suv iching',
+  hydrationTip2: 'Suv ichib, tanangizni namlang',
+  hydrationTip3: 'Choy yoki suv — bir nima iching',
+  eyeTip1: 'Ko\'zingizni 20 soniya yuming',
+  eyeTip2: 'Uzoqdagi narsaga tikiling',
+  eyeTip3: 'Ko\'zingizni aylantiring va dam bering',
+  stretchTip9: 'Bo\'yningizni asta cho\'zing',
+  stretchTip10: 'Bilaklaringizni aylantiring',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;
