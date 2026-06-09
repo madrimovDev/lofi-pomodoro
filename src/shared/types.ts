@@ -27,6 +27,7 @@ export interface TimerSettings {
   animationsEnabled: boolean;
   forceBreakFullscreen: boolean;
   restoreWindowMinutes: number; // 0 = never restore, -1 = always, else minutes
+  breathingPattern: BreathingPatternId;
 }
 
 export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
@@ -50,6 +51,7 @@ export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
   animationsEnabled: true,
   forceBreakFullscreen: true,
   restoreWindowMinutes: 120,
+  breathingPattern: '478',
 };
 
 export interface TimerPreset {
@@ -66,6 +68,32 @@ export const DEFAULT_PRESETS: TimerPreset[] = [
   { id: 'classic', name: 'Classic', focusDuration: 25, shortBreakDuration: 5, longBreakDuration: 15, sessionsBeforeLongBreak: 4 },
   { id: 'quick', name: 'Quick', focusDuration: 15, shortBreakDuration: 3, longBreakDuration: 10, sessionsBeforeLongBreak: 4 },
 ];
+
+export type BreathingPatternId = '478' | 'box' | 'coherent';
+
+export interface BreathPhase {
+  labelKey: 'breatheIn' | 'breatheHold' | 'breatheOut';
+  seconds: number;
+  scale: 'in' | 'hold' | 'out';
+}
+
+export const BREATHING_PATTERNS: Record<BreathingPatternId, BreathPhase[]> = {
+  '478': [
+    { labelKey: 'breatheIn', seconds: 4, scale: 'in' },
+    { labelKey: 'breatheHold', seconds: 7, scale: 'hold' },
+    { labelKey: 'breatheOut', seconds: 8, scale: 'out' },
+  ],
+  box: [
+    { labelKey: 'breatheIn', seconds: 4, scale: 'in' },
+    { labelKey: 'breatheHold', seconds: 4, scale: 'hold' },
+    { labelKey: 'breatheOut', seconds: 4, scale: 'out' },
+    { labelKey: 'breatheHold', seconds: 4, scale: 'hold' },
+  ],
+  coherent: [
+    { labelKey: 'breatheIn', seconds: 5, scale: 'in' },
+    { labelKey: 'breatheOut', seconds: 5, scale: 'out' },
+  ],
+};
 
 export interface SavedYtPlaylist {
   id: string;
