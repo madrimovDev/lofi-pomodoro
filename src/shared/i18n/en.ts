@@ -127,6 +127,7 @@ export default {
   videoCount: '{count} videos',
   videoCount_one: '{count} video',
   videoCount_other: '{count} videos',
+  streakDay: 'day streak',
   streakDay_one: 'day streak',
   streakDay_other: 'day streak',
   emptyStepsTitle: '3 steps to start:',

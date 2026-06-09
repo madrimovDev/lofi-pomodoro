@@ -128,6 +128,7 @@ export default {
   videoCount_one: '{count} видео',
   videoCount_few: '{count} видео',
   videoCount_many: '{count} видео',
+  streakDay: 'дней подряд',
   streakDay_one: 'день подряд',
   streakDay_few: 'дня подряд',
   streakDay_many: 'дней подряд',

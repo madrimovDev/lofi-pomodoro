@@ -4,6 +4,8 @@ import { Button } from '@shared/components/ui/button';
 import { useStats } from '@renderer/hooks/use-stats';
 import { useSettings } from '@renderer/hooks/use-settings';
 import { dateKey } from '@shared/lib/date';
+import { formatWeekdayShort } from '@shared/lib/format';
+import type { Locale } from '@shared/i18n';
 import type { DailyStat } from '@shared/types';
 
 interface StatsPanelProps {
@@ -11,16 +13,14 @@ interface StatsPanelProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const DAY_LABELS = ['Ya', 'Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh'];
-
-function getLast7Days(): { date: string; label: string }[] {
+function getLast7Days(locale: Locale): { date: string; label: string }[] {
   const result = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
     result.push({
       date: dateKey(d),
-      label: DAY_LABELS[d.getDay()],
+      label: formatWeekdayShort(locale, d),
     });
   }
   return result;
@@ -60,7 +60,7 @@ function WeekBar({ days, stats }: { days: { date: string; label: string }[]; sta
 export function StatsPanel({ open, onOpenChange }: StatsPanelProps) {
   const { stats, todayStat, streak } = useStats();
   const { settings, t } = useSettings();
-  const last7Days = getLast7Days();
+  const last7Days = getLast7Days(settings.locale);
 
   const totalSessions = stats.reduce((s, d) => s + d.focusSessions, 0);
   const totalHours = stats.reduce((s, d) => s + d.focusMinutes, 0) / 60;
@@ -84,7 +84,7 @@ export function StatsPanel({ open, onOpenChange }: StatsPanelProps) {
               </Dialog.Title>
             </div>
             <Dialog.Close asChild>
-              <Button variant="ghost" size="icon-xs" aria-label="Yopish">
+              <Button variant="ghost" size="icon-xs" aria-label={t('close')}>
                 <X className="size-3.5" />
               </Button>
             </Dialog.Close>
@@ -96,7 +96,7 @@ export function StatsPanel({ open, onOpenChange }: StatsPanelProps) {
               <div className="flex items-center justify-center gap-1.5">
                 <span className="text-base">🔥</span>
                 <span className="text-sm font-light text-foreground/80 tabular-nums">{streak}</span>
-                <span className="text-xs text-muted-foreground/50">{t('streak')}</span>
+                <span className="text-xs text-muted-foreground/50">{t('streakDay', { count: streak })}</span>
               </div>
             )}
 

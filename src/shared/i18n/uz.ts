@@ -154,6 +154,7 @@ export default {
   videoCount: '{count} ta video',
   videoCount_other: '{count} ta video',
   // Plural: streak day label
+  streakDay: 'kun ketma-ket',
   streakDay_other: 'kun ketma-ket',
   emptyStepsTitle: 'Boshlash uchun 3 ta qadam:',
   exportJsonTitle: 'JSON eksport',
