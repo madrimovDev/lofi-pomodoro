@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
     "format": "prettier --write src",
+    "check:i18n": "node scripts/check-i18n.mjs",
     "download-ytdlp": "node scripts/download-ytdlp.mjs"
   },
   "dependencies": {
