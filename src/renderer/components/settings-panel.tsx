@@ -98,6 +98,7 @@ function PresetManager() {
         </div>
       ))}
       <div className="flex flex-col gap-2 rounded-lg border border-border/40 p-2">
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40">{t('newPreset')}</p>
         <input
           value={name}
           onChange={e => setName(e.target.value)}
