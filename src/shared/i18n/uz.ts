@@ -166,6 +166,9 @@ export default {
   ytEmptyHint: 'URL kiriting va saqlang',
   ytdlpMissing: 'yt-dlp o\'rnatilmagan',
   ytdlpInstallHint: 'Terminalda o\'rnating:',
+  // Plural: skipped sessions count (uz has a single form); base key for TypeScript
+  skippedSessionsCount: '{count} ta sessiya o\'tkazib yuborildi',
+  skippedSessionsCount_other: '{count} ta sessiya o\'tkazib yuborildi',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;

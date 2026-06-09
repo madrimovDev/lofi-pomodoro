@@ -140,4 +140,8 @@ export default {
   ytEmptyHint: 'Enter a URL and save it',
   ytdlpMissing: 'yt-dlp is not installed',
   ytdlpInstallHint: 'Install in terminal:',
+  // Plural: skipped sessions count (en: one / other); base key for TypeScript
+  skippedSessionsCount: '{count} session skipped',
+  skippedSessionsCount_one: '{count} session skipped',
+  skippedSessionsCount_other: '{count} sessions skipped',
 } as const;

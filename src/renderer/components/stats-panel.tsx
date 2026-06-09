@@ -110,7 +110,7 @@ export function StatsPanel({ open, onOpenChange }: StatsPanelProps) {
               </div>
               {(todayStat.skippedSessions ?? 0) > 0 && (
                 <p className="text-[10px] text-muted-foreground/35 text-center">
-                  {todayStat.skippedSessions} ta sessiya o'tkazib yuborildi
+                  {t('skippedSessionsCount', { count: todayStat.skippedSessions ?? 0 })}
                 </p>
               )}
               {settings.dailyGoal > 0 && (

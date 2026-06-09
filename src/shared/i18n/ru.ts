@@ -142,4 +142,9 @@ export default {
   ytEmptyHint: 'Введите URL и сохраните',
   ytdlpMissing: 'yt-dlp не установлен',
   ytdlpInstallHint: 'Установите в терминале:',
+  // Plural: skipped sessions count (ru: one / few / many); base key for TypeScript
+  skippedSessionsCount: '{count} сессий пропущено',
+  skippedSessionsCount_one: '{count} сессия пропущена',
+  skippedSessionsCount_few: '{count} сессии пропущено',
+  skippedSessionsCount_many: '{count} сессий пропущено',
 } as const;
