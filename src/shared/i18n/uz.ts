@@ -158,6 +158,9 @@ export default {
   emptyStepsTitle: 'Boshlash uchun 3 ta qadam:',
   exportJsonTitle: 'JSON eksport',
   importJsonTitle: 'JSON import',
+  refresh: 'Yangilash',
+  play: 'Ijro etish',
+  save: 'Saqlash',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;

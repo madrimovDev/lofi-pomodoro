@@ -134,4 +134,7 @@ export default {
   emptyStepsTitle: '3 шага для начала:',
   exportJsonTitle: 'Экспорт JSON',
   importJsonTitle: 'Импорт JSON',
+  refresh: 'Обновить',
+  play: 'Воспроизвести',
+  save: 'Сохранить',
 } as const;

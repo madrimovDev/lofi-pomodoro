@@ -132,4 +132,7 @@ export default {
   emptyStepsTitle: '3 steps to start:',
   exportJsonTitle: 'Export JSON',
   importJsonTitle: 'Import JSON',
+  refresh: 'Refresh',
+  play: 'Play',
+  save: 'Save',
 } as const;

@@ -139,7 +139,7 @@ function FolderTab() {
                 ? <Shuffle className="size-3.5" />
                 : <ArrowDownAZ className="size-3.5" />}
             </Button>
-            <Button variant="ghost" size="icon-xs" onClick={refreshFiles} title="Yangilash">
+            <Button variant="ghost" size="icon-xs" onClick={refreshFiles} title={t('refresh')}>
               <RefreshCw className="size-3.5" />
             </Button>
           </>
@@ -346,7 +346,7 @@ function YoutubeTab() {
           variant="outline" size="icon-xs"
           onClick={() => loadYoutube(inputUrl.trim())}
           disabled={ytLoading || !inputUrl.trim()}
-          title="Ijro etish"
+          title={t('play')}
         >
           {ytLoading && !saving ? <Loader2 className="size-3 animate-spin" /> : <ChevronRight className="size-3" />}
         </Button>
@@ -354,7 +354,7 @@ function YoutubeTab() {
           variant="outline" size="icon-xs"
           onClick={handleSave}
           disabled={saving || ytLoading || !inputUrl.trim()}
-          title="Saqlash"
+          title={t('save')}
         >
           {saving ? <Loader2 className="size-3 animate-spin" /> : <BookmarkPlus className="size-3" />}
         </Button>
@@ -444,7 +444,7 @@ function YoutubeTab() {
                   <Button
                     variant="ghost" size="icon-xs"
                     onClick={() => loadSavedPlaylist(playlist)}
-                    title="Ijro etish"
+                    title={t('play')}
                   >
                     <Play className="size-3" />
                   </Button>

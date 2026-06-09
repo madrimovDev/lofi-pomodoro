@@ -114,7 +114,7 @@ function FolderTab() {
                 : <ArrowDownAZ className="size-3.5" />
               }
             </Button>
-            <Button variant="ghost" size="icon-xs" onClick={refreshFiles} title="Yangilash">
+            <Button variant="ghost" size="icon-xs" onClick={refreshFiles} title={tFn('refresh')}>
               <RefreshCw className="size-3.5" />
             </Button>
           </>
