@@ -167,4 +167,7 @@ export default {
   pattern478: '4-7-8',
   patternBox: 'Box 4-4-4-4',
   patternCoherent: 'Coherent 5-5',
+  presetDeepWork: 'Deep Work',
+  presetClassic: 'Classic',
+  presetQuick: 'Quick',
 } as const;

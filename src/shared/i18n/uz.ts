@@ -192,6 +192,9 @@ export default {
   pattern478: '4-7-8',
   patternBox: 'Box 4-4-4-4',
   patternCoherent: 'Coherent 5-5',
+  presetDeepWork: 'Chuqur ish',
+  presetClassic: 'Klassik',
+  presetQuick: 'Tezkor',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;

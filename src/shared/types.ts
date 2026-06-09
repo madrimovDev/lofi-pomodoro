@@ -28,6 +28,7 @@ export interface TimerSettings {
   forceBreakFullscreen: boolean;
   restoreWindowMinutes: number; // 0 = never restore, -1 = always, else minutes
   breathingPattern: BreathingPatternId;
+  customPresets: TimerPreset[];
 }
 
 export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
@@ -52,6 +53,7 @@ export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
   forceBreakFullscreen: true,
   restoreWindowMinutes: 120,
   breathingPattern: '478',
+  customPresets: [],
 };
 
 export interface TimerPreset {
@@ -61,13 +63,20 @@ export interface TimerPreset {
   shortBreakDuration: number;
   longBreakDuration: number;
   sessionsBeforeLongBreak: number;
+  isBuiltIn?: boolean;
 }
 
 export const DEFAULT_PRESETS: TimerPreset[] = [
-  { id: 'deep-work', name: 'Deep Work', focusDuration: 50, shortBreakDuration: 10, longBreakDuration: 25, sessionsBeforeLongBreak: 2 },
-  { id: 'classic', name: 'Classic', focusDuration: 25, shortBreakDuration: 5, longBreakDuration: 15, sessionsBeforeLongBreak: 4 },
-  { id: 'quick', name: 'Quick', focusDuration: 15, shortBreakDuration: 3, longBreakDuration: 10, sessionsBeforeLongBreak: 4 },
+  { id: 'deep-work', name: 'Deep Work', focusDuration: 50, shortBreakDuration: 10, longBreakDuration: 25, sessionsBeforeLongBreak: 2, isBuiltIn: true },
+  { id: 'classic', name: 'Classic', focusDuration: 25, shortBreakDuration: 5, longBreakDuration: 15, sessionsBeforeLongBreak: 4, isBuiltIn: true },
+  { id: 'quick', name: 'Quick', focusDuration: 15, shortBreakDuration: 3, longBreakDuration: 10, sessionsBeforeLongBreak: 4, isBuiltIn: true },
 ];
+
+export const PRESET_NAME_KEYS: Record<string, string> = {
+  'deep-work': 'presetDeepWork',
+  'classic': 'presetClassic',
+  'quick': 'presetQuick',
+};
 
 export type BreathingPatternId = '478' | 'box' | 'coherent';
 

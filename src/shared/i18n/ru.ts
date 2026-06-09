@@ -170,4 +170,7 @@ export default {
   pattern478: '4-7-8',
   patternBox: 'Бокс 4-4-4-4',
   patternCoherent: 'Когерентное 5-5',
+  presetDeepWork: 'Глубокая работа',
+  presetClassic: 'Классика',
+  presetQuick: 'Быстрый',
 } as const;
