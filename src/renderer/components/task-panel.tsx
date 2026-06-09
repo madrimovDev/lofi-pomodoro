@@ -17,8 +17,10 @@ import { Button } from '@shared/components/ui/button';
 import { dialogApi } from '@shared/tauri/dialog';
 import { useTasks } from '@renderer/hooks/use-tasks';
 import { useStats } from '@renderer/hooks/use-stats';
+import { useSettings } from '@renderer/hooks/use-settings';
 import { cn } from '@shared/lib/utils';
 import type { Task, Subtask } from '@shared/types';
+import type { TFunc } from '@shared/i18n';
 
 interface TaskPanelProps {
   open: boolean;
@@ -27,35 +29,35 @@ interface TaskPanelProps {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatDate(ts: number) {
+function formatDate(ts: number, tr: TFunc) {
   const d = new Date(ts);
   const today = new Date();
   const yesterday = new Date();
   yesterday.setDate(today.getDate() - 1);
-  if (d.toDateString() === today.toDateString()) return 'Bugun';
-  if (d.toDateString() === yesterday.toDateString()) return 'Kecha';
+  if (d.toDateString() === today.toDateString()) return tr('dueDateToday');
+  if (d.toDateString() === yesterday.toDateString()) return tr('dateYesterday');
   return d.toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' });
 }
 
-function groupByDate(tasks: Task[]): { label: string; tasks: Task[] }[] {
+function groupByDate(tasks: Task[], tr: TFunc): { label: string; tasks: Task[] }[] {
   const map = new Map<string, Task[]>();
   for (const t of [...tasks].sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0))) {
-    const label = formatDate(t.completedAt!);
+    const label = formatDate(t.completedAt!, tr);
     if (!map.has(label)) map.set(label, []);
     map.get(label)!.push(t);
   }
   return Array.from(map.entries()).map(([label, tasks]) => ({ label, tasks }));
 }
 
-function formatDueDate(ts: number): { text: string; overdue: boolean } {
+function formatDueDate(ts: number, tr: TFunc): { text: string; overdue: boolean } {
   const d = new Date(ts);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   d.setHours(0, 0, 0, 0);
   const diff = Math.round((d.getTime() - today.getTime()) / 86400000);
-  if (diff < 0) return { text: `⚠ Kechikdi`, overdue: true };
-  if (diff === 0) return { text: '🗓 Bugun', overdue: false };
-  if (diff === 1) return { text: '🗓 Ertaga', overdue: false };
+  if (diff < 0) return { text: `⚠ ${tr('dueDateOverdue')}`, overdue: true };
+  if (diff === 0) return { text: `🗓 ${tr('dueDateToday')}`, overdue: false };
+  if (diff === 1) return { text: `🗓 ${tr('dueDateTomorrow')}`, overdue: false };
   return { text: `🗓 ${new Date(ts).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' })}`, overdue: false };
 }
 
@@ -102,6 +104,7 @@ function ActiveTaskCard({ task, onDeactivate, onComplete }: {
   onComplete: () => void;
 }) {
   const { toggleSubtask } = useTasks();
+  const { t: tr } = useSettings();
   const doneSubtasks = (task.subtasks ?? []).filter(s => s.done).length;
   const totalSubtasks = (task.subtasks ?? []).length;
 
@@ -113,21 +116,21 @@ function ActiveTaskCard({ task, onDeactivate, onComplete }: {
             {task.priority && (
               <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', PRIORITY_COLORS[task.priority])} />
             )}
-            <p className="text-[10px] uppercase tracking-widest text-primary/60 select-none">Joriy ish</p>
+            <p className="text-[10px] uppercase tracking-widest text-primary/60 select-none">{tr('activeTask')}</p>
           </div>
           <p className="text-sm font-medium text-foreground leading-snug">{task.name}</p>
           {task.description && (
             <p className="text-xs text-muted-foreground/50 mt-0.5 truncate">{task.description}</p>
           )}
           {task.dueDate && (() => {
-            const { text, overdue } = formatDueDate(task.dueDate);
+            const { text, overdue } = formatDueDate(task.dueDate, tr);
             return <p className={cn('text-[10px] mt-0.5', overdue ? 'text-red-400/70' : 'text-muted-foreground/40')}>{text}</p>;
           })()}
         </div>
         <button
           onClick={onDeactivate}
           className="text-muted-foreground/30 hover:text-muted-foreground transition-colors p-0.5 mt-0.5 shrink-0"
-          aria-label="Bekor qilish"
+          aria-label={tr('cancel')}
         >
           <X className="size-3" />
         </button>
@@ -168,7 +171,7 @@ function ActiveTaskCard({ task, onDeactivate, onComplete }: {
         className="w-full gap-1.5 text-primary border-primary/25 hover:bg-primary/10"
       >
         <CheckCircle2 className="size-3" />
-        Tugatish
+        {tr('finish')}
       </Button>
     </div>
   );
@@ -181,6 +184,7 @@ function EditTaskForm({ task, onSave, onCancel }: {
   onSave: (patch: Partial<Pick<Task, 'name' | 'description' | 'estimatedPomodoros' | 'priority' | 'dueDate'>>) => void;
   onCancel: () => void;
 }) {
+  const { t: tr } = useSettings();
   const [name, setName] = useState(task.name);
   const [desc, setDesc] = useState(task.description);
   const [est, setEst] = useState(task.estimatedPomodoros);
@@ -214,7 +218,7 @@ function EditTaskForm({ task, onSave, onCancel }: {
         value={desc}
         onChange={e => setDesc(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter') submit(); if (e.key === 'Escape') onCancel(); }}
-        placeholder="Tasnif..."
+        placeholder={tr('descPlaceholder')}
         className="bg-transparent text-xs text-muted-foreground focus:outline-none border-b border-border/30 pb-0.5 w-full placeholder:text-muted-foreground/30"
       />
       {/* Priority + Due Date */}
@@ -260,6 +264,7 @@ function EditTaskForm({ task, onSave, onCancel }: {
 
 function SubtasksPanel({ taskId, subtasks }: { taskId: string; subtasks: Subtask[] }) {
   const { addSubtask, toggleSubtask, removeSubtask } = useTasks();
+  const { t: tr } = useSettings();
   const [input, setInput] = useState('');
 
   const handleAdd = () => {
@@ -283,7 +288,7 @@ function SubtasksPanel({ taskId, subtasks }: { taskId: string; subtasks: Subtask
         value={input}
         onChange={e => setInput(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
-        placeholder="Kichik ish qo'shish..."
+        placeholder={tr('addSubtask')}
         className="text-xs bg-transparent focus:outline-none text-muted-foreground/50 placeholder:text-muted-foreground/25 border-b border-border/20 pb-0.5"
       />
     </div>
@@ -300,6 +305,7 @@ function SortableTaskRow({ task, onActivate, onComplete, onRemove, onEdit }: {
   onEdit: (patch: Partial<Pick<Task, 'name' | 'description' | 'estimatedPomodoros' | 'priority' | 'dueDate'>>) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id });
+  const { t: tr } = useSettings();
   const [editing, setEditing] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
@@ -309,7 +315,7 @@ function SortableTaskRow({ task, onActivate, onComplete, onRemove, onEdit }: {
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const dueInfo = task.dueDate ? formatDueDate(task.dueDate) : null;
+  const dueInfo = task.dueDate ? formatDueDate(task.dueDate, tr) : null;
 
   return (
     <div ref={setNodeRef} style={style} className="flex flex-col">
@@ -332,7 +338,7 @@ function SortableTaskRow({ task, onActivate, onComplete, onRemove, onEdit }: {
         <button
           onClick={onActivate}
           className="mt-0.5 shrink-0 transition-colors text-muted-foreground/30 hover:text-primary/60"
-          aria-label="Tanlash"
+          aria-label={tr('selectFile')}
         >
           <Circle className="size-4" />
         </button>
@@ -371,14 +377,14 @@ function SortableTaskRow({ task, onActivate, onComplete, onRemove, onEdit }: {
               <button
                 onClick={() => setEditing(true)}
                 className="p-1 rounded hover:text-primary text-muted-foreground/30 transition-colors"
-                aria-label="Tahrirlash"
+                aria-label={tr('edit')}
               >
                 <Pencil className="size-3" />
               </button>
               <button
                 onClick={onRemove}
                 className="p-1 rounded hover:text-destructive text-muted-foreground/30 transition-colors"
-                aria-label="O'chirish"
+                aria-label={tr('delete')}
               >
                 <Trash2 className="size-3" />
               </button>
@@ -390,7 +396,7 @@ function SortableTaskRow({ task, onActivate, onComplete, onRemove, onEdit }: {
               <button
                 onClick={onComplete}
                 className="p-0.5 rounded hover:text-primary text-muted-foreground/25 transition-colors"
-                aria-label="Bajarildi"
+                aria-label={tr('completed')}
               >
                 <CheckCircle2 className="size-3.5" />
               </button>
@@ -410,18 +416,19 @@ function SortableTaskRow({ task, onActivate, onComplete, onRemove, onEdit }: {
 // ─── Empty State ──────────────────────────────────────────────────────────────
 
 function EmptyState() {
+  const { t: tr } = useSettings();
   return (
     <div className="flex-1 flex flex-col items-center justify-center gap-5 py-8 select-none">
       <div className="text-4xl opacity-30">📋</div>
       <div className="text-center">
-        <p className="text-sm text-foreground/50 font-medium mb-1">Ishlar ro'yxati bo'sh</p>
+        <p className="text-sm text-foreground/50 font-medium mb-1">{tr('emptyTitle')}</p>
         <p className="text-xs text-muted-foreground/40">Boshlash uchun 3 ta qadam:</p>
       </div>
       <div className="flex flex-col gap-3 w-full max-w-[220px]">
         {[
-          { num: '1', text: 'Quyida ish nomini kiriting' },
-          { num: '2', text: "Ro'yxatdan ishni tanlang" },
-          { num: '3', text: 'Taymerini ishga tushiring' },
+          { num: '1', text: tr('emptyStep1') },
+          { num: '2', text: tr('emptyStep2') },
+          { num: '3', text: tr('emptyStep3') },
         ].map(step => (
           <div key={step.num} className="flex items-center gap-3">
             <span className="size-5 rounded-full border border-border/50 text-[10px] text-muted-foreground/50 flex items-center justify-center shrink-0">{step.num}</span>
@@ -436,6 +443,7 @@ function EmptyState() {
 // ─── Add Task Form (fixed bottom) ─────────────────────────────────────────────
 
 function AddTaskFormFixed({ onAdd }: { onAdd: (name: string, desc: string, est: number) => void }) {
+  const { t: tr } = useSettings();
   const [name, setName] = useState('');
   const [desc, setDesc] = useState('');
   const [est, setEst] = useState(4);
@@ -453,11 +461,11 @@ function AddTaskFormFixed({ onAdd }: { onAdd: (name: string, desc: string, est: 
   return (
     <div className="shrink-0 border-t border-border/30 pt-3 flex flex-col gap-2.5">
       <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 flex items-center gap-1.5">
-        <Plus className="size-3" /> Yangi ish
+        <Plus className="size-3" /> {tr('newTask')}
       </p>
       <input
         ref={inputRef}
-        placeholder="Task nomi..."
+        placeholder={tr('taskNamePlaceholder')}
         value={name}
         onChange={e => setName(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter') submit(); }}
@@ -465,7 +473,7 @@ function AddTaskFormFixed({ onAdd }: { onAdd: (name: string, desc: string, est: 
       />
       <div className="flex items-center gap-2">
         <input
-          placeholder="Tasnif (ixtiyoriy)..."
+          placeholder={tr('descPlaceholder')}
           value={desc}
           onChange={e => setDesc(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') submit(); }}
@@ -482,7 +490,7 @@ function AddTaskFormFixed({ onAdd }: { onAdd: (name: string, desc: string, est: 
           <span className="text-xs">🍅</span>
         </div>
         <Button variant="outline" size="xs" onClick={submit} disabled={!name.trim()} className="shrink-0">
-          Qo'shish
+          {tr('addTask')}
         </Button>
       </div>
     </div>
@@ -498,6 +506,7 @@ function CompletedSection({ groups, totalPomodoros, count, onRemove, onClearAll 
   onRemove: (id: string) => void;
   onClearAll: () => void;
 }) {
+  const { t: tr } = useSettings();
   const [open, setOpen] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
 
@@ -517,7 +526,7 @@ function CompletedSection({ groups, totalPomodoros, count, onRemove, onClearAll 
       <button onClick={() => setOpen(o => !o)} className="flex items-center justify-between w-full py-2 text-left">
         <div className="flex items-center gap-1.5">
           <ListChecks className="size-3 text-muted-foreground/30" />
-          <span className="text-[10px] uppercase tracking-widest text-muted-foreground/40">Bajarildi ({count})</span>
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground/40">{tr('completed')} ({count})</span>
           {totalPomodoros > 0 && <span className="text-[10px] text-muted-foreground/30">· {totalPomodoros} 🍅</span>}
         </div>
         {open ? <ChevronUp className="size-3 text-muted-foreground/30" /> : <ChevronDown className="size-3 text-muted-foreground/30" />}
@@ -525,7 +534,7 @@ function CompletedSection({ groups, totalPomodoros, count, onRemove, onClearAll 
       {open && (
         <div className="flex flex-col gap-3 pb-2">
           <button onClick={handleClearClick} className={cn('text-[10px] text-right transition-colors', confirmClear ? 'text-destructive/70 font-medium' : 'text-muted-foreground/30 hover:text-destructive/50')}>
-            {confirmClear ? 'Ishonchingiz komilmi?' : "Barchasini o'chirish"}
+            {confirmClear ? tr('confirmClearTasks') : tr('clearCompleted')}
           </button>
           {groups.map(group => (
             <div key={group.label} className="flex flex-col gap-0.5">
@@ -538,7 +547,7 @@ function CompletedSection({ groups, totalPomodoros, count, onRemove, onClearAll 
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="text-[10px] text-muted-foreground/25 tabular-nums">{task.completedPomodoros}🍅</span>
-                    <button onClick={() => onRemove(task.id)} className="text-muted-foreground/20 hover:text-destructive/50 transition-colors opacity-0 group-hover/done:opacity-100" aria-label="O'chirish">
+                    <button onClick={() => onRemove(task.id)} className="text-muted-foreground/20 hover:text-destructive/50 transition-colors opacity-0 group-hover/done:opacity-100" aria-label={tr('delete')}>
                       <X className="size-2.5" />
                     </button>
                   </div>
@@ -562,6 +571,7 @@ export function TaskPanel({ open, onOpenChange }: TaskPanelProps) {
   } = useTasks();
 
   const { addTaskCompleted } = useStats();
+  const { t: tr } = useSettings();
   const [search, setSearch] = useState('');
   const [showSearch, setShowSearch] = useState(false);
 
@@ -608,29 +618,29 @@ export function TaskPanel({ open, onOpenChange }: TaskPanelProps) {
   });
 
   const completed = tasks.filter(t => !!t.completedAt);
-  const completedGroups = groupByDate(completed);
+  const completedGroups = groupByDate(completed, tr);
   const totalPomodoros = completed.reduce((s, t) => s + t.completedPomodoros, 0);
   const showEmpty = !activeTask && pending.length === 0;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" title="Ishlar" className="fixed z-50 left-0 bottom-0 w-[360px] bg-background border-r border-border/30 shadow-xl flex flex-col outline-none">
+      <SheetContent side="left" title={tr('tasks')} className="fixed z-50 left-0 bottom-0 w-[360px] bg-background border-r border-border/30 shadow-xl flex flex-col outline-none">
           <div className="flex-1 flex flex-col min-h-0 p-5 gap-4">
 
             {/* Header */}
             <div className="flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
                 <ClipboardList className="size-3.5 text-muted-foreground/60" />
-                <span className="text-xs font-medium tracking-widest uppercase text-muted-foreground/60">Ishlar</span>
+                <span className="text-xs font-medium tracking-widest uppercase text-muted-foreground/60">{tr('tasks')}</span>
               </div>
               <div className="flex items-center gap-1">
-                <Button variant={showSearch ? 'outline' : 'ghost'} size="icon-xs" onClick={() => setShowSearch(s => !s)} aria-label="Qidirish">
+                <Button variant={showSearch ? 'outline' : 'ghost'} size="icon-xs" onClick={() => setShowSearch(s => !s)} aria-label={tr('search')}>
                   <Search className="size-3.5" />
                 </Button>
-                <Button variant="ghost" size="icon-xs" onClick={handleExport} aria-label="Eksport" title="JSON eksport">
+                <Button variant="ghost" size="icon-xs" onClick={handleExport} aria-label={tr('exportTasks')} title="JSON eksport">
                   <Download className="size-3.5" />
                 </Button>
-                <Button variant="ghost" size="icon-xs" onClick={handleImport} aria-label="Import" title="JSON import">
+                <Button variant="ghost" size="icon-xs" onClick={handleImport} aria-label={tr('importTasks')} title="JSON import">
                   <Upload className="size-3.5" />
                 </Button>
                 <Button variant="ghost" size="icon-xs" onClick={() => onOpenChange(false)}>
@@ -643,7 +653,7 @@ export function TaskPanel({ open, onOpenChange }: TaskPanelProps) {
             {showSearch && (
               <input
                 autoFocus
-                placeholder="Ish nomi..."
+                placeholder={tr('searchPlaceholder')}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 onKeyDown={e => e.key === 'Escape' && setShowSearch(false)}
