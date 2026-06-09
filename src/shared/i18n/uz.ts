@@ -150,7 +150,8 @@ export default {
   changeFolder: 'Papkani o\'zgartirish',
   selectFolder: 'Papka tanlash',
   ytUrlPlaceholder: 'YouTube URL yoki playlist...',
-  // Plural: video count (uz has a single form)
+  // Plural: video count (uz has a single form); base key for TypeScript
+  videoCount: '{count} ta video',
   videoCount_other: '{count} ta video',
   // Plural: streak day label
   streakDay_other: 'kun ketma-ket',

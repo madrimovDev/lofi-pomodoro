@@ -123,7 +123,8 @@ export default {
   changeFolder: 'Сменить папку',
   selectFolder: 'Выбрать папку',
   ytUrlPlaceholder: 'YouTube URL или плейлист...',
-  // Plural (ru: one / few / many)
+  // Plural (ru: one / few / many); base key for TypeScript
+  videoCount: '{count} видео',
   videoCount_one: '{count} видео',
   videoCount_few: '{count} видео',
   videoCount_many: '{count} видео',

@@ -90,7 +90,7 @@ function PlaybackBar() {
 // ─── Folder Tab ───────────────────────────────────────────────────────────────
 
 function FolderTab() {
-  const { t } = useSettings();
+  const { t: tFn } = useSettings();
   const { config, updateConfig, files, currentFileIndex, pickFolder, refreshFiles, playFile, isPlaying, source } = useMusic();
 
   const sortMode = config.sortMode;
@@ -100,7 +100,7 @@ function FolderTab() {
       <div className="flex items-center gap-2">
         <Button variant="outline" size="xs" onClick={pickFolder} className="flex-1 gap-1.5">
           <FolderOpen className="size-3.5" />
-          {config.folderPath ? 'Papkani o\'zgartirish' : 'Papka tanlash'}
+          {config.folderPath ? tFn('changeFolder') : tFn('selectFolder')}
         </Button>
         {config.folderPath && (
           <>
@@ -129,7 +129,7 @@ function FolderTab() {
 
       {files.length === 0 && config.folderPath && (
         <p className="text-xs text-muted-foreground/40 text-center py-3 select-none">
-          {t('noAudioFiles')}
+          {tFn('noAudioFiles')}
         </p>
       )}
 
@@ -162,6 +162,7 @@ function FolderTab() {
 // ─── YouTube Tab ──────────────────────────────────────────────────────────────
 
 function YoutubeTab() {
+  const { t: tFn } = useSettings();
   const {
     config, ytAvailable, ytPlaylist, ytCurrentIndex, ytStreamInfo,
     ytLoading, ytError, loadYoutube, playYtTrack, source, isPlaying,
@@ -206,7 +207,7 @@ function YoutubeTab() {
           value={inputUrl}
           onChange={e => setInputUrl(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleLoad()}
-          placeholder="YouTube URL yoki playlist..."
+          placeholder={tFn('ytUrlPlaceholder')}
           className="flex-1 bg-background/20 border border-border/50 rounded-lg px-3 py-1.5 text-xs placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary"
         />
         <Button variant="outline" size="xs" onClick={handleLoad} disabled={ytLoading || !inputUrl.trim()}>
@@ -265,6 +266,7 @@ function YoutubeTab() {
 
 export function MusicPanel({ open, onOpenChange }: MusicPanelProps) {
   const [tab, setTab] = useState<Tab>('folder');
+  const { t: tFn } = useSettings();
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -277,11 +279,11 @@ export function MusicPanel({ open, onOpenChange }: MusicPanelProps) {
             <div className="flex items-center gap-2">
               <Music2 className="size-3.5 text-muted-foreground" />
               <Dialog.Title className="text-xs font-medium tracking-widest uppercase text-muted-foreground">
-                Musiqa
+                {tFn('music')}
               </Dialog.Title>
             </div>
             <Dialog.Close asChild>
-              <Button variant="ghost" size="icon-xs" aria-label="Yopish">
+              <Button variant="ghost" size="icon-xs" aria-label={tFn('close')}>
                 <X className="size-3.5" />
               </Button>
             </Dialog.Close>
@@ -300,7 +302,7 @@ export function MusicPanel({ open, onOpenChange }: MusicPanelProps) {
                     : 'text-muted-foreground/50 hover:text-muted-foreground/80',
                 )}
               >
-                {t === 'folder' ? '📁 Papka' : '▶ YouTube'}
+                {t === 'folder' ? `📁 ${tFn('tabFolder')}` : '▶ YouTube'}
               </button>
             ))}
           </div>

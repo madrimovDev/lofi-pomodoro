@@ -123,7 +123,8 @@ export default {
   changeFolder: 'Change folder',
   selectFolder: 'Select folder',
   ytUrlPlaceholder: 'YouTube URL or playlist...',
-  // Plural (en: one / other)
+  // Plural (en: one / other); base key for TypeScript
+  videoCount: '{count} videos',
   videoCount_one: '{count} video',
   videoCount_other: '{count} videos',
   streakDay_one: 'day streak',

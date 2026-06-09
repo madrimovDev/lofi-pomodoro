@@ -97,7 +97,7 @@ function FolderTab() {
       {/* Saved folders */}
       {savedFolders.length > 0 && (
         <div className="flex flex-col gap-1 shrink-0">
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground/30">Saqlangan papkalar</p>
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground/30">{t('savedFolders')}</p>
           {savedFolders.map(folder => (
             <div key={folder.id} className="flex items-center gap-1.5 group">
               <button
@@ -126,7 +126,7 @@ function FolderTab() {
       <div className="flex items-center gap-1.5 shrink-0">
         <Button variant="outline" size="xs" onClick={addFolder} className="flex-1 gap-1.5 text-xs">
           <Plus className="size-3.5" />
-          Papka qo'shish
+          {t('addFolder')}
         </Button>
         {config.folderPath && (
           <>
@@ -149,7 +149,7 @@ function FolderTab() {
       {!config.folderPath && savedFolders.length === 0 && (
         <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center">
           <FolderOpen className="size-6 text-muted-foreground/20" />
-          <p className="text-xs text-muted-foreground/30">Papka tanlang</p>
+          <p className="text-xs text-muted-foreground/30">{t('selectFolder')}</p>
         </div>
       )}
 
@@ -192,6 +192,7 @@ function FolderTab() {
 // ─── Radio Tab ────────────────────────────────────────────────────────────────
 
 function RadioTab() {
+  const { t } = useSettings();
   const { config, source, currentRadio, radioError, playRadio, addRadioStation, removeRadioStation, isPlaying } = useMusic();
   const [newName, setNewName] = useState('');
   const [newUrl, setNewUrl] = useState('');
@@ -254,14 +255,14 @@ function RadioTab() {
       {showAdd ? (
         <div className="flex flex-col gap-1.5 shrink-0">
           <input
-            placeholder="Stansiya nomi..."
+            placeholder={t('radioName')}
             value={newName}
             onChange={e => setNewName(e.target.value)}
             className="bg-background/20 border border-border/50 rounded-lg px-3 py-1.5 text-xs placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary"
           />
           <div className="flex gap-1.5">
             <input
-              placeholder="Stream URL..."
+              placeholder={t('radioUrlPlaceholder')}
               value={newUrl}
               onChange={e => setNewUrl(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleAdd()}
@@ -277,7 +278,7 @@ function RadioTab() {
         </div>
       ) : (
         <Button variant="ghost" size="xs" onClick={() => setShowAdd(true)} className="gap-1.5 text-xs text-muted-foreground/50 shrink-0">
-          <Plus className="size-3" /> URL qo'shish
+          <Plus className="size-3" /> {t('radioAddUrl')}
         </Button>
       )}
     </div>
@@ -338,7 +339,7 @@ function YoutubeTab() {
           value={inputUrl}
           onChange={e => setInputUrl(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && loadYoutube(inputUrl.trim())}
-          placeholder="YouTube URL yoki playlist..."
+          placeholder={t('ytUrlPlaceholder')}
           className="flex-1 bg-background/20 border border-border/50 rounded-lg px-3 py-1.5 text-xs placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary min-w-0"
         />
         <Button
@@ -382,7 +383,7 @@ function YoutubeTab() {
           <button
             onClick={exitYtPlaylist}
             className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mb-1"
-            aria-label="Ortga"
+            aria-label={t('back')}
           >
             <ArrowLeft className="size-3.5" /> {t('back')}
           </button>
@@ -435,7 +436,7 @@ function YoutubeTab() {
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-foreground/70 truncate">{playlist.name}</p>
                   <p className="text-[10px] text-muted-foreground/30">
-                    {playlist.itemCount > 0 ? `${playlist.itemCount} ta video` : '1 ta video'}
+                    {t('videoCount', { count: playlist.itemCount > 0 ? playlist.itemCount : 1 })}
                   </p>
                 </div>
                 {/* Actions */}
@@ -450,7 +451,7 @@ function YoutubeTab() {
                   <Button
                     variant="ghost" size="icon-xs"
                     onClick={() => removeSavedPlaylist(playlist.id)}
-                    title="O'chirish"
+                    title={t('delete')}
                     className="text-destructive/50 hover:text-destructive"
                   >
                     <Trash2 className="size-3" />
@@ -477,14 +478,14 @@ function YoutubeTab() {
 
 // ─── Main Side Panel ──────────────────────────────────────────────────────────
 
-const TAB_LABELS: Record<Tab, string> = { folder: 'Papka', youtube: 'YouTube', radio: 'Radio' };
-
 export function MusicSidePanel({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const [tab, setTab] = useState<Tab>('folder');
+  const { t } = useSettings();
+  const TAB_LABELS: Record<Tab, string> = { folder: t('tabFolder'), youtube: 'YouTube', radio: t('radio') };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" title="Musiqa" className="w-[360px] bg-background border-l border-border/30 shadow-xl flex flex-col outline-none">
+      <SheetContent side="right" title={t('music')} className="w-[360px] bg-background border-l border-border/30 shadow-xl flex flex-col outline-none">
         <div className="flex-1 flex flex-col gap-4 p-5 min-h-0">
 
           {/* Header */}
@@ -492,7 +493,7 @@ export function MusicSidePanel({ open, onOpenChange }: { open: boolean; onOpenCh
             <div className="flex items-center gap-2">
               <Music2 className="size-3.5 text-muted-foreground/60" />
               <span className="text-xs font-medium tracking-widest uppercase text-muted-foreground/60">
-                Musiqa
+                {t('music')}
               </span>
             </div>
             {/* Tab switcher */}
