@@ -129,4 +129,6 @@ export default {
   streakDay_one: 'day streak',
   streakDay_other: 'day streak',
   emptyStepsTitle: '3 steps to start:',
+  exportJsonTitle: 'Export JSON',
+  importJsonTitle: 'Import JSON',
 } as const;

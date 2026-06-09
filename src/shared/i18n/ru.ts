@@ -131,4 +131,6 @@ export default {
   streakDay_few: 'дня подряд',
   streakDay_many: 'дней подряд',
   emptyStepsTitle: '3 шага для начала:',
+  exportJsonTitle: 'Экспорт JSON',
+  importJsonTitle: 'Импорт JSON',
 } as const;

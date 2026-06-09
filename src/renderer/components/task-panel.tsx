@@ -637,10 +637,10 @@ export function TaskPanel({ open, onOpenChange }: TaskPanelProps) {
                 <Button variant={showSearch ? 'outline' : 'ghost'} size="icon-xs" onClick={() => setShowSearch(s => !s)} aria-label={tr('search')}>
                   <Search className="size-3.5" />
                 </Button>
-                <Button variant="ghost" size="icon-xs" onClick={handleExport} aria-label={tr('exportTasks')} title="JSON eksport">
+                <Button variant="ghost" size="icon-xs" onClick={handleExport} aria-label={tr('exportTasks')} title={tr('exportJsonTitle')}>
                   <Download className="size-3.5" />
                 </Button>
-                <Button variant="ghost" size="icon-xs" onClick={handleImport} aria-label={tr('importTasks')} title="JSON import">
+                <Button variant="ghost" size="icon-xs" onClick={handleImport} aria-label={tr('importTasks')} title={tr('importJsonTitle')}>
                   <Upload className="size-3.5" />
                 </Button>
                 <Button variant="ghost" size="icon-xs" onClick={() => onOpenChange(false)}>

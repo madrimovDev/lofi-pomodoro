@@ -155,6 +155,8 @@ export default {
   // Plural: streak day label
   streakDay_other: 'kun ketma-ket',
   emptyStepsTitle: 'Boshlash uchun 3 ta qadam:',
+  exportJsonTitle: 'JSON eksport',
+  importJsonTitle: 'JSON import',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;
