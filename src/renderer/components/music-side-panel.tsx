@@ -312,7 +312,7 @@ function YoutubeTab() {
       <div className="flex flex-col gap-3 items-center text-center py-6">
         <AlertCircle className="size-8 text-muted-foreground/20" />
         <div>
-          <p className="text-sm text-muted-foreground/50">yt-dlp topilmadi</p>
+          <p className="text-sm text-muted-foreground/50">{t('ytdlpMissing')}</p>
           <p className="text-xs text-muted-foreground/30 mt-1">
             <code className="bg-border/30 px-1 rounded">pip install yt-dlp</code>
           </p>
@@ -417,7 +417,7 @@ function YoutubeTab() {
       {savedPlaylists.length > 0 && ytPlaylist.length === 0 && (
         <div className="flex-1 flex flex-col min-h-0">
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground/30 mb-2 shrink-0 flex items-center gap-1.5">
-            <ListMusic className="size-3" /> Saqlangan
+            <ListMusic className="size-3" /> {t('saved')}
           </p>
           <div className="flex-1 overflow-y-auto flex flex-col gap-1.5 pr-1">
             {savedPlaylists.map(playlist => (
@@ -467,9 +467,7 @@ function YoutubeTab() {
       {savedPlaylists.length === 0 && ytPlaylist.length === 0 && !ytStreamInfo && (
         <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center">
           <ListMusic className="size-6 text-muted-foreground/20" />
-          <p className="text-xs text-muted-foreground/30">
-            URL kiritib <BookmarkPlus className="size-3 inline" /> bosing
-          </p>
+          <p className="text-xs text-muted-foreground/30">{t('ytEmptyHint')}</p>
         </div>
       )}
     </div>

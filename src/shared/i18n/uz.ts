@@ -161,6 +161,10 @@ export default {
   refresh: 'Yangilash',
   play: 'Ijro etish',
   save: 'Saqlash',
+  saved: 'Saqlangan',
+  ytEmptyHint: 'URL kiriting va saqlang',
+  ytdlpMissing: 'yt-dlp o\'rnatilmagan',
+  ytdlpInstallHint: 'Terminalda o\'rnating:',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;

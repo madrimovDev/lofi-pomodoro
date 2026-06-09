@@ -135,4 +135,8 @@ export default {
   refresh: 'Refresh',
   play: 'Play',
   save: 'Save',
+  saved: 'Saved',
+  ytEmptyHint: 'Enter a URL and save it',
+  ytdlpMissing: 'yt-dlp is not installed',
+  ytdlpInstallHint: 'Install in terminal:',
 } as const;

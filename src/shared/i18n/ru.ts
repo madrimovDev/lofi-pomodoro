@@ -137,4 +137,8 @@ export default {
   refresh: 'Обновить',
   play: 'Воспроизвести',
   save: 'Сохранить',
+  saved: 'Сохранённые',
+  ytEmptyHint: 'Введите URL и сохраните',
+  ytdlpMissing: 'yt-dlp не установлен',
+  ytdlpInstallHint: 'Установите в терминале:',
 } as const;

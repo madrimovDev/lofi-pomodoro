@@ -190,9 +190,9 @@ function YoutubeTab() {
       <div className="flex flex-col gap-3 items-center text-center py-4">
         <AlertCircle className="size-8 text-muted-foreground/20" />
         <div>
-          <p className="text-sm text-muted-foreground/60">yt-dlp o'rnatilmagan</p>
+          <p className="text-sm text-muted-foreground/60">{tFn('ytdlpMissing')}</p>
           <p className="text-xs text-muted-foreground/40 mt-1">
-            Terminalda: <code className="bg-border/30 px-1 rounded">pip install yt-dlp</code>
+            {tFn('ytdlpInstallHint')} <code className="bg-border/30 px-1 rounded">pip install yt-dlp</code>
           </p>
         </div>
       </div>
@@ -211,7 +211,7 @@ function YoutubeTab() {
           className="flex-1 bg-background/20 border border-border/50 rounded-lg px-3 py-1.5 text-xs placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary"
         />
         <Button variant="outline" size="xs" onClick={handleLoad} disabled={ytLoading || !inputUrl.trim()}>
-          {ytLoading ? <Loader2 className="size-3 animate-spin" /> : 'Ijro'}
+          {ytLoading ? <Loader2 className="size-3 animate-spin" /> : tFn('play')}
         </Button>
       </div>
 
