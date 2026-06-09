@@ -148,4 +148,10 @@ export default {
   shuffle: 'Shuffle',
   alphabetical: 'Alphabetical',
   sessionsProgress: '{completed} of {total} sessions completed',
+  restoreWindow: 'Restore state',
+  restoreOff: 'Off',
+  restore1h: '1 hour',
+  restore2h: '2 hours',
+  restore8h: '8 hours',
+  restoreAlways: 'Always',
 } as const;

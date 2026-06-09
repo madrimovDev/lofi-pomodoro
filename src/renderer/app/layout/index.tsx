@@ -334,6 +334,7 @@ export const Layout = () => {
     sessionsBeforeLongBreak: settings.sessionsBeforeLongBreak,
     autoStartBreaks: settings.autoStartBreaks,
     autoStartFocus: settings.autoStartFocus,
+    restoreWindowMinutes: settings.restoreWindowMinutes,
   };
 
   const handleSessionComplete = (completedMode: TimerMode) => {

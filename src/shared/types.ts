@@ -26,6 +26,7 @@ export interface TimerSettings {
   showBreakScreen: boolean;
   animationsEnabled: boolean;
   forceBreakFullscreen: boolean;
+  restoreWindowMinutes: number; // 0 = never restore, -1 = always, else minutes
 }
 
 export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
@@ -48,6 +49,7 @@ export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
   showBreakScreen: true,
   animationsEnabled: true,
   forceBreakFullscreen: true,
+  restoreWindowMinutes: 120,
 };
 
 export interface TimerPreset {

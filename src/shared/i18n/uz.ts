@@ -173,6 +173,12 @@ export default {
   shuffle: 'Aralash',
   alphabetical: 'Alifbo',
   sessionsProgress: '{completed} / {total} sessiya bajarildi',
+  restoreWindow: 'Holatni tiklash',
+  restoreOff: 'O\'chiq',
+  restore1h: '1 soat',
+  restore2h: '2 soat',
+  restore8h: '8 soat',
+  restoreAlways: 'Doim',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;

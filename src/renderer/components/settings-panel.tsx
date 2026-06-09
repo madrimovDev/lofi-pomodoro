@@ -168,6 +168,30 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
                   {t('miniMode')}
                 </Button>
               </div>
+              <div className="flex items-center justify-between gap-4">
+                <label className="text-sm text-foreground/80 select-none">{t('restoreWindow')}</label>
+                <div className="flex gap-1 flex-wrap justify-end">
+                  {([
+                    { v: 0, key: 'restoreOff' as const },
+                    { v: 60, key: 'restore1h' as const },
+                    { v: 120, key: 'restore2h' as const },
+                    { v: 480, key: 'restore8h' as const },
+                    { v: -1, key: 'restoreAlways' as const },
+                  ]).map(opt => (
+                    <button
+                      key={opt.v}
+                      onClick={() => updateSettings({ restoreWindowMinutes: opt.v })}
+                      className={`px-2 py-0.5 rounded-md text-[10px] transition-colors duration-150 border ${
+                        (settings.restoreWindowMinutes ?? 120) === opt.v
+                          ? 'bg-primary/20 border-primary/40 text-foreground'
+                          : 'border-border/50 text-muted-foreground/60 hover:border-border hover:text-muted-foreground'
+                      }`}
+                    >
+                      {t(opt.key)}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <div className="h-px bg-border/50" />

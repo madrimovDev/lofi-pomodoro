@@ -9,6 +9,7 @@ export interface TimerConfig {
   sessionsBeforeLongBreak: number;
   autoStartBreaks?: boolean;
   autoStartFocus?: boolean;
+  restoreWindowMinutes?: number;
 }
 
 interface TimerState {
@@ -27,7 +28,6 @@ function buildDurations(config: TimerConfig): Record<TimerMode, number> {
 }
 
 const TIMER_STORAGE_KEY = 'zen-timer-state';
-const RESTORE_WINDOW_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 export function useTimer(
   config: TimerConfig,
@@ -41,7 +41,9 @@ export function useTimer(
       const raw = localStorage.getItem(TIMER_STORAGE_KEY);
       if (raw) {
         const s = JSON.parse(raw);
-        if (s.savedAt && Date.now() - s.savedAt < RESTORE_WINDOW_MS) {
+        const mins = config.restoreWindowMinutes ?? 120;
+        const windowMs = mins < 0 ? Infinity : mins * 60_000; // -1 → always, 0 → never
+        if (windowMs > 0 && s.savedAt && Date.now() - s.savedAt < windowMs) {
           return { timeLeft: s.timeLeft, isRunning: false, mode: s.mode as TimerMode, completedInCycle: s.completedInCycle };
         }
       }

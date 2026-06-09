@@ -151,4 +151,10 @@ export default {
   shuffle: 'Перемешать',
   alphabetical: 'По алфавиту',
   sessionsProgress: '{completed} из {total} сессий завершено',
+  restoreWindow: 'Восстановление',
+  restoreOff: 'Выкл',
+  restore1h: '1 час',
+  restore2h: '2 часа',
+  restore8h: '8 часов',
+  restoreAlways: 'Всегда',
 } as const;
