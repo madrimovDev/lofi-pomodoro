@@ -173,4 +173,7 @@ export default {
   presetDeepWork: 'Глубокая работа',
   presetClassic: 'Классика',
   presetQuick: 'Быстрый',
+  newPreset: 'Новый пресет',
+  presetNamePlaceholder: 'Название пресета...',
+  savePreset: 'Сохранить',
 } as const;

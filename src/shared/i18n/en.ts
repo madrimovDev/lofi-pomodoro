@@ -170,4 +170,7 @@ export default {
   presetDeepWork: 'Deep Work',
   presetClassic: 'Classic',
   presetQuick: 'Quick',
+  newPreset: 'New preset',
+  presetNamePlaceholder: 'Preset name...',
+  savePreset: 'Save',
 } as const;

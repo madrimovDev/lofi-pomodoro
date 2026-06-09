@@ -57,6 +57,67 @@ function ToggleRow({
 }
 
 
+function PresetManager() {
+  const { settings, updateSettings, t } = useSettings();
+  const custom = settings.customPresets ?? [];
+  const [name, setName] = useState('');
+  const [f, setF] = useState(25);
+  const [sb, setSb] = useState(5);
+  const [lb, setLb] = useState(15);
+  const [n, setN] = useState(4);
+
+  const add = () => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const preset = {
+      id: `custom-${Date.now()}`,
+      name: trimmed,
+      focusDuration: f, shortBreakDuration: sb, longBreakDuration: lb, sessionsBeforeLongBreak: n,
+    };
+    updateSettings({ customPresets: [...custom, preset] });
+    setName('');
+  };
+
+  const remove = (id: string) => {
+    updateSettings({
+      customPresets: custom.filter(p => p.id !== id),
+      ...(settings.activePreset === id ? { activePreset: null } : {}),
+    });
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-xs uppercase tracking-widest text-muted-foreground/60">{t('presets')}</p>
+      {custom.map(p => (
+        <div key={p.id} className="flex items-center justify-between gap-2">
+          <span className="text-sm text-foreground/80 truncate">{p.name}</span>
+          <span className="text-xs text-muted-foreground/40 tabular-nums">{p.focusDuration}/{p.shortBreakDuration}/{p.longBreakDuration}</span>
+          <Button variant="ghost" size="icon-xs" onClick={() => remove(p.id)} aria-label={t('delete')}>
+            <X className="size-3" />
+          </Button>
+        </div>
+      ))}
+      <div className="flex flex-col gap-2 rounded-lg border border-border/40 p-2">
+        <input
+          value={name}
+          onChange={e => setName(e.target.value)}
+          placeholder={t('presetNamePlaceholder')}
+          className="w-full bg-background/20 border border-border/50 rounded-md px-2 py-1 text-sm placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+        <div className="grid grid-cols-2 gap-2">
+          <NumberInput label={t('focusDuration')} value={f} min={1} max={120} onChange={setF} />
+          <NumberInput label={t('shortBreakDuration')} value={sb} min={1} max={60} onChange={setSb} />
+          <NumberInput label={t('longBreakDuration')} value={lb} min={1} max={60} onChange={setLb} />
+          <NumberInput label={t('sessionsBeforeLongBreak')} value={n} min={1} max={10} onChange={setN} />
+        </div>
+        <Button variant="outline" size="xs" className="text-xs" onClick={add} disabled={!name.trim()}>
+          {t('savePreset')}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
   const { settings, updateSettings, t } = useSettings();
   const { status, check, install } = useUpdater();
@@ -85,14 +146,18 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
             <div className="flex flex-col gap-3">
               <p className="text-xs uppercase tracking-widest text-muted-foreground/60">{t('durations')}</p>
               <NumberInput label={t('focusDuration')} value={settings.focusDuration} min={1} max={120}
-                onChange={v => updateSettings({ focusDuration: v })} />
+                onChange={v => updateSettings({ focusDuration: v, activePreset: null })} />
               <NumberInput label={t('shortBreakDuration')} value={settings.shortBreakDuration} min={1} max={60}
-                onChange={v => updateSettings({ shortBreakDuration: v })} />
+                onChange={v => updateSettings({ shortBreakDuration: v, activePreset: null })} />
               <NumberInput label={t('longBreakDuration')} value={settings.longBreakDuration} min={1} max={60}
-                onChange={v => updateSettings({ longBreakDuration: v })} />
+                onChange={v => updateSettings({ longBreakDuration: v, activePreset: null })} />
               <NumberInput label={t('sessionsBeforeLongBreak')} value={settings.sessionsBeforeLongBreak} min={1} max={10}
-                onChange={v => updateSettings({ sessionsBeforeLongBreak: v })} />
+                onChange={v => updateSettings({ sessionsBeforeLongBreak: v, activePreset: null })} />
             </div>
+
+            <div className="h-px bg-border/50" />
+
+            <PresetManager />
 
             <div className="h-px bg-border/50" />
 

@@ -195,6 +195,9 @@ export default {
   presetDeepWork: 'Chuqur ish',
   presetClassic: 'Klassik',
   presetQuick: 'Tezkor',
+  newPreset: 'Yangi preset',
+  presetNamePlaceholder: 'Preset nomi...',
+  savePreset: 'Saqlash',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;
