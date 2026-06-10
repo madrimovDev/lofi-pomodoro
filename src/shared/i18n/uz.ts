@@ -229,6 +229,10 @@ export default {
   thisYear: 'Bu yil',
   last6Months: 'Oxirgi 6 oy',
   resetStats: 'Statistikani tozalash',
+  repeatOff: 'Takror: o\'chiq',
+  repeatAll: 'Takror: hammasi',
+  repeatOne: 'Takror: bitta',
+  searchTracks: 'Trek qidirish...',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;

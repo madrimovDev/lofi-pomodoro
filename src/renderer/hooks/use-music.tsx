@@ -14,6 +14,7 @@ import {
   type MusicConfig,
   type MusicSortMode,
   type RadioStation,
+  type RepeatMode,
   type SavedMusicFolder,
   type SavedYtPlaylist,
   type YoutubePlaylistItem,
@@ -67,6 +68,8 @@ interface MusicContextValue {
   next: () => void;
   prev: () => void;
   setVolume: (v: number) => void;
+  repeatMode: RepeatMode;
+  setRepeatMode: (mode: RepeatMode) => void;
 
   // Saved playlists
   addSavedPlaylist: (url: string) => Promise<void>;
@@ -111,6 +114,8 @@ const MusicContext = createContext<MusicContextValue>({
   next: () => {},
   prev: () => {},
   setVolume: () => {},
+  repeatMode: 'all',
+  setRepeatMode: () => {},
   addSavedPlaylist: async () => {},
   removeSavedPlaylist: () => {},
   loadSavedPlaylist: async () => {},
@@ -151,6 +156,14 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
   const [ytError, setYtError] = useState<string | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const repeatModeRef = useRef<RepeatMode>(config.repeatMode);
+  repeatModeRef.current = config.repeatMode;
+
+  // Refs kept current for stale-closure-free ended handler
+  const sourceRef = useRef<MusicSource>(null);
+  const ytPlaylistLenRef = useRef(0);
+  const advanceFolderTrackRef = useRef<() => void>(() => {});
+  const advanceYtTrackRef = useRef<() => void>(() => {});
 
   // Radio state
   const [currentRadio, setCurrentRadio] = useState<RadioStation | null>(null);
@@ -194,6 +207,10 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
     }
   }, [config.volume]);
 
+  // Keep refs current (rendered synchronously, before any effect)
+  sourceRef.current = source;
+  ytPlaylistLenRef.current = ytPlaylist.length;
+
   // ── Audio element management ──────────────────────────────────────────────
 
   function getOrCreateAudio(): HTMLAudioElement {
@@ -201,10 +218,16 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
       const audio = new Audio();
       audio.volume = config.volume;
       audio.addEventListener('ended', () => {
+        // Handle repeat: one — replay the current track
+        if (repeatModeRef.current === 'one') {
+          const a = audioRef.current;
+          if (a) { a.currentTime = 0; a.play().catch(() => {}); }
+          return;
+        }
         // Auto-advance to next track
-        if (source === 'folder') advanceFolderTrack();
-        else if (source === 'youtube' && ytPlaylist.length > 0) {
-          advanceYtTrack();
+        if (sourceRef.current === 'folder') advanceFolderTrackRef.current();
+        else if (sourceRef.current === 'youtube' && ytPlaylistLenRef.current > 0) {
+          advanceYtTrackRef.current();
         }
       });
       audioRef.current = audio;
@@ -214,21 +237,33 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
 
   const advanceFolderTrack = useCallback(() => {
     setCurrentFileIndex(prev => {
-      const next = (prev + 1) % files.length;
-      loadFolderTrack(next);
-      return next;
+      const last = files.length - 1;
+      if (last < 0) return prev;
+      if (prev >= last) {
+        if (repeatModeRef.current === 'off') { audioRef.current?.pause(); return prev; }
+        loadFolderTrack(0); return 0; // 'all'
+      }
+      const next = prev + 1; loadFolderTrack(next); return next;
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [files]);
+  }, [files.length]);
 
   const advanceYtTrack = useCallback(() => {
     setYtCurrentIndex(prev => {
-      const next = (prev + 1) % ytPlaylist.length;
-      loadYtTrackByIndex(next);
-      return next;
+      const last = ytPlaylist.length - 1;
+      if (last < 0) return prev;
+      if (prev >= last) {
+        if (repeatModeRef.current === 'off') { audioRef.current?.pause(); return prev; }
+        loadYtTrackByIndex(0); return 0; // 'all'
+      }
+      const next = prev + 1; loadYtTrackByIndex(next); return next;
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ytPlaylist]);
+  }, [ytPlaylist.length]);
+
+  // Keep advance refs current so the stale-closure-free ended handler always calls the latest version
+  advanceFolderTrackRef.current = advanceFolderTrack;
+  advanceYtTrackRef.current = advanceYtTrack;
 
   function loadFolderTrack(index: number) {
     if (!files[index]) return;
@@ -464,6 +499,8 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
 
   const setVolume = (v: number) => updateConfig({ volume: v });
 
+  const setRepeatMode = (mode: RepeatMode) => updateConfig({ repeatMode: mode });
+
   // ── Saved playlists ───────────────────────────────────────────────────────
 
   function extractVideoId(url: string): string | null {
@@ -561,6 +598,7 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
       loadYoutube, playYtTrack, exitYtPlaylist,
       currentRadio, radioError, playRadio, addRadioStation, removeRadioStation,
       source, isPlaying, play, pause, next, prev, setVolume,
+      repeatMode: config.repeatMode, setRepeatMode,
       addSavedPlaylist, removeSavedPlaylist, loadSavedPlaylist,
       audioRef,
     }}>

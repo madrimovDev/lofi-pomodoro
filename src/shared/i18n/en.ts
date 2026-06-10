@@ -207,4 +207,8 @@ export default {
   thisYear: 'This year',
   last6Months: 'Last 6 months',
   resetStats: 'Reset stats',
+  repeatOff: 'Repeat: off',
+  repeatAll: 'Repeat: all',
+  repeatOne: 'Repeat: one',
+  searchTracks: 'Search tracks...',
 } as const;

@@ -213,4 +213,8 @@ export default {
   thisYear: 'Этот год',
   last6Months: 'Последние 6 месяцев',
   resetStats: 'Сбросить статистику',
+  repeatOff: 'Повтор: выкл',
+  repeatAll: 'Повтор: все',
+  repeatOne: 'Повтор: один',
+  searchTracks: 'Поиск треков...',
 } as const;

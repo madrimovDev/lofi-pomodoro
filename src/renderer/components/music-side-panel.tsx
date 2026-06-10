@@ -3,7 +3,7 @@ import {
   FolderOpen, SkipBack, SkipForward, Play, Pause,
   RefreshCw, MonitorPlay, AlertCircle, Loader2, Shuffle, ArrowDownAZ,
   Volume2, Music2, ChevronRight, BookmarkPlus, Trash2, ListMusic,
-  Radio, Plus, X, ArrowLeft,
+  Radio, Plus, X, ArrowLeft, Repeat, Repeat1,
 } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Sheet, SheetContent } from '@shared/components/ui/sheet';
@@ -20,7 +20,8 @@ function NowPlayingBar() {
   const { t } = useSettings();
   const { source, isPlaying, play, pause, next, prev,
     files, currentFileIndex, ytPlaylist, ytCurrentIndex,
-    ytStreamInfo, ytLoading, config, setVolume } = useMusic();
+    ytStreamInfo, ytLoading, config, setVolume,
+    repeatMode, setRepeatMode } = useMusic();
 
   const folderTrack = source === 'folder' ? files[currentFileIndex] : undefined;
   const trackName = source === 'folder'
@@ -75,6 +76,19 @@ function NowPlayingBar() {
         <Button variant="ghost" size="icon-xs" onClick={next}>
           <SkipForward className="size-3" />
         </Button>
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          onClick={() => setRepeatMode(repeatMode === 'off' ? 'all' : repeatMode === 'all' ? 'one' : 'off')}
+          title={t(repeatMode === 'off' ? 'repeatOff' : repeatMode === 'all' ? 'repeatAll' : 'repeatOne')}
+          aria-label={t(repeatMode === 'off' ? 'repeatOff' : repeatMode === 'all' ? 'repeatAll' : 'repeatOne')}
+          className={cn(repeatMode === 'off' ? 'opacity-40' : '')}
+        >
+          {repeatMode === 'one'
+            ? <Repeat1 className="size-3" />
+            : <Repeat className="size-3" />
+          }
+        </Button>
         <div className="flex items-center gap-1.5 flex-1 ml-1">
           <Volume2 className="size-3 text-muted-foreground/30 shrink-0" />
           <input
@@ -94,8 +108,20 @@ function NowPlayingBar() {
 function FolderTab() {
   const { t } = useSettings();
   const { config, updateConfig, files, currentFileIndex, pickFolder, refreshFiles, playFile, isPlaying, source, addFolder, removeFolder, loadFolder } = useMusic();
+  const [trackSearch, setTrackSearch] = useState('');
 
   const savedFolders = config.savedFolders ?? [];
+
+  const filteredFiles = trackSearch.trim()
+    ? files.filter(f => {
+        const q = trackSearch.toLowerCase();
+        return (
+          f.name.toLowerCase().includes(q) ||
+          (f.title ?? '').toLowerCase().includes(q) ||
+          (f.artist ?? '').toLowerCase().includes(q)
+        );
+      })
+    : files;
 
   return (
     <div className="flex flex-col gap-3 flex-1 min-h-0">
@@ -158,6 +184,16 @@ function FolderTab() {
         </div>
       )}
 
+      {/* Track search */}
+      {files.length > 0 && (
+        <input
+          value={trackSearch}
+          onChange={e => setTrackSearch(e.target.value)}
+          placeholder={t('searchTracks')}
+          className="shrink-0 bg-background/20 border border-border/50 rounded-lg px-3 py-1.5 text-xs placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+      )}
+
       {/* Track list */}
       {files.length === 0 && config.folderPath ? (
         <p className="text-xs text-muted-foreground/30 text-center py-6 select-none">
@@ -165,12 +201,13 @@ function FolderTab() {
         </p>
       ) : (
         <div className="flex-1 overflow-y-auto flex flex-col gap-0.5 pr-1">
-          {files.map((file, i) => {
-            const isActive = i === currentFileIndex && source === 'folder';
+          {filteredFiles.map(file => {
+            const realIndex = files.indexOf(file);
+            const isActive = realIndex === currentFileIndex && source === 'folder';
             return (
               <button
                 key={file.url}
-                onClick={() => playFile(i)}
+                onClick={() => playFile(realIndex)}
                 className={cn(
                   'flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-colors text-xs w-full',
                   isActive
@@ -182,7 +219,7 @@ function FolderTab() {
                   'shrink-0 text-[10px] w-4 tabular-nums',
                   isActive ? 'text-primary' : 'text-muted-foreground/30',
                 )}>
-                  {isActive && isPlaying ? '♪' : i + 1}
+                  {isActive && isPlaying ? '♪' : realIndex + 1}
                 </span>
                 <span className="truncate">{file.name.replace(/\.[^.]+$/, '')}</span>
               </button>
