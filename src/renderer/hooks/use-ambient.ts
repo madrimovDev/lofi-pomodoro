@@ -21,9 +21,11 @@ export function useAmbient(sound: AmbientSound | undefined, volume: number | und
     const target = safeVolume;
 
     if (safeSound === 'none') {
-      let v = old?.volume ?? 0;
+      const startVol = old?.volume ?? 0;
+      const step = startVol / FADE_STEPS;
+      let v = startVol;
       fadeRef.current = setInterval(() => {
-        v -= target / FADE_STEPS;
+        v -= step;
         if (old) old.volume = Math.max(0, v);
         if (v <= 0) { cancelFade(); old?.pause(); if (currentRef.current === old) currentRef.current = null; }
       }, FADE_MS / FADE_STEPS);
