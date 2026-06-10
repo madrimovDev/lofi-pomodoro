@@ -228,6 +228,7 @@ export default {
   thisMonth: 'Bu oy',
   thisYear: 'Bu yil',
   last6Months: 'Oxirgi 6 oy',
+  resetStats: 'Statistikani tozalash',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;

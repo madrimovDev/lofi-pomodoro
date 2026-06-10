@@ -124,6 +124,7 @@ pub fn run() {
       commands::store::set_music,
       commands::store::get_stats,
       commands::store::set_stats,
+      commands::store::export_stats,
       commands::music::pick_music_folder,
       commands::music::list_music_files,
       commands::music::yt_check,

@@ -206,4 +206,5 @@ export default {
   thisMonth: 'This month',
   thisYear: 'This year',
   last6Months: 'Last 6 months',
+  resetStats: 'Reset stats',
 } as const;

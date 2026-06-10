@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { Dialog } from 'radix-ui';
-import { X, BarChart2 } from 'lucide-react';
+import { X, BarChart2, Download } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { useStats } from '@renderer/hooks/use-stats';
 import { useSettings } from '@renderer/hooks/use-settings';
+import { dialogApi } from '@shared/tauri/dialog';
 import { dateKey } from '@shared/lib/date';
 import { formatWeekdayShort, formatMonthShort, formatDateShort } from '@shared/lib/format';
 import type { Locale } from '@shared/i18n';
@@ -87,8 +89,9 @@ function MonthBar({ months, stats }: { months: { prefix: string; label: string }
 }
 
 export function StatsPanel({ open, onOpenChange }: StatsPanelProps) {
-  const { stats, todayStat, streak, record } = useStats();
+  const { stats, todayStat, streak, record, clearStats } = useStats();
   const { settings, t } = useSettings();
+  const [confirmReset, setConfirmReset] = useState(false);
   const last7Days = getLast7Days(settings.locale);
 
   const totalSessions = stats.reduce((s, d) => s + d.focusSessions, 0);
@@ -210,6 +213,19 @@ export function StatsPanel({ open, onOpenChange }: StatsPanelProps) {
             <div className="flex flex-col gap-3">
               <p className="text-xs uppercase tracking-widest text-muted-foreground/60">{t('last6Months')}</p>
               <MonthBar months={last6} stats={stats} />
+            </div>
+
+            <div className="flex items-center justify-between gap-2 pt-1">
+              <Button variant="ghost" size="xs" className="text-xs gap-1.5" onClick={() => dialogApi.exportStats()}>
+                <Download className="size-3" /> {t('exportTasks')}
+              </Button>
+              <Button
+                variant="ghost" size="xs"
+                className={`text-xs ${confirmReset ? 'text-destructive' : 'text-muted-foreground/50'}`}
+                onClick={() => { if (confirmReset) { clearStats(); setConfirmReset(false); } else { setConfirmReset(true); setTimeout(() => setConfirmReset(false), 3000); } }}
+              >
+                {confirmReset ? t('confirmClearTasks') : t('resetStats')}
+              </Button>
             </div>
           </div>
         </Dialog.Content>

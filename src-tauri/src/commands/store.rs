@@ -2,6 +2,7 @@ use crate::asset_scope;
 use crate::models::{DailyStat, MusicConfig, Task, Theme, TimerSettings};
 use crate::store_util::deserialize_or_default;
 use serde::Serialize;
+use std::time::{SystemTime, UNIX_EPOCH};
 use tauri::AppHandle;
 use tauri_plugin_dialog::DialogExt;
 use tauri_plugin_store::StoreExt;
@@ -84,6 +85,26 @@ pub fn get_stats(app: AppHandle) -> Result<Vec<DailyStat>, String> {
 #[tauri::command]
 pub fn set_stats(app: AppHandle, stats: Vec<DailyStat>) -> Result<(), String> {
   write_value(&app, "stats", stats)
+}
+
+/// Statistikani JSON faylga eksport qilish. Bekor/xato → false.
+#[tauri::command]
+pub async fn export_stats(app: AppHandle) -> bool {
+  let Ok(store) = app.store(STORE_FILE) else {
+    log::error!("export_stats: store ochilmadi");
+    return false;
+  };
+  let stats: Vec<DailyStat> = deserialize_or_default("stats", store.get("stats"));
+  let ts = SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_millis()).unwrap_or(0);
+  let default_name = format!("zenfocus-stats-{ts}.json");
+  let file = app.dialog().file().set_file_name(&default_name).add_filter("JSON", &["json"]).blocking_save_file();
+  let Some(path) = file.and_then(|f| f.into_path().ok()) else {
+    return false;
+  };
+  match serde_json::to_string_pretty(&stats) {
+    Ok(json) => std::fs::write(&path, json).is_ok(),
+    Err(e) => { log::error!("export_stats serialize failed: {e}"); false }
+  }
 }
 
 /// Custom bildirishnoma ovozi faylini tanlash. Xom yo'l qaytaradi (None=bekor).

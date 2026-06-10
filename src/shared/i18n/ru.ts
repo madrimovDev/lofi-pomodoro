@@ -212,4 +212,5 @@ export default {
   thisMonth: 'Этот месяц',
   thisYear: 'Этот год',
   last6Months: 'Последние 6 месяцев',
+  resetStats: 'Сбросить статистику',
 } as const;
