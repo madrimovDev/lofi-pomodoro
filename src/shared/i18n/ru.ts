@@ -189,4 +189,8 @@ export default {
   pressKey: 'Нажмите клавишу...',
   keyConflict: 'Клавиша занята',
   resetShortcuts: 'Сбросить',
+  searchResults: '{count} результатов',
+  searchResults_one: '{count} результат',
+  searchResults_few: '{count} результата',
+  searchResults_many: '{count} результатов',
 } as const;

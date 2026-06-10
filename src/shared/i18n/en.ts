@@ -186,4 +186,7 @@ export default {
   pressKey: 'Press a key...',
   keyConflict: 'Key already in use',
   resetShortcuts: 'Reset to defaults',
+  searchResults: '{count} result',
+  searchResults_one: '{count} result',
+  searchResults_other: '{count} results',
 } as const;

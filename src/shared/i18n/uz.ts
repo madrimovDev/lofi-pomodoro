@@ -211,6 +211,8 @@ export default {
   pressKey: 'Klavishani bosing...',
   keyConflict: 'Bu klavisha band',
   resetShortcuts: 'Standartga qaytarish',
+  searchResults: '{count} natija',
+  searchResults_other: '{count} natija',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;

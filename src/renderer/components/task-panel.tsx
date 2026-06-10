@@ -605,8 +605,12 @@ export function TaskPanel({ open, onOpenChange }: TaskPanelProps) {
   };
 
   const pending = tasks.filter(t => !t.completedAt && t.id !== activeTaskId);
-  const filtered = showSearch && search
-    ? pending.filter(t => t.name.toLowerCase().includes(search.toLowerCase()))
+  const q = search.trim().toLowerCase();
+  const filtered = showSearch && q
+    ? pending.filter(t =>
+        t.name.toLowerCase().includes(q) ||
+        t.description.toLowerCase().includes(q) ||
+        (t.subtasks ?? []).some(s => s.text.toLowerCase().includes(q)))
     : pending;
 
   // Sort by priority: high → medium → low → null
@@ -651,14 +655,19 @@ export function TaskPanel({ open, onOpenChange }: TaskPanelProps) {
 
             {/* Search */}
             {showSearch && (
-              <input
-                autoFocus
-                placeholder={tr('searchPlaceholder')}
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                onKeyDown={e => e.key === 'Escape' && setShowSearch(false)}
-                className="shrink-0 bg-background/20 border border-border/40 rounded-lg px-3 py-1.5 text-sm placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary/50"
-              />
+              <div className="shrink-0 flex flex-col gap-1">
+                <input
+                  autoFocus
+                  placeholder={tr('searchPlaceholder')}
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  onKeyDown={e => e.key === 'Escape' && setShowSearch(false)}
+                  className="bg-background/20 border border-border/40 rounded-lg px-3 py-1.5 text-sm placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary/50"
+                />
+                {showSearch && q && (
+                  <span className="text-[10px] text-muted-foreground/40 px-1">{tr('searchResults', { count: filtered.length })}</span>
+                )}
+              </div>
             )}
 
             {/* Active task card */}
