@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { type Subtask, type Task } from '@shared/types';
 import { api } from '@shared/tauri/api';
+import { dialogApi } from '@shared/tauri/dialog';
 
 interface TasksContextValue {
   tasks: Task[];
@@ -22,6 +23,14 @@ interface TasksContextValue {
   toggleSubtask: (taskId: string, subtaskId: string, autoComplete: boolean) => void;
   removeSubtask: (taskId: string, subtaskId: string) => void;
   reorderSubtasks: (taskId: string, newOrder: Subtask[]) => void;
+  mergeTasks: (imported: Task[]) => void;
+  pendingImport: { tasks: Task[]; total: number } | null;
+  importError: 'invalid' | null;
+  beginImportViaDialog: () => void;
+  beginImportViaPath: (path: string) => void;
+  resolveImport: (mode: 'replace' | 'merge') => void;
+  dismissImport: () => void;
+  clearImportError: () => void;
 }
 
 const TasksContext = createContext<TasksContextValue>({
@@ -44,6 +53,14 @@ const TasksContext = createContext<TasksContextValue>({
   toggleSubtask: () => {},
   removeSubtask: () => {},
   reorderSubtasks: () => {},
+  mergeTasks: () => {},
+  pendingImport: null,
+  importError: null,
+  beginImportViaDialog: () => {},
+  beginImportViaPath: () => {},
+  resolveImport: () => {},
+  dismissImport: () => {},
+  clearImportError: () => {},
 });
 
 export function TasksProvider({ children }: { children: ReactNode }): ReactElement {
@@ -190,6 +207,40 @@ export function TasksProvider({ children }: { children: ReactNode }): ReactEleme
     ));
   };
 
+  const [pendingImport, setPendingImport] = useState<{ tasks: Task[]; total: number } | null>(null);
+  const [importError, setImportError] = useState<'invalid' | null>(null);
+
+  const mergeTasks = (imported: Task[]) => {
+    setTasksState(prev => {
+      const existing = new Set(prev.map(t => t.id));
+      const fresh = imported.filter(t => !existing.has(t.id));
+      return [...prev, ...fresh];
+    });
+  };
+
+  const handleImportResult = (r: { status: string; tasks: Task[]; total: number }) => {
+    if (r.status === 'cancelled') return;
+    if (r.status === 'invalid') { setImportError('invalid'); return; }
+    setPendingImport({ tasks: r.tasks, total: r.total });
+  };
+
+  const beginImportViaDialog = () => {
+    dialogApi.importTasks().then(handleImportResult).catch(err => { console.error('import failed:', err); setImportError('invalid'); });
+  };
+
+  const beginImportViaPath = (path: string) => {
+    dialogApi.importTasksFromPath(path).then(handleImportResult).catch(err => { console.error('import failed:', err); setImportError('invalid'); });
+  };
+
+  const resolveImport = (mode: 'replace' | 'merge') => {
+    if (!pendingImport) return;
+    if (mode === 'replace') replaceTasks(pendingImport.tasks); else mergeTasks(pendingImport.tasks);
+    setPendingImport(null);
+  };
+
+  const dismissImport = () => setPendingImport(null);
+  const clearImportError = () => setImportError(null);
+
   const activeTask = tasks.find(t => t.id === activeTaskId && !t.completedAt);
 
   return (
@@ -198,6 +249,8 @@ export function TasksProvider({ children }: { children: ReactNode }): ReactEleme
       addTask, editTask, removeTask, setActiveTask, completeTask, incrementPomodoro,
       moveTask, clearCompleted, bulkComplete, bulkRemove, replaceTasks, reorderTasks,
       addSubtask, toggleSubtask, removeSubtask, reorderSubtasks,
+      mergeTasks, pendingImport, importError,
+      beginImportViaDialog, beginImportViaPath, resolveImport, dismissImport, clearImportError,
     }}>
       {children}
     </TasksContext.Provider>

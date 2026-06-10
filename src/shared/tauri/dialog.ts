@@ -1,12 +1,11 @@
 import { invoke } from '@tauri-apps/api/core';
 import type { Task } from '@shared/types';
 
-/**
- * Faza 6 dialog command'lari (export/import vazifalar, sound tanlash).
- * pickNotificationSound xom yo'l qaytaradi — ijro paytida convertFileSrc qo'llanadi.
- */
+export interface ImportResult { status: 'ok' | 'invalid' | 'cancelled'; tasks: Task[]; total: number }
+
 export const dialogApi = {
   exportTasks: () => invoke<boolean>('export_tasks'),
-  importTasks: () => invoke<Task[] | null>('import_tasks'),
+  importTasks: () => invoke<ImportResult>('import_tasks'),
+  importTasksFromPath: (path: string) => invoke<ImportResult>('import_tasks_from_path', { path }),
   pickNotificationSound: () => invoke<string | null>('pick_notification_sound'),
 };

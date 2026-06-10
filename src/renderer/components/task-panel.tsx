@@ -599,7 +599,8 @@ export function TaskPanel({ open, onOpenChange }: TaskPanelProps) {
   const {
     tasks, activeTaskId, activeTask,
     addTask, editTask, removeTask,
-    setActiveTask, completeTask, clearCompleted, bulkComplete, bulkRemove, replaceTasks, reorderTasks,
+    setActiveTask, completeTask, clearCompleted, bulkComplete, bulkRemove, reorderTasks,
+    beginImportViaDialog,
   } = useTasks();
 
   const { addTaskCompleted } = useStats();
@@ -623,10 +624,7 @@ export function TaskPanel({ open, onOpenChange }: TaskPanelProps) {
     await dialogApi.exportTasks();
   };
 
-  const handleImport = async () => {
-    const imported = await dialogApi.importTasks();
-    if (imported) replaceTasks(imported);
-  };
+  const handleImport = () => beginImportViaDialog();
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;

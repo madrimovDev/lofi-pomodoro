@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import { ImportChoiceDialog } from '@renderer/components/import-choice-dialog';
+import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { Play, Pause, Maximize2, SkipForward } from 'lucide-react';
 import { WindowControl } from '@renderer/components/window-control';
 import { MusicSidePanel } from '@renderer/components/music-side-panel';
@@ -245,6 +247,7 @@ function LayoutInner() {
   const [showBreak, setShowBreak] = useState(false);
   const [currentBreakMode, setCurrentBreakMode] = useState<'short-break' | 'long-break' | null>(null);
   const { settings } = useSettings();
+  const { beginImportViaPath } = useTasks();
 
   useEffect(() => {
     const unlisten = winEvents.onMiniModeChanged((enabled) => setIsMiniMode(enabled));
@@ -254,6 +257,18 @@ function LayoutInner() {
   useEffect(() => {
     document.documentElement.classList.toggle('no-animations', !settings.animationsEnabled);
   }, [settings.animationsEnabled]);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    let cancelled = false;
+    getCurrentWebview().onDragDropEvent(e => {
+      if (e.payload.type === 'drop') {
+        const json = e.payload.paths.find(p => p.toLowerCase().endsWith('.json'));
+        if (json) beginImportViaPath(json);
+      }
+    }).then(fn => { if (cancelled) fn(); else unlisten = fn; });
+    return () => { cancelled = true; unlisten?.(); };
+  }, [beginImportViaPath]);
 
   const overlayActiveRef = useRef(false);
   const { timeLeft, isRunning, mode, toggle, skip } = useTimerContext();
@@ -307,6 +322,7 @@ function LayoutInner() {
           <MusicSidePanel open={musicOpen} onOpenChange={setMusicOpen} />
         </main>
         <StatsPanel open={statsOpen} onOpenChange={setStatsOpen} />
+        <ImportChoiceDialog />
       </div>
       {showBreak && currentBreakMode && (
         <BreakScreen

@@ -194,4 +194,10 @@ export default {
   selectedCount_one: '{count} selected',
   selectedCount_other: '{count} selected',
   autoCompleteOnSubtasks: 'Auto-complete when subtasks done',
+  importFound: '{count} tasks found',
+  importFound_one: '{count} task found',
+  importFound_other: '{count} tasks found',
+  importReplace: 'Replace',
+  importMerge: 'Merge',
+  invalidFile: 'Invalid file',
 } as const;

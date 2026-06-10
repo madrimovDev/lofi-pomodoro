@@ -217,6 +217,11 @@ export default {
   selectedCount: '{count} tanlandi',
   selectedCount_other: '{count} tanlandi',
   autoCompleteOnSubtasks: 'Subtasklar tugaganda avtomatik bajarish',
+  importFound: '{count} ta vazifa topildi',
+  importFound_other: '{count} ta vazifa topildi',
+  importReplace: 'Almashtirish',
+  importMerge: 'Qo\'shish',
+  invalidFile: 'Yaroqsiz fayl',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;

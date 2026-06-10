@@ -199,4 +199,11 @@ export default {
   selectedCount_few: '{count} выбрано',
   selectedCount_many: '{count} выбрано',
   autoCompleteOnSubtasks: 'Автозавершение по подзадачам',
+  importFound: '{count} задач найдено',
+  importFound_one: '{count} задача найдена',
+  importFound_few: '{count} задачи найдено',
+  importFound_many: '{count} задач найдено',
+  importReplace: 'Заменить',
+  importMerge: 'Добавить',
+  invalidFile: 'Неверный файл',
 } as const;
