@@ -235,6 +235,12 @@ export default {
   searchTracks: 'Trek qidirish...',
   invalidUrl: 'Yaroqsiz URL',
   ytTimeout: 'Timeout (s)',
+  ambient: 'Ambient ovoz',
+  ambientNone: 'Yo\'q',
+  ambientRain: 'Yomg\'ir',
+  ambientForest: 'O\'rmon',
+  ambientCafe: 'Kafe',
+  ambientVolume: 'Ambient ovoz balandligi',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;

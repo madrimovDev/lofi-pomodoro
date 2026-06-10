@@ -213,4 +213,10 @@ export default {
   searchTracks: 'Search tracks...',
   invalidUrl: 'Invalid URL',
   ytTimeout: 'Timeout (s)',
+  ambient: 'Ambient sound',
+  ambientNone: 'None',
+  ambientRain: 'Rain',
+  ambientForest: 'Forest',
+  ambientCafe: 'Cafe',
+  ambientVolume: 'Ambient volume',
 } as const;

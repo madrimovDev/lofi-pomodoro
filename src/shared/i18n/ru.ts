@@ -219,4 +219,10 @@ export default {
   searchTracks: 'Поиск треков...',
   invalidUrl: 'Неверный URL',
   ytTimeout: 'Таймаут (с)',
+  ambient: 'Эмбиент',
+  ambientNone: 'Нет',
+  ambientRain: 'Дождь',
+  ambientForest: 'Лес',
+  ambientCafe: 'Кафе',
+  ambientVolume: 'Громкость эмбиента',
 } as const;

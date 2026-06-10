@@ -355,6 +355,30 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
             <div className="h-px bg-border/50" />
 
             <div className="flex flex-col gap-3">
+              <p className="text-xs uppercase tracking-widest text-muted-foreground/60">{t('ambient')}</p>
+              <div className="flex gap-1">
+                {(['none','rain','forest','cafe'] as const).map(s => (
+                  <button key={s} onClick={() => updateSettings({ ambientSound: s })}
+                    className={`px-2 py-0.5 rounded-md text-[10px] transition-colors duration-150 border ${
+                      (settings.ambientSound ?? 'none') === s
+                        ? 'bg-primary/20 border-primary/40 text-foreground'
+                        : 'border-border/50 text-muted-foreground/60 hover:border-border hover:text-muted-foreground'
+                    }`}>
+                    {t(s === 'none' ? 'ambientNone' : s === 'rain' ? 'ambientRain' : s === 'forest' ? 'ambientForest' : 'ambientCafe')}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <label className="text-sm text-foreground/80 select-none">{t('ambientVolume')}</label>
+                <input type="range" min={0} max={1} step={0.05} value={settings.ambientVolume ?? 0.4}
+                  onChange={e => updateSettings({ ambientVolume: parseFloat(e.target.value) })}
+                  className="w-28 accent-primary" />
+              </div>
+            </div>
+
+            <div className="h-px bg-border/50" />
+
+            <div className="flex flex-col gap-3">
               <p className="text-xs uppercase tracking-widest text-muted-foreground/60">{t('language')}</p>
               <div className="flex gap-1.5">
                 {(['uz', 'en', 'ru'] as const).map((loc) => (
