@@ -144,10 +144,10 @@ export function StatsPanel({ open, onOpenChange }: StatsPanelProps) {
                     ))}
                   </div>
                 )}
-                {record > 0 && (
-                  <p className="text-[10px] text-center text-muted-foreground/40">🏆 {t('bestStreak')}: <span className="tabular-nums">{record}</span></p>
-                )}
               </div>
+            )}
+            {record > 0 && (
+              <p className="text-[10px] text-center text-muted-foreground/40">🏆 {t('bestStreak')}: <span className="tabular-nums">{record}</span></p>
             )}
 
             {/* Today */}
