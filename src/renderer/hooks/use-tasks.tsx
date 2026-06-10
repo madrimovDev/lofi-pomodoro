@@ -19,8 +19,9 @@ interface TasksContextValue {
   replaceTasks: (tasks: Task[]) => void;
   reorderTasks: (newOrder: Task[]) => void;
   addSubtask: (taskId: string, text: string) => void;
-  toggleSubtask: (taskId: string, subtaskId: string) => void;
+  toggleSubtask: (taskId: string, subtaskId: string, autoComplete: boolean) => void;
   removeSubtask: (taskId: string, subtaskId: string) => void;
+  reorderSubtasks: (taskId: string, newOrder: Subtask[]) => void;
 }
 
 const TasksContext = createContext<TasksContextValue>({
@@ -42,6 +43,7 @@ const TasksContext = createContext<TasksContextValue>({
   addSubtask: () => {},
   toggleSubtask: () => {},
   removeSubtask: () => {},
+  reorderSubtasks: () => {},
 });
 
 export function TasksProvider({ children }: { children: ReactNode }): ReactElement {
@@ -161,12 +163,23 @@ export function TasksProvider({ children }: { children: ReactNode }): ReactEleme
     setTasksState(prev => prev.map(t => t.id === taskId ? { ...t, subtasks: [...(t.subtasks ?? []), subtask] } : t));
   };
 
-  const toggleSubtask = (taskId: string, subtaskId: string) => {
-    setTasksState(prev => prev.map(t =>
-      t.id === taskId
-        ? { ...t, subtasks: (t.subtasks ?? []).map(s => s.id === subtaskId ? { ...s, done: !s.done } : s) }
-        : t
-    ));
+  const toggleSubtask = (taskId: string, subtaskId: string, autoComplete: boolean) => {
+    let deactivate = false;
+    setTasksState(prev => prev.map(t => {
+      if (t.id !== taskId) return t;
+      const subtasks = (t.subtasks ?? []).map(s => s.id === subtaskId ? { ...s, done: !s.done } : s);
+      let next: Task = { ...t, subtasks };
+      if (autoComplete && !t.completedAt && subtasks.length > 0 && subtasks.every(s => s.done)) {
+        next = { ...next, completedAt: Date.now() };
+        if (t.id === activeTaskId) deactivate = true;
+      }
+      return next;
+    }));
+    if (deactivate) setActiveTaskIdState(null);
+  };
+
+  const reorderSubtasks = (taskId: string, newOrder: Subtask[]) => {
+    setTasksState(prev => prev.map(t => t.id === taskId ? { ...t, subtasks: newOrder } : t));
   };
 
   const removeSubtask = (taskId: string, subtaskId: string) => {
@@ -184,7 +197,7 @@ export function TasksProvider({ children }: { children: ReactNode }): ReactEleme
       tasks, activeTaskId, activeTask,
       addTask, editTask, removeTask, setActiveTask, completeTask, incrementPomodoro,
       moveTask, clearCompleted, bulkComplete, bulkRemove, replaceTasks, reorderTasks,
-      addSubtask, toggleSubtask, removeSubtask,
+      addSubtask, toggleSubtask, removeSubtask, reorderSubtasks,
     }}>
       {children}
     </TasksContext.Provider>

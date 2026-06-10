@@ -44,6 +44,7 @@ export interface TimerSettings {
   breathingPattern: BreathingPatternId;
   customPresets: TimerPreset[];
   keybindings: Record<ShortcutAction, string>;
+  autoCompleteOnSubtasks: boolean;
 }
 
 export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
@@ -70,6 +71,7 @@ export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
   breathingPattern: '478',
   customPresets: [],
   keybindings: DEFAULT_KEYBINDINGS,
+  autoCompleteOnSubtasks: false,
 };
 
 export interface TimerPreset {

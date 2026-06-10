@@ -306,6 +306,8 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
                 checked={settings.animationsEnabled}
                 onCheckedChange={v => updateSettings({ animationsEnabled: v })}
               />
+              <ToggleRow label={t('autoCompleteOnSubtasks')} checked={settings.autoCompleteOnSubtasks ?? false}
+                onCheckedChange={v => updateSettings({ autoCompleteOnSubtasks: v })} />
               <NumberInput label={t('dailyGoal')} value={settings.dailyGoal ?? 0} min={0} max={20}
                 onChange={v => updateSettings({ dailyGoal: v })} />
               <div className="flex items-center justify-between gap-4">

@@ -198,4 +198,5 @@ export default {
   selectedCount_one: '{count} выбрано',
   selectedCount_few: '{count} выбрано',
   selectedCount_many: '{count} выбрано',
+  autoCompleteOnSubtasks: 'Автозавершение по подзадачам',
 } as const;

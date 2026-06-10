@@ -193,4 +193,5 @@ export default {
   selectedCount: '{count} selected',
   selectedCount_one: '{count} selected',
   selectedCount_other: '{count} selected',
+  autoCompleteOnSubtasks: 'Auto-complete when subtasks done',
 } as const;

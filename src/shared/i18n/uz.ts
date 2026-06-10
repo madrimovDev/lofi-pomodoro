@@ -216,6 +216,7 @@ export default {
   selectMode: 'Tanlash',
   selectedCount: '{count} tanlandi',
   selectedCount_other: '{count} tanlandi',
+  autoCompleteOnSubtasks: 'Subtasklar tugaganda avtomatik bajarish',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;

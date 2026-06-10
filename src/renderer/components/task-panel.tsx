@@ -104,7 +104,7 @@ function ActiveTaskCard({ task, onDeactivate, onComplete }: {
   onComplete: () => void;
 }) {
   const { toggleSubtask } = useTasks();
-  const { t: tr } = useSettings();
+  const { settings, t: tr } = useSettings();
   const doneSubtasks = (task.subtasks ?? []).filter(s => s.done).length;
   const totalSubtasks = (task.subtasks ?? []).length;
 
@@ -142,7 +142,7 @@ function ActiveTaskCard({ task, onDeactivate, onComplete }: {
           {task.subtasks.map(sub => (
             <button
               key={sub.id}
-              onClick={() => toggleSubtask(task.id, sub.id)}
+              onClick={() => toggleSubtask(task.id, sub.id, settings.autoCompleteOnSubtasks)}
               className="flex items-center gap-2 text-left"
             >
               <span className={cn('size-3 rounded border flex-shrink-0 flex items-center justify-center', sub.done ? 'bg-primary/30 border-primary/40' : 'border-border/50')}>
@@ -262,10 +262,38 @@ function EditTaskForm({ task, onSave, onCancel }: {
 
 // ─── Subtasks Panel ───────────────────────────────────────────────────────────
 
+function SortableSubtask({ taskId, sub, autoComplete }: { taskId: string; sub: Subtask; autoComplete: boolean }) {
+  const { toggleSubtask, removeSubtask } = useTasks();
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: sub.id });
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
+  return (
+    <div ref={setNodeRef} style={style} className="flex items-center gap-1.5 group">
+      <button {...attributes} {...listeners} className="cursor-grab touch-none text-muted-foreground/20 hover:text-muted-foreground/40">
+        <GripVertical className="size-2.5" />
+      </button>
+      <button onClick={() => toggleSubtask(taskId, sub.id, autoComplete)} className={cn('size-3 rounded border flex-shrink-0', sub.done ? 'bg-primary/30 border-primary/40' : 'border-border/50')} />
+      <span className={cn('text-xs flex-1 min-w-0', sub.done ? 'line-through text-muted-foreground/30' : 'text-foreground/60')}>{sub.text}</span>
+      <button onClick={() => removeSubtask(taskId, sub.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground/20 hover:text-destructive/50 transition-all">
+        <X className="size-2.5" />
+      </button>
+    </div>
+  );
+}
+
 function SubtasksPanel({ taskId, subtasks }: { taskId: string; subtasks: Subtask[] }) {
-  const { addSubtask, toggleSubtask, removeSubtask } = useTasks();
-  const { t: tr } = useSettings();
+  const { addSubtask, reorderSubtasks } = useTasks();
+  const { settings, t: tr } = useSettings();
   const [input, setInput] = useState('');
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const handleSubDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e;
+    if (!over || active.id === over.id) return;
+    const oldIndex = subtasks.findIndex(s => s.id === active.id);
+    const newIndex = subtasks.findIndex(s => s.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+    reorderSubtasks(taskId, arrayMove(subtasks, oldIndex, newIndex));
+  };
 
   const handleAdd = () => {
     if (!input.trim()) return;
@@ -275,15 +303,13 @@ function SubtasksPanel({ taskId, subtasks }: { taskId: string; subtasks: Subtask
 
   return (
     <div className="flex flex-col gap-1 pl-4 pt-1">
-      {subtasks.map(sub => (
-        <div key={sub.id} className="flex items-center gap-1.5 group">
-          <button onClick={() => toggleSubtask(taskId, sub.id)} className={cn('size-3 rounded border flex-shrink-0', sub.done ? 'bg-primary/30 border-primary/40' : 'border-border/50')} />
-          <span className={cn('text-xs flex-1 min-w-0', sub.done ? 'line-through text-muted-foreground/30' : 'text-foreground/60')}>{sub.text}</span>
-          <button onClick={() => removeSubtask(taskId, sub.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground/20 hover:text-destructive/50 transition-all">
-            <X className="size-2.5" />
-          </button>
-        </div>
-      ))}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSubDragEnd}>
+        <SortableContext items={subtasks.map(s => s.id)} strategy={verticalListSortingStrategy}>
+          {subtasks.map(sub => (
+            <SortableSubtask key={sub.id} taskId={taskId} sub={sub} autoComplete={settings.autoCompleteOnSubtasks} />
+          ))}
+        </SortableContext>
+      </DndContext>
       <input
         value={input}
         onChange={e => setInput(e.target.value)}
