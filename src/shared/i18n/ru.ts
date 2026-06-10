@@ -199,6 +199,8 @@ export default {
   selectedCount_few: '{count} выбрано',
   selectedCount_many: '{count} выбрано',
   autoCompleteOnSubtasks: 'Автозавершение по подзадачам',
+  streakGraceDays: 'Льгота серии (дни)',
+  statsRetentionDays: 'Хранение статистики (дни, 0=∞)',
   importFound: '{count} задач найдено',
   importFound_one: '{count} задача найдена',
   importFound_few: '{count} задачи найдено',

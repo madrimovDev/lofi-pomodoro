@@ -310,6 +310,10 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
                 onCheckedChange={v => updateSettings({ autoCompleteOnSubtasks: v })} />
               <NumberInput label={t('dailyGoal')} value={settings.dailyGoal ?? 0} min={0} max={20}
                 onChange={v => updateSettings({ dailyGoal: v })} />
+              <NumberInput label={t('streakGraceDays')} value={settings.streakGraceDays ?? 1} min={0} max={7}
+                onChange={v => updateSettings({ streakGraceDays: v })} />
+              <NumberInput label={t('statsRetentionDays')} value={settings.statsRetentionDays ?? 365} min={0} max={3650}
+                onChange={v => updateSettings({ statsRetentionDays: v })} />
               <div className="flex items-center justify-between gap-4">
                 <label className="text-sm text-foreground/80 select-none">{t('miniMode')}</label>
                 <Button variant="outline" size="xs" className="text-xs gap-1.5"

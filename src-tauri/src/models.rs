@@ -86,6 +86,8 @@ pub struct TimerSettings {
   pub custom_presets: Vec<TimerPreset>,
   pub keybindings: HashMap<String, String>,
   pub auto_complete_on_subtasks: bool,
+  pub streak_grace_days: i32,
+  pub stats_retention_days: i32,
 }
 
 impl Default for TimerSettings {
@@ -115,6 +117,8 @@ impl Default for TimerSettings {
       custom_presets: Vec::new(),
       keybindings: HashMap::new(),
       auto_complete_on_subtasks: false,
+      streak_grace_days: 1,
+      stats_retention_days: 365,
     }
   }
 }
@@ -368,7 +372,8 @@ mod tests {
       "restoreWindowMinutes":-1,"breathingPattern":"box",
       "customPresets":[{"id":"custom-1","name":"X","focusDuration":50,"shortBreakDuration":10,"longBreakDuration":25,"sessionsBeforeLongBreak":2}],
       "keybindings":{"toggleTimer":"Space","skip":"KeyZ"},
-      "autoCompleteOnSubtasks":true
+      "autoCompleteOnSubtasks":true,
+      "streakGraceDays":2,"statsRetentionDays":90
     });
     let s: TimerSettings = serde_json::from_value(json).unwrap();
     assert_eq!(s.restore_window_minutes, -1);
@@ -383,6 +388,10 @@ mod tests {
     assert_eq!(back["autoCompleteOnSubtasks"], true);
     assert_eq!(back["keybindings"]["skip"], "KeyZ");
     assert_eq!(back["customPresets"][0]["name"], "X");
+    assert_eq!(s.streak_grace_days, 2);
+    assert_eq!(s.stats_retention_days, 90);
+    assert_eq!(back["streakGraceDays"], 2);
+    assert_eq!(back["statsRetentionDays"], 90);
   }
 
   #[test]

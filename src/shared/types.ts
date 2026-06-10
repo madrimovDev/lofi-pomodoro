@@ -45,6 +45,8 @@ export interface TimerSettings {
   customPresets: TimerPreset[];
   keybindings: Record<ShortcutAction, string>;
   autoCompleteOnSubtasks: boolean;
+  streakGraceDays: number;
+  statsRetentionDays: number;
 }
 
 export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
@@ -72,6 +74,8 @@ export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
   customPresets: [],
   keybindings: DEFAULT_KEYBINDINGS,
   autoCompleteOnSubtasks: false,
+  streakGraceDays: 1,
+  statsRetentionDays: 365,
 };
 
 export interface TimerPreset {
@@ -271,6 +275,8 @@ export type UpdaterStatus =
   | { type: 'downloading'; percent: number }
   | { type: 'downloaded'; version: string }
   | { type: 'error'; message: string };
+
+export const STREAK_MILESTONES = [3, 7, 14, 30, 100] as const;
 
 export interface DailyStat {
   date: string; // 'YYYY-MM-DD'

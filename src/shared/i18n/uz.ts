@@ -217,6 +217,8 @@ export default {
   selectedCount: '{count} tanlandi',
   selectedCount_other: '{count} tanlandi',
   autoCompleteOnSubtasks: 'Subtasklar tugaganda avtomatik bajarish',
+  streakGraceDays: 'Streak grace (kun)',
+  statsRetentionDays: 'Statistika saqlash (kun, 0=cheksiz)',
   importFound: '{count} ta vazifa topildi',
   importFound_other: '{count} ta vazifa topildi',
   importReplace: 'Almashtirish',
