@@ -14,6 +14,8 @@ interface TasksContextValue {
   incrementPomodoro: (id: string) => void;
   moveTask: (id: string, direction: 'up' | 'down') => void;
   clearCompleted: () => void;
+  bulkComplete: (ids: string[]) => void;
+  bulkRemove: (ids: string[]) => void;
   replaceTasks: (tasks: Task[]) => void;
   reorderTasks: (newOrder: Task[]) => void;
   addSubtask: (taskId: string, text: string) => void;
@@ -33,6 +35,8 @@ const TasksContext = createContext<TasksContextValue>({
   incrementPomodoro: () => {},
   moveTask: () => {},
   clearCompleted: () => {},
+  bulkComplete: () => {},
+  bulkRemove: () => {},
   replaceTasks: () => {},
   reorderTasks: () => {},
   addSubtask: () => {},
@@ -129,6 +133,20 @@ export function TasksProvider({ children }: { children: ReactNode }): ReactEleme
     setTasksState(prev => prev.filter(t => !t.completedAt));
   };
 
+  const bulkComplete = (ids: string[]) => {
+    const idSet = new Set(ids);
+    setTasksState(prev => prev.map(t =>
+      idSet.has(t.id) && !t.completedAt ? { ...t, completedAt: Date.now() } : t
+    ));
+    if (activeTaskId && idSet.has(activeTaskId)) setActiveTaskIdState(null);
+  };
+
+  const bulkRemove = (ids: string[]) => {
+    const idSet = new Set(ids);
+    setTasksState(prev => prev.filter(t => !idSet.has(t.id)));
+    if (activeTaskId && idSet.has(activeTaskId)) setActiveTaskIdState(null);
+  };
+
   const replaceTasks = (newTasks: Task[]) => {
     setTasksState(newTasks);
     setActiveTaskIdState(null);
@@ -165,7 +183,7 @@ export function TasksProvider({ children }: { children: ReactNode }): ReactEleme
     <TasksContext.Provider value={{
       tasks, activeTaskId, activeTask,
       addTask, editTask, removeTask, setActiveTask, completeTask, incrementPomodoro,
-      moveTask, clearCompleted, replaceTasks, reorderTasks,
+      moveTask, clearCompleted, bulkComplete, bulkRemove, replaceTasks, reorderTasks,
       addSubtask, toggleSubtask, removeSubtask,
     }}>
       {children}

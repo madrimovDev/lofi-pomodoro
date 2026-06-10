@@ -3,7 +3,7 @@ import { Sheet, SheetContent } from '@shared/components/ui/sheet';
 import {
   Plus, Trash2, CheckCircle2, ClipboardList,
   ChevronDown, ChevronUp, Pencil, Check, X,
-  Circle, ListChecks, Download, Upload, Search, GripVertical,
+  Circle, ListChecks, Download, Upload, Search, GripVertical, CheckSquare,
 } from 'lucide-react';
 import {
   DndContext, closestCenter, PointerSensor, useSensor, useSensors,
@@ -297,12 +297,15 @@ function SubtasksPanel({ taskId, subtasks }: { taskId: string; subtasks: Subtask
 
 // ─── Task Row (sortable) ──────────────────────────────────────────────────────
 
-function SortableTaskRow({ task, onActivate, onComplete, onRemove, onEdit }: {
+function SortableTaskRow({ task, onActivate, onComplete, onRemove, onEdit, selectMode, selected, onToggleSelect }: {
   task: Task;
   onActivate: () => void;
   onComplete: () => void;
   onRemove: () => void;
   onEdit: (patch: Partial<Pick<Task, 'name' | 'description' | 'estimatedPomodoros' | 'priority' | 'dueDate'>>) => void;
+  selectMode?: boolean;
+  selected?: boolean;
+  onToggleSelect?: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id });
   const { t: tr } = useSettings();
@@ -320,6 +323,9 @@ function SortableTaskRow({ task, onActivate, onComplete, onRemove, onEdit }: {
   return (
     <div ref={setNodeRef} style={style} className="flex flex-col">
       <div className="flex items-start gap-1 p-2 rounded-xl hover:bg-border/20 transition-colors duration-150 group">
+        {selectMode && (
+          <button onClick={onToggleSelect} className={cn('size-3.5 rounded border flex-shrink-0 mt-1', selected ? 'bg-primary/40 border-primary/50' : 'border-border/50')} aria-label={tr('selectMode')} />
+        )}
         {/* Drag handle */}
         <button
           {...attributes}
@@ -567,13 +573,18 @@ export function TaskPanel({ open, onOpenChange }: TaskPanelProps) {
   const {
     tasks, activeTaskId, activeTask,
     addTask, editTask, removeTask,
-    setActiveTask, completeTask, clearCompleted, replaceTasks, reorderTasks,
+    setActiveTask, completeTask, clearCompleted, bulkComplete, bulkRemove, replaceTasks, reorderTasks,
   } = useTasks();
 
   const { addTaskCompleted } = useStats();
   const { t: tr } = useSettings();
   const [search, setSearch] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const toggleSelected = (id: string) =>
+    setSelected(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  const exitSelect = () => { setSelectMode(false); setSelected(new Set()); };
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -647,6 +658,9 @@ export function TaskPanel({ open, onOpenChange }: TaskPanelProps) {
                 <Button variant="ghost" size="icon-xs" onClick={handleImport} aria-label={tr('importTasks')} title={tr('importJsonTitle')}>
                   <Upload className="size-3.5" />
                 </Button>
+                <Button variant={selectMode ? 'outline' : 'ghost'} size="icon-xs" onClick={() => { if (selectMode) exitSelect(); else setSelectMode(true); }} aria-label={tr('selectMode')}>
+                  <CheckSquare className="size-3.5" />
+                </Button>
                 <Button variant="ghost" size="icon-xs" onClick={() => onOpenChange(false)}>
                   <X className="size-3.5" />
                 </Button>
@@ -683,6 +697,16 @@ export function TaskPanel({ open, onOpenChange }: TaskPanelProps) {
             <div className="flex-1 flex flex-col min-h-0 gap-1 overflow-y-auto pr-1">
               {showEmpty && <EmptyState />}
 
+              {selectMode && selected.size > 0 && (
+                <div className="flex items-center justify-between gap-2 px-1 py-1.5 rounded-lg bg-primary/5 border border-primary/20">
+                  <span className="text-xs text-muted-foreground/70">{tr('selectedCount', { count: selected.size })}</span>
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="xs" className="text-xs" onClick={() => { bulkComplete([...selected]); exitSelect(); }}>{tr('completed')}</Button>
+                    <Button variant="ghost" size="xs" className="text-xs text-destructive/70" onClick={() => { bulkRemove([...selected]); exitSelect(); }}>{tr('delete')}</Button>
+                  </div>
+                </div>
+              )}
+
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={sorted.map(t => t.id)} strategy={verticalListSortingStrategy}>
                   {sorted.map(task => (
@@ -693,6 +717,9 @@ export function TaskPanel({ open, onOpenChange }: TaskPanelProps) {
                       onComplete={() => handleComplete(task.id)}
                       onRemove={() => removeTask(task.id)}
                       onEdit={patch => editTask(task.id, patch)}
+                      selectMode={selectMode}
+                      selected={selected.has(task.id)}
+                      onToggleSelect={() => toggleSelected(task.id)}
                     />
                   ))}
                 </SortableContext>

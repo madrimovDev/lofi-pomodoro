@@ -189,4 +189,8 @@ export default {
   searchResults: '{count} result',
   searchResults_one: '{count} result',
   searchResults_other: '{count} results',
+  selectMode: 'Select',
+  selectedCount: '{count} selected',
+  selectedCount_one: '{count} selected',
+  selectedCount_other: '{count} selected',
 } as const;

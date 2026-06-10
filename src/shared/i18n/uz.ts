@@ -213,6 +213,9 @@ export default {
   resetShortcuts: 'Standartga qaytarish',
   searchResults: '{count} natija',
   searchResults_other: '{count} natija',
+  selectMode: 'Tanlash',
+  selectedCount: '{count} tanlandi',
+  selectedCount_other: '{count} tanlandi',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;

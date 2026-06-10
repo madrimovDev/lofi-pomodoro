@@ -193,4 +193,9 @@ export default {
   searchResults_one: '{count} результат',
   searchResults_few: '{count} результата',
   searchResults_many: '{count} результатов',
+  selectMode: 'Выбрать',
+  selectedCount: '{count} выбрано',
+  selectedCount_one: '{count} выбрано',
+  selectedCount_few: '{count} выбрано',
+  selectedCount_many: '{count} выбрано',
 } as const;
