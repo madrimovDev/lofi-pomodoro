@@ -22,9 +22,11 @@ function NowPlayingBar() {
     files, currentFileIndex, ytPlaylist, ytCurrentIndex,
     ytStreamInfo, ytLoading, config, setVolume } = useMusic();
 
+  const folderTrack = source === 'folder' ? files[currentFileIndex] : undefined;
   const trackName = source === 'folder'
-    ? files[currentFileIndex]?.name.replace(/\.[^.]+$/, '')
+    ? (folderTrack ? (folderTrack.title ?? folderTrack.name.replace(/\.[^.]+$/, '')) : null)
     : ytStreamInfo?.title ?? null;
+  const trackArtist = folderTrack?.artist ?? null;
 
   const trackCount = source === 'folder'
     ? files.length
@@ -48,6 +50,9 @@ function NowPlayingBar() {
           <p className="text-xs text-foreground/80 truncate">
             {trackName ?? (ytLoading ? t('loadingTrack') : '—')}
           </p>
+          {trackArtist && (
+            <p className="text-[10px] text-muted-foreground/50 truncate">{trackArtist}</p>
+          )}
           {trackCount > 0 && (
             <p className="text-[10px] text-muted-foreground/40 tabular-nums">
               {currentIndex + 1} / {trackCount}

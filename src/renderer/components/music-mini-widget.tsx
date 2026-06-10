@@ -21,8 +21,13 @@ export function MusicMiniWidget({ onOpenDrawer }: MusicMiniWidgetProps) {
   const textRef = useRef<HTMLSpanElement>(null);
   const [overflow, setOverflow] = useState(false);
 
+  const folderTrack = source === 'folder' ? files[currentFileIndex] : undefined;
   const trackName = source === 'folder'
-    ? files[currentFileIndex]?.name.replace(/\.[^.]+$/, '')
+    ? (folderTrack
+        ? (folderTrack.artist
+            ? `${folderTrack.title ?? folderTrack.name.replace(/\.[^.]+$/, '')} — ${folderTrack.artist}`
+            : (folderTrack.title ?? folderTrack.name.replace(/\.[^.]+$/, '')))
+        : null)
     : source === 'radio'
     ? null
     : ytStreamInfo?.title ?? null;
