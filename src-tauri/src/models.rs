@@ -232,6 +232,12 @@ pub struct AudioFile {
 pub struct AudioFileRaw {
   pub name: String,
   pub path: String,
+  #[serde(default, skip_serializing_if = "Option::is_none")]
+  pub artist: Option<String>,
+  #[serde(default, skip_serializing_if = "Option::is_none")]
+  pub album: Option<String>,
+  #[serde(default, skip_serializing_if = "Option::is_none")]
+  pub title: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

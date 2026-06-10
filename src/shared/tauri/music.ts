@@ -5,6 +5,9 @@ import type { AudioFile, YoutubeStreamInfo, YoutubePlaylistItem } from '@shared/
 interface AudioFileRaw {
   name: string;
   path: string;
+  artist?: string;
+  album?: string;
+  title?: string;
 }
 
 /**
@@ -16,7 +19,7 @@ export const musicApi = {
 
   listMusicFiles: async (folderPath: string): Promise<AudioFile[]> => {
     const raw = await invoke<AudioFileRaw[]>('list_music_files', { folderPath });
-    return raw.map(f => ({ name: f.name, url: convertFileSrc(f.path) }));
+    return raw.map(f => ({ name: f.name, url: convertFileSrc(f.path), artist: f.artist, album: f.album, title: f.title }));
   },
 
   ytCheck: () => invoke<boolean>('yt_check'),

@@ -16,30 +16,44 @@ pub async fn pick_music_folder(app: AppHandle) -> Option<String> {
   Some(path_str)
 }
 
+/// Reads (title, artist, album) tags; any failure → all None (never aborts the listing).
+fn read_meta(path: &str) -> (Option<String>, Option<String>, Option<String>) {
+  use lofty::prelude::*;
+  match lofty::read_from_path(path) {
+    Ok(tf) => match tf.primary_tag().or_else(|| tf.first_tag()) {
+      Some(t) => (
+        t.title().map(|c| c.to_string()),
+        t.artist().map(|c| c.to_string()),
+        t.album().map(|c| c.to_string()),
+      ),
+      None => (None, None, None),
+    },
+    Err(_) => (None, None, None),
+  }
+}
+
 /// Papkadagi audio fayllarni ro'yxatlash (xom yo'l bilan).
 /// O'qish xatosida bo'sh vektor (Electron xulqini mirror).
+/// async — katta papkalarda UI muzlab qolmasligi uchun blocking thread'da.
 #[tauri::command]
-pub fn list_music_files(app: AppHandle, folder_path: String) -> Vec<AudioFileRaw> {
+pub async fn list_music_files(app: AppHandle, folder_path: String) -> Vec<AudioFileRaw> {
   asset_scope::allow_path(&app, &folder_path);
-  let Ok(entries) = std::fs::read_dir(&folder_path) else {
-    return Vec::new();
-  };
-  // Tartiblash yo'q — Electron ham tartiblamaydi; frontend sortFiles re-sort qiladi.
-  entries
-    .flatten()
-    .filter(|e| e.file_type().map(|t| t.is_file()).unwrap_or(false))
-    .filter_map(|e| {
-      let name = e.file_name().to_string_lossy().to_string();
-      if is_audio_file(&name) {
-        Some(AudioFileRaw {
-          name,
-          path: e.path().to_string_lossy().to_string(),
-        })
-      } else {
-        None
-      }
-    })
-    .collect()
+  tauri::async_runtime::spawn_blocking(move || {
+    let Ok(entries) = std::fs::read_dir(&folder_path) else { return Vec::new(); };
+    entries
+      .flatten()
+      .filter(|e| e.file_type().map(|t| t.is_file()).unwrap_or(false))
+      .filter_map(|e| {
+        let name = e.file_name().to_string_lossy().to_string();
+        if !is_audio_file(&name) { return None; }
+        let path = e.path().to_string_lossy().to_string();
+        let (title, artist, album) = read_meta(&path);
+        Some(AudioFileRaw { name, path, artist, album, title })
+      })
+      .collect()
+  })
+  .await
+  .unwrap_or_default()
 }
 
 const AUDIO_EXTENSIONS: &[&str] = &[

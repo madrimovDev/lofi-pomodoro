@@ -185,6 +185,9 @@ export const DEFAULT_MUSIC_CONFIG: MusicConfig = {
 export interface AudioFile {
   name: string;
   url: string; // localfile:// URL
+  artist?: string;
+  album?: string;
+  title?: string;
 }
 
 export interface YoutubeStreamInfo {
