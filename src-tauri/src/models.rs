@@ -32,6 +32,15 @@ pub enum MusicSortMode {
   Alphabetical,
 }
 
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum RepeatMode {
+  Off,
+  #[default]
+  All,
+  One,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Locale {
@@ -175,6 +184,8 @@ pub struct MusicConfig {
   pub saved_playlists: Vec<SavedYtPlaylist>,
   pub saved_folders: Vec<SavedMusicFolder>,
   pub saved_radio_stations: Vec<RadioStation>,
+  pub repeat_mode: RepeatMode,
+  pub yt_timeout_secs: u64,
 }
 
 impl Default for MusicConfig {
@@ -187,6 +198,8 @@ impl Default for MusicConfig {
       saved_playlists: Vec::new(),
       saved_folders: Vec::new(),
       saved_radio_stations: Vec::new(),
+      repeat_mode: RepeatMode::All,
+      yt_timeout_secs: 30,
     }
   }
 }
@@ -392,6 +405,21 @@ mod tests {
     assert_eq!(s.stats_retention_days, 90);
     assert_eq!(back["streakGraceDays"], 2);
     assert_eq!(back["statsRetentionDays"], 90);
+  }
+
+  #[test]
+  fn music_config_roundtrip_preserves_new_fields() {
+    let json = serde_json::json!({
+      "folderPath": null, "sortMode": "shuffle", "youtubeUrl": null, "volume": 0.5,
+      "savedPlaylists": [], "savedFolders": [], "savedRadioStations": [],
+      "repeatMode": "one", "ytTimeoutSecs": 45
+    });
+    let c: MusicConfig = serde_json::from_value(json).unwrap();
+    assert_eq!(c.repeat_mode, RepeatMode::One);
+    assert_eq!(c.yt_timeout_secs, 45);
+    let back = serde_json::to_value(&c).unwrap();
+    assert_eq!(back["repeatMode"], "one");
+    assert_eq!(back["ytTimeoutSecs"], 45);
   }
 
   #[test]

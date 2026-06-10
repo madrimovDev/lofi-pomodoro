@@ -18,6 +18,8 @@ export type AmbientSound = 'none' | 'rain' | 'forest' | 'cafe';
 
 export type MusicSortMode = 'shuffle' | 'alphabetical';
 
+export type RepeatMode = 'off' | 'all' | 'one';
+
 export type Locale = 'uz' | 'en' | 'ru';
 
 export interface TimerSettings {
@@ -164,6 +166,8 @@ export interface MusicConfig {
   savedPlaylists: SavedYtPlaylist[];
   savedFolders: SavedMusicFolder[];
   savedRadioStations: RadioStation[];
+  repeatMode: RepeatMode;
+  ytTimeoutSecs: number;
 }
 
 export const DEFAULT_MUSIC_CONFIG: MusicConfig = {
@@ -174,6 +178,8 @@ export const DEFAULT_MUSIC_CONFIG: MusicConfig = {
   savedPlaylists: [],
   savedFolders: [],
   savedRadioStations: [],
+  repeatMode: 'all',
+  ytTimeoutSecs: 30,
 };
 
 export interface AudioFile {
