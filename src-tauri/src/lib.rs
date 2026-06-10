@@ -131,6 +131,7 @@ pub fn run() {
       commands::music::yt_get_playlist,
       commands::tasks::export_tasks,
       commands::tasks::import_tasks,
+      commands::tasks::import_tasks_from_path,
       commands::store::pick_notification_sound,
       commands::window::set_always_on_top,
       commands::window::set_mini_mode,
