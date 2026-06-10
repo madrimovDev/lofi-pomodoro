@@ -6,6 +6,7 @@
 #![allow(dead_code)]
 
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -80,6 +81,11 @@ pub struct TimerSettings {
   pub show_break_screen: bool,
   pub animations_enabled: bool,
   pub force_break_fullscreen: bool,
+  pub restore_window_minutes: i32,
+  pub breathing_pattern: String,
+  pub custom_presets: Vec<TimerPreset>,
+  pub keybindings: HashMap<String, String>,
+  pub auto_complete_on_subtasks: bool,
 }
 
 impl Default for TimerSettings {
@@ -104,6 +110,11 @@ impl Default for TimerSettings {
       show_break_screen: true,
       animations_enabled: true,
       force_break_fullscreen: true,
+      restore_window_minutes: 120,
+      breathing_pattern: "478".to_string(),
+      custom_presets: Vec::new(),
+      keybindings: HashMap::new(),
+      auto_complete_on_subtasks: false,
     }
   }
 }
@@ -117,6 +128,8 @@ pub struct TimerPreset {
   pub short_break_duration: u32,
   pub long_break_duration: u32,
   pub sessions_before_long_break: u32,
+  #[serde(default, skip_serializing_if = "Option::is_none")]
+  pub is_built_in: Option<bool>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -342,6 +355,34 @@ mod tests {
     // round-trip
     let back: Task = serde_json::from_value(v).unwrap();
     assert_eq!(back, t);
+  }
+
+  #[test]
+  fn settings_roundtrip_preserves_new_fields() {
+    let json = serde_json::json!({
+      "focusDuration":25,"shortBreakDuration":5,"longBreakDuration":15,"sessionsBeforeLongBreak":4,
+      "soundEnabled":true,"notificationsEnabled":true,"ambientSound":"none","ambientVolume":0.4,
+      "focusMode":false,"notificationSoundPath":null,"locale":"uz","autoStartBreaks":false,
+      "autoStartFocus":false,"alwaysOnTop":false,"activePreset":null,"dailyGoal":0,
+      "showBreakScreen":true,"animationsEnabled":true,"forceBreakFullscreen":true,
+      "restoreWindowMinutes":-1,"breathingPattern":"box",
+      "customPresets":[{"id":"custom-1","name":"X","focusDuration":50,"shortBreakDuration":10,"longBreakDuration":25,"sessionsBeforeLongBreak":2}],
+      "keybindings":{"toggleTimer":"Space","skip":"KeyZ"},
+      "autoCompleteOnSubtasks":true
+    });
+    let s: TimerSettings = serde_json::from_value(json).unwrap();
+    assert_eq!(s.restore_window_minutes, -1);
+    assert_eq!(s.breathing_pattern, "box");
+    assert_eq!(s.custom_presets.len(), 1);
+    assert_eq!(s.keybindings.get("skip").map(String::as_str), Some("KeyZ"));
+    assert!(s.auto_complete_on_subtasks);
+    // re-serialize and confirm fields persist (the bug was that they were dropped here)
+    let back = serde_json::to_value(&s).unwrap();
+    assert_eq!(back["restoreWindowMinutes"], -1);
+    assert_eq!(back["breathingPattern"], "box");
+    assert_eq!(back["autoCompleteOnSubtasks"], true);
+    assert_eq!(back["keybindings"]["skip"], "KeyZ");
+    assert_eq!(back["customPresets"][0]["name"], "X");
   }
 
   #[test]
