@@ -281,6 +281,7 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
     setYtError(null);
     const result = await musicApi.ytGetStream(
       `https://www.youtube.com/watch?v=${item.id}`,
+      config.ytTimeoutSecs ?? 30,
     );
     setYtLoading(false);
     if (!result || 'error' in result) {
@@ -354,14 +355,20 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
   };
 
   const loadYoutube = async (url: string) => {
+    if (!/^https?:\/\//i.test(url.trim())) {
+      setYtError('__invalid_url__');
+      return;
+    }
     setYtError(null);
     setYtLoading(true);
     setYtPlaylist([]);
     setYtCurrentIndex(0);
     setYtStreamInfo(null);
 
+    const timeout = config.ytTimeoutSecs ?? 30;
+
     // Try to get playlist info
-    const playlistResult = await musicApi.ytGetPlaylist(url);
+    const playlistResult = await musicApi.ytGetPlaylist(url, timeout);
     if (playlistResult && !('error' in playlistResult) && playlistResult.length > 1) {
       setYtPlaylist(playlistResult);
       updateConfig({ youtubeUrl: url });
@@ -374,7 +381,7 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
     }
 
     // Single video or live stream
-    const result = await musicApi.ytGetStream(url);
+    const result = await musicApi.ytGetStream(url, timeout);
     setYtLoading(false);
     if (!result || 'error' in result) {
       setYtError((result as { error: string })?.error ?? 'Xatolik yuz berdi');
@@ -511,13 +518,14 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
   const addSavedPlaylist = async (url: string) => {
     setYtLoading(true);
     setYtError(null);
+    const timeout = config.ytTimeoutSecs ?? 30;
     try {
       let name = url;
       let thumbnailUrl: string | null = null;
       let itemCount = 0;
       let firstVideoId: string | null = null;
 
-      const playlistResult = await musicApi.ytGetPlaylist(url);
+      const playlistResult = await musicApi.ytGetPlaylist(url, timeout);
       if (playlistResult && !('error' in playlistResult) && playlistResult.length > 0) {
         itemCount = playlistResult.length;
         name = url; // will be overridden if stream info available
@@ -525,12 +533,13 @@ export function MusicProvider({ children }: { children: ReactNode }): ReactEleme
         // Try to get a title from first video
         const streamResult = await musicApi.ytGetStream(
           `https://www.youtube.com/watch?v=${firstVideoId}`,
+          timeout,
         );
         if (streamResult && !('error' in streamResult)) {
           name = streamResult.title.replace(/\s*[-–|].*$/, '').trim(); // strip channel suffix
         }
       } else {
-        const streamResult = await musicApi.ytGetStream(url);
+        const streamResult = await musicApi.ytGetStream(url, timeout);
         if (!streamResult || 'error' in streamResult) {
           setYtError((streamResult as { error: string })?.error ?? 'Xatolik');
           return;

@@ -124,15 +124,15 @@ pub async fn yt_check(app: AppHandle) -> bool {
 
 /// Bitta video/jonli oqim uchun stream URL + sarlavha + isLive.
 #[tauri::command]
-pub async fn yt_get_stream(app: AppHandle, url: String) -> Result<YoutubeStreamInfo, String> {
+pub async fn yt_get_stream(app: AppHandle, url: String, timeout_secs: u64) -> Result<YoutubeStreamInfo, String> {
   let stream_args = ["-g", "-x", "--audio-quality", "0", "--no-playlist", &url];
   let title_args = ["--get-title", "--no-playlist", &url];
   let live_args = ["--print", "%(is_live)s", "--no-playlist", &url];
 
   let (stream, title, live) = tokio::join!(
-    run_yt_dlp(&app, &stream_args, 30),
-    run_yt_dlp(&app, &title_args, 30),
-    run_yt_dlp(&app, &live_args, 30),
+    run_yt_dlp(&app, &stream_args, timeout_secs),
+    run_yt_dlp(&app, &title_args, timeout_secs),
+    run_yt_dlp(&app, &live_args, timeout_secs),
   );
 
   let stream = stream.map_err(|e| {
@@ -150,11 +150,12 @@ pub async fn yt_get_stream(app: AppHandle, url: String) -> Result<YoutubeStreamI
 pub async fn yt_get_playlist(
   app: AppHandle,
   url: String,
+  timeout_secs: u64,
 ) -> Result<Vec<YoutubePlaylistItem>, String> {
   let out = run_yt_dlp(
     &app,
     &["--flat-playlist", "--print", "%(id)s\t%(title)s", &url],
-    60,
+    timeout_secs,
   )
   .await
   .map_err(|e| {

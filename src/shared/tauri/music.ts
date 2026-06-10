@@ -24,11 +24,11 @@ export const musicApi = {
 
   ytCheck: () => invoke<boolean>('yt_check'),
 
-  ytGetStream: (url: string): Promise<YoutubeStreamInfo | { error: string }> =>
-    invoke<YoutubeStreamInfo>('yt_get_stream', { url })
+  ytGetStream: (url: string, timeoutSecs: number): Promise<YoutubeStreamInfo | { error: string }> =>
+    invoke<YoutubeStreamInfo>('yt_get_stream', { url, timeoutSecs })
       .catch((e: unknown) => ({ error: typeof e === 'string' ? e : 'Xatolik yuz berdi' })),
 
-  ytGetPlaylist: (url: string): Promise<YoutubePlaylistItem[] | { error: string }> =>
-    invoke<YoutubePlaylistItem[]>('yt_get_playlist', { url })
+  ytGetPlaylist: (url: string, timeoutSecs: number): Promise<YoutubePlaylistItem[] | { error: string }> =>
+    invoke<YoutubePlaylistItem[]>('yt_get_playlist', { url, timeoutSecs })
       .catch((e: unknown) => ({ error: typeof e === 'string' ? e : 'Xatolik yuz berdi' })),
 };

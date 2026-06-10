@@ -239,6 +239,7 @@ function RadioTab() {
   const [newName, setNewName] = useState('');
   const [newUrl, setNewUrl] = useState('');
   const [showAdd, setShowAdd] = useState(false);
+  const [urlError, setUrlError] = useState(false);
 
   const allStations: RadioStation[] = [
     ...BUILT_IN_STATIONS,
@@ -247,6 +248,11 @@ function RadioTab() {
 
   const handleAdd = () => {
     if (!newUrl.trim() || !newName.trim()) return;
+    if (!/^https?:\/\//i.test(newUrl.trim())) {
+      setUrlError(true);
+      return;
+    }
+    setUrlError(false);
     addRadioStation(newName.trim(), newUrl.trim(), 'Custom');
     setNewName('');
     setNewUrl('');
@@ -306,17 +312,22 @@ function RadioTab() {
             <input
               placeholder={t('radioUrlPlaceholder')}
               value={newUrl}
-              onChange={e => setNewUrl(e.target.value)}
+              onChange={e => { setNewUrl(e.target.value); setUrlError(false); }}
               onKeyDown={e => e.key === 'Enter' && handleAdd()}
               className="flex-1 bg-background/20 border border-border/50 rounded-lg px-3 py-1.5 text-xs placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary min-w-0"
             />
             <Button variant="outline" size="icon-xs" onClick={handleAdd} disabled={!newUrl.trim() || !newName.trim()}>
               <Plus className="size-3" />
             </Button>
-            <Button variant="ghost" size="icon-xs" onClick={() => setShowAdd(false)}>
+            <Button variant="ghost" size="icon-xs" onClick={() => { setShowAdd(false); setUrlError(false); }}>
               <X className="size-3" />
             </Button>
           </div>
+          {urlError && (
+            <p className="text-xs text-destructive/60 flex items-center gap-1.5">
+              <AlertCircle className="size-3 shrink-0" /> {t('invalidUrl')}
+            </p>
+          )}
         </div>
       ) : (
         <Button variant="ghost" size="xs" onClick={() => setShowAdd(true)} className="gap-1.5 text-xs text-muted-foreground/50 shrink-0">
@@ -331,7 +342,7 @@ function RadioTab() {
 
 function YoutubeTab() {
   const {
-    config, ytAvailable, ytPlaylist, ytCurrentIndex, ytStreamInfo,
+    config, updateConfig, ytAvailable, ytPlaylist, ytCurrentIndex, ytStreamInfo,
     ytLoading, ytError, loadYoutube, playYtTrack, source, isPlaying,
     addSavedPlaylist, removeSavedPlaylist, loadSavedPlaylist, exitYtPlaylist,
   } = useMusic();
@@ -402,10 +413,41 @@ function YoutubeTab() {
         </Button>
       </div>
 
+      {/* Timeout input */}
+      <div className="flex items-center gap-2 shrink-0">
+        <label className="text-[10px] text-muted-foreground/40 shrink-0">{t('ytTimeout')}</label>
+        <input
+          type="number"
+          min={5}
+          max={120}
+          step={5}
+          value={config.ytTimeoutSecs ?? 30}
+          onChange={e => {
+            const v = Number(e.target.value);
+            if (v >= 5) updateConfig({ ytTimeoutSecs: v });
+          }}
+          className="w-16 bg-background/20 border border-border/50 rounded-lg px-2 py-1 text-xs text-center focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+      </div>
+
       {ytError && (
-        <p className="text-xs text-destructive/60 flex items-center gap-1.5 shrink-0">
-          <AlertCircle className="size-3 shrink-0" /> {ytError}
-        </p>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <p className="text-xs text-destructive/60 flex items-center gap-1.5 flex-1">
+            <AlertCircle className="size-3 shrink-0" />
+            {ytError === '__invalid_url__' ? t('invalidUrl') : ytError}
+          </p>
+          {ytError !== '__invalid_url__' && (
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={() => loadYoutube(inputUrl.trim())}
+              disabled={ytLoading || !inputUrl.trim()}
+              className="text-xs text-muted-foreground/50 shrink-0"
+            >
+              {t('retry')}
+            </Button>
+          )}
+        </div>
       )}
 
       {/* Single stream info */}

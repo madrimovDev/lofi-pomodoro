@@ -217,4 +217,6 @@ export default {
   repeatAll: 'Повтор: все',
   repeatOne: 'Повтор: один',
   searchTracks: 'Поиск треков...',
+  invalidUrl: 'Неверный URL',
+  ytTimeout: 'Таймаут (с)',
 } as const;

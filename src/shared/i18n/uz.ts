@@ -233,6 +233,8 @@ export default {
   repeatAll: 'Takror: hammasi',
   repeatOne: 'Takror: bitta',
   searchTracks: 'Trek qidirish...',
+  invalidUrl: 'Yaroqsiz URL',
+  ytTimeout: 'Timeout (s)',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;

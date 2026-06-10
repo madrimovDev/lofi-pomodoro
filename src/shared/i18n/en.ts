@@ -211,4 +211,6 @@ export default {
   repeatAll: 'Repeat: all',
   repeatOne: 'Repeat: one',
   searchTracks: 'Search tracks...',
+  invalidUrl: 'Invalid URL',
+  ytTimeout: 'Timeout (s)',
 } as const;
