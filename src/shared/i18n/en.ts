@@ -202,4 +202,8 @@ export default {
   importReplace: 'Replace',
   importMerge: 'Merge',
   invalidFile: 'Invalid file',
+  bestStreak: 'Best',
+  thisMonth: 'This month',
+  thisYear: 'This year',
+  last6Months: 'Last 6 months',
 } as const;

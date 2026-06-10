@@ -208,4 +208,8 @@ export default {
   importReplace: 'Заменить',
   importMerge: 'Добавить',
   invalidFile: 'Неверный файл',
+  bestStreak: 'Рекорд',
+  thisMonth: 'Этот месяц',
+  thisYear: 'Этот год',
+  last6Months: 'Последние 6 месяцев',
 } as const;

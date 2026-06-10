@@ -224,6 +224,10 @@ export default {
   importReplace: 'Almashtirish',
   importMerge: 'Qo\'shish',
   invalidFile: 'Yaroqsiz fayl',
+  bestStreak: 'Eng uzun',
+  thisMonth: 'Bu oy',
+  thisYear: 'Bu yil',
+  last6Months: 'Oxirgi 6 oy',
 } as const;
 
 export type TranslationKey = keyof typeof import('./uz').default;
